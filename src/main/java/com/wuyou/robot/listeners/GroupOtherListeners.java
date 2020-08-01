@@ -1,9 +1,5 @@
 package com.wuyou.robot.listeners;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Random;
-
 import com.forte.qqrobot.anno.Filter;
 import com.forte.qqrobot.anno.Listen;
 import com.forte.qqrobot.anno.depend.Beans;
@@ -12,10 +8,13 @@ import com.forte.qqrobot.beans.messages.types.MsgGetTypes;
 import com.forte.qqrobot.beans.types.MostDIYType;
 import com.forte.qqrobot.sender.MsgSender;
 import com.forte.qqrobot.utils.CQCodeUtil;
-import com.wuyou.robot.Test;
 import com.wuyou.utils.CQ;
 import com.wuyou.utils.GlobalVariable;
 import com.wuyou.utils.PowerUtils;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Random;
 
 /**
  * @author Administrator<br>
@@ -68,49 +67,41 @@ public class GroupOtherListeners {
 		if (setuNum > 5) {
 			try {
 				sender.SENDER.sendGroupMsg(msg.getGroup(), "任务太多啦!人家忙不过来啦~~");
-			} catch (Exception e) {
+			} catch (Exception ignored) {
 			}
 			setuNum--;
 			return;
 		}
-		Thread t = new Thread() {
-			@Override
-			public void run() {
-				boolean r18 = msg.getMsg().toLowerCase().contains("r18");
-				long start = System.currentTimeMillis();
-				String CQCode = null;
-				System.out.println("开始获取图片");
-				try {
+		new Thread(() -> {
+			boolean r18 = msg.getMsg().toLowerCase().contains("r18");
+			long start = System.currentTimeMillis();
+			String CQCode;
+			System.out.println("开始获取图片");
+			try {
+				CQCode = r18 ? GlobalVariable.setuR18Queue.poll() : GlobalVariable.setuQueue.poll();
+				if (CQCode == null) {
 					CQCode = r18 ? GlobalVariable.setuR18Queue.poll() : GlobalVariable.setuQueue.poll();
 					if (CQCode == null) {
-						CQCode = r18 ? GlobalVariable.setuR18Queue.poll() : GlobalVariable.setuQueue.poll();
-						if (CQCode == null) {
-							System.out.println("获取到null");
-							sender.SENDER.sendGroupMsg(msg.getGroup(), "色图已经发完啦,请稍等片刻~");
-							return;
-						}
-					}
-					System.out.println("获取到的CQCode" + CQCode);
-					if (CQCode.equals("0000")) {
-						sender.SENDER.sendGroupMsg(msg.getGroup(), "今天的色图已经发完啦,明天再来吧~");
+						System.out.println("获取到null");
+						sender.SENDER.sendGroupMsg(msg.getGroup(), "色图已经发完啦,请稍等片刻~");
 						return;
 					}
-					System.out.println("获取到的图片: " + CQCode);
-					System.out.println("图片CQ码: " + CQCode);
-					sender.SENDER.sendGroupMsg(msg.getGroup(), CQCode);
-					System.out.println("发送成功,耗时: " + (System.currentTimeMillis() - start));
-				} catch (Exception e) {
-					try {
-//						sender.SENDER.sendGroupMsg(msg.getGroup(), "色图发的太多了,让人家缓一缓嘛~~");
-					} catch (Exception e1) {
-					}
-					e.printStackTrace();
-				} finally {
-					setuNum--;
 				}
+				System.out.println("获取到的CQCode" + CQCode);
+				if (CQCode.equals("0000")) {
+					sender.SENDER.sendGroupMsg(msg.getGroup(), "今天的色图已经发完啦,明天再来吧~");
+					return;
+				}
+				System.out.println("获取到的图片: " + CQCode);
+				System.out.println("图片CQ码: " + CQCode);
+				sender.SENDER.sendGroupMsg(msg.getGroup(), CQCode);
+				System.out.println("发送成功,耗时: " + (System.currentTimeMillis() - start));
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				setuNum--;
 			}
-		};
-		t.start();
+		}).start();
 	}
 
 	@Listen(MsgGetTypes.groupMsg)
@@ -139,7 +130,8 @@ public class GroupOtherListeners {
 		String fromGroup = msg.getGroup();
 		String fromQQ = msg.getQQ();
 		String message = msg.getMsg();
-		String end = message.substring(message.indexOf("领取套餐") + 4).trim();
+		String sub = message.substring(message.indexOf("领取套餐") + 4);
+		String end = sub.trim();
 		if ("".equals(end)) {
 			Random r = new Random();
 			int time = r.nextInt(30) + 1;
@@ -156,8 +148,8 @@ public class GroupOtherListeners {
 		}
 		try {
 			if (PowerUtils.powerCompare(msg, fromQQ, sender)) {
-				String timeStr = message.substring(message.indexOf("领取套餐") + 4).trim();
-				int times = Integer.valueOf(timeStr);
+				String timeStr = sub.trim();
+				int times = Integer.parseInt(timeStr);
 				if (times > 1440 * 30) {
 					sender.SENDER.sendGroupMsg(fromGroup, CQ.at(fromQQ) + "领取失败,时间不能超过30天!");
 					return;
@@ -183,9 +175,5 @@ public class GroupOtherListeners {
 			sender.SENDER.sendGroupMsg(fromGroup, CQ.at(fromQQ) + "领取失败,指令不合法");
 		}
 	}
-	@Listen(MsgGetTypes.groupMsg)
-	@Filter(diyFilter = { "boot"},value = {"状态信息","运行状态"})
-	public void stat(GroupMsg msg, MsgSender sender) {
-		Test.main();
-	}
+
 }
