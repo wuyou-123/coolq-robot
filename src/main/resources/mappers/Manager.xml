@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"      
+ "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+ <mapper namespace="com.wuyou.mapper.ManagerMapper">
+     <insert id="insertManager">
+         insert into manager values(#{groupId},#{user})
+     </insert>
+     <delete id="deleteManager">
+         delete from manager where groupId=#{groupId} and user=#{user}
+     </delete>
+     <select id="findManagerByGroupId" resultType="java.lang.String">
+         select user from manager where groupId=#{groupId}
+     </select>
+ </mapper>

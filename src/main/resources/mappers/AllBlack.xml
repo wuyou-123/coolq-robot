@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"      
+ "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+ <mapper namespace="com.wuyou.mapper.AllBlackMapper">
+     <insert id="insertAllBlack">
+         insert into AllBlack values(#{type},#{user})
+     </insert>
+     <delete id="deleteAllBlack">
+         delete from AllBlack where type=#{type} and user=#{user}
+     </delete>
+     <select id="findAllBlack" resultType="java.lang.String">
+         select user from AllBlack where type=#{type}
+     </select>
+ </mapper>

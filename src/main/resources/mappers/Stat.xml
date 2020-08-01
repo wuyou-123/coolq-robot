@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"      
+ "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.wuyou.mapper.StatMapper">
+	<insert id="bootAndShutDown">
+		insert into stat values(#{groupId},#{stat})
+	</insert>
+	<update id="changeStat">
+		update stat set stat=#{stat} where groupId=#{groupId}
+	</update>
+	<select id="findStat" resultType="java.lang.Integer">
+		select stat from stat where
+		groupId=#{groupId}
+	</select>
+	<select id="findAllStat" resultType="com.wuyou.entity.Stat">
+		select groupId,stat from stat
+	</select>
+</mapper>
