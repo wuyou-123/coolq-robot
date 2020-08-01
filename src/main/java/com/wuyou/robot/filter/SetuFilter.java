@@ -1,8 +1,5 @@
 package com.wuyou.robot.filter;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.forte.qqrobot.anno.DIYFilter;
 import com.forte.qqrobot.anno.data.Filter;
 import com.forte.qqrobot.anno.depend.Beans;
@@ -14,6 +11,9 @@ import com.forte.qqrobot.listener.ListenContext;
 import com.forte.qqrobot.listener.invoker.AtDetection;
 import com.forte.qqrobot.utils.CQCodeUtil;
 import com.wuyou.utils.CQ;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 获取现在机器人是否开机
@@ -29,11 +29,11 @@ public class SetuFilter {
 
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
-//			String message = msgget.getMsg();
-//			List<CQCode> list = CQCodeUtil.build().getCQCodeFromMsgByType(message, CQCodeTypes.image);
-//			for (CQCode CQCode : list) {
-//				return CQCode.getParam("file").equals("463FBD38F6A0BD4ED008D84D26DCE538.gif");
-//			}
+			String message = msgget.getMsg();
+			List<CQCode> list = CQCodeUtil.build().getCQCodeFromMsgByType(message, CQCodeTypes.image);
+			for (CQCode CQCode : list) {
+				return CQCode.getParam("file").equals("463FBD38F6A0BD4ED008D84D26DCE538.gif");
+			}
 			return false;
 
 		}
@@ -65,10 +65,10 @@ public class SetuFilter {
 			list.add("来点好康的");
 			String message = msgget.getMsg();
 			String atThis = CQ.at(msgget.getThisCode());
-//			if (list.contains(message.replace(atThis, "").trim().toLowerCase()))
-//				return true;
-//			if(message.contains("色")&&message.contains("图")&&message.length()<10)
-//				return true;
+			if (list.contains(message.replace(atThis, "").trim().toLowerCase()))
+				return true;
+			if(message.contains("色")&&message.contains("图")&&message.length()<10)
+				return true;
 			return false;
 		}
 	}

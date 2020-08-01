@@ -1,14 +1,5 @@
 package com.wuyou.robot.listeners;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.jsoup.Jsoup;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.forte.qqrobot.anno.Filter;
@@ -27,6 +18,10 @@ import com.wuyou.service.BlackUserService;
 import com.wuyou.service.ClearService;
 import com.wuyou.utils.CQ;
 import com.wuyou.utils.PowerUtils;
+import org.jsoup.Jsoup;
+
+import java.io.IOException;
+import java.util.*;
 
 /**
  * @author Administrator<br>
@@ -60,7 +55,7 @@ public class GroupManagementListener {
 		if (getPower(msg, sender)) {
 			StringBuilder str = new StringBuilder("\n踢人:");
 			for (String qq : set) {
-				String nickname = sender.GETTER.getGroupMemberInfo(fromGroup, qq).getNickOrName();
+				String nickname = sender.GETTER.getGroupMemberInfo(fromGroup, qq).getRemarkOrNickname();
 				if (qq.equals(msg.getThisCode())) {
 					str.append("\n\t\t踢出成员[" + qq + "](" + nickname + ")失败,我踢我自己？");
 					continue;
@@ -104,7 +99,7 @@ public class GroupManagementListener {
 			try {
 				StringBuilder str = new StringBuilder("\n禁言:");
 				for (String qq : set) {
-					String nickname = sender.GETTER.getGroupMemberInfo(fromGroup, qq).getNickOrName();
+					String nickname = sender.GETTER.getGroupMemberInfo(fromGroup, qq).getRemarkOrNickname();
 					if (qq.equals(msg.getThisCode())) {
 						str.append("\n\t\t禁言成员[" + qq + "](" + nickname + ")失败,我禁我自己？");
 						continue;
@@ -156,7 +151,7 @@ public class GroupManagementListener {
 			StringBuilder str = new StringBuilder("\n解禁:");
 			for (String qq : set) {
 				GroupMemberInfo member = sender.GETTER.getGroupMemberInfo(fromGroup, qq);
-				String nickname = member.getNickOrName();
+				String nickname = member.getRemarkOrNickname();
 				if (qq.equals(msg.getThisCode())) {
 					str.append("\n\t\t解禁成员[" + qq + "](" + nickname + ")失败,我要是被禁言了能发出这条消息?");
 					continue;
@@ -273,7 +268,7 @@ public class GroupManagementListener {
 							str.append("\n\t\t已把我的名字改为: \"" + name + "\"");
 							continue;
 						}
-						String nickname = sender.GETTER.getGroupMemberInfo(fromGroup, qq).getNickOrName();
+						String nickname = sender.GETTER.getGroupMemberInfo(fromGroup, qq).getRemarkOrNickname();
 						sender.SETTER.setGroupCard(fromGroup, qq, name);
 						str.append("\n\t\t已将成员[" + qq + "](" + nickname + ")群名片改为: \"" + name + "\"");
 					}
@@ -284,7 +279,7 @@ public class GroupManagementListener {
 							str.append("\n\t\t已取消我的群名片");
 							continue;
 						}
-						String nickname = sender.GETTER.getGroupMemberInfo(fromGroup, qq).getNickOrName();
+						String nickname = sender.GETTER.getGroupMemberInfo(fromGroup, qq).getRemarkOrNickname();
 						sender.SETTER.setGroupCard(fromGroup, qq, "");
 						str.append("\n\t\t已取消成员[" + qq + "](" + nickname + ")的群名片");
 					}
@@ -319,7 +314,7 @@ public class GroupManagementListener {
 							str.append("\n\t\t已把我的头衔设置为: " + name);
 							continue;
 						}
-						String nickname = sender.GETTER.getGroupMemberInfo(fromGroup, qq).getNickOrName();
+						String nickname = sender.GETTER.getGroupMemberInfo(fromGroup, qq).getRemarkOrNickname();
 						sender.SETTER.setGroupExclusiveTitle(fromGroup, qq, name, -1);
 						str.append("\n\t\t已将成员[" + qq + "](" + nickname + ")的群头衔设置为: \"" + name + "\"");
 					}
@@ -335,7 +330,7 @@ public class GroupManagementListener {
 							str.append("\n\t\t已取消我的群头衔");
 							continue;
 						}
-						String nickname = sender.GETTER.getGroupMemberInfo(fromGroup, qq).getNickOrName();
+						String nickname = sender.GETTER.getGroupMemberInfo(fromGroup, qq).getRemarkOrNickname();
 						if ("".equals(title)) {
 							str.append("\n\t\t取消失败,成员[" + qq + "](" + nickname + ")没有头衔");
 							continue;
@@ -396,7 +391,7 @@ public class GroupManagementListener {
 			JSONObject j = (JSONObject) object;
 			int time = j.getInteger("t");
 			String qq = j.getString("uin");
-			String nick = sender.GETTER.getGroupMemberInfo(fromGroup, qq).getNickOrName();
+			String nick = sender.GETTER.getGroupMemberInfo(fromGroup, qq).getRemarkOrNickname();
 			String times = "";
 			if (time > 1440 * 60) {
 				times = time / 1440 / 60 + "天" + (time / 60) % 1440 / 60 + "小时" + (time / 60) % 1440 % 60 + "分钟";
@@ -475,7 +470,7 @@ public class GroupManagementListener {
 				}
 				continue;
 			}
-			String nickname = userMember.getNickOrName();
+			String nickname = userMember.getRemarkOrNickname();
 			if (administrator.contains(user)) {
 				str.append("\n\t\t添加黑名单失败: QQ:[" + user + "](" + nickname + "),不可以拉黑我的主人!");
 				continue;

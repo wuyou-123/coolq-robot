@@ -1,8 +1,5 @@
 package com.wuyou.robot.listeners;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.forte.component.forcoolqhttpapi.CoolQHttpInteractionException;
 import com.forte.component.forcoolqhttpapi.server.CoolQHttpMsgSender;
 import com.forte.qqrobot.anno.Filter;
@@ -23,6 +20,9 @@ import com.forte.qqrobot.utils.CQCodeUtil;
 import com.wuyou.service.AllBlackService;
 import com.wuyou.service.BlackUserService;
 import com.wuyou.service.StatService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Administrator<br>
@@ -134,10 +134,10 @@ public class RequestListener {
 				if (msg.getGroupMemberInfo(fromGroup, loginQQ).getPowerType() != PowerType.MEMBER) {
 					sender.SETTER.setGroupMemberKick(fromGroup, beingOperateQQ, true);
 					sender.SENDER.sendGroupMsg(fromGroup,
-							"发现黑名单成员[" + beingOperateQQ + "](" + beingOperateMember.getNickOrName() + ")入群,已将他移除此群");
+							"发现黑名单成员[" + beingOperateQQ + "](" + beingOperateMember.getRemarkOrNickname() + ")入群,已将他移除此群");
 				} else {
 					sender.SENDER.sendGroupMsg(fromGroup, "发现黑名单成员[" + beingOperateQQ + "]("
-							+ beingOperateMember.getNickOrName() + ")入群,但是我没有权限将他移除此群");
+							+ beingOperateMember.getRemarkOrNickname() + ")入群,但是我没有权限将他移除此群");
 				}
 				return;
 

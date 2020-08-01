@@ -1,10 +1,5 @@
 package com.wuyou.robot.listeners;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import com.forte.qqrobot.anno.Filter;
 import com.forte.qqrobot.anno.Listen;
 import com.forte.qqrobot.anno.depend.Beans;
@@ -22,6 +17,11 @@ import com.wuyou.exception.ObjectNotFoundException;
 import com.wuyou.service.ManagerService;
 import com.wuyou.utils.CQ;
 import com.wuyou.utils.PowerUtils;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Administrator<br>
@@ -57,7 +57,7 @@ public class GroupManagerListener {
 				continue;
 			}
 			a++;
-			String nickname = sender.GETTER.getGroupMemberInfo(fromGroup, qq).getNickOrName();
+			String nickname = sender.GETTER.getGroupMemberInfo(fromGroup, qq).getRemarkOrNickname();
 			str.append("\t管理员" + a + ": " + qq + "(" + nickname + ")\n");
 		}
 		if (members.size() > 0) {
@@ -142,7 +142,7 @@ public class GroupManagerListener {
 		StringBuilder str = new StringBuilder("设置群管理员:");
 		for (String user : list) {
 			GroupMemberInfo userMember = sender.GETTER.getGroupMemberInfo(fromGroup, user);
-			String nickname = userMember.getNickOrName();
+			String nickname = userMember.getRemarkOrNickname();
 			int power = PowerUtils.getPowerType(fromGroup, user, sender);
 			System.out.println(power);
 			switch (power) {
@@ -178,7 +178,7 @@ public class GroupManagerListener {
 		StringBuilder str = new StringBuilder("取消群管理员:");
 		for (String user : list) {
 			GroupMemberInfo userMember = sender.GETTER.getGroupMemberInfo(fromGroup, user);
-			String nickname = userMember.getNickOrName();
+			String nickname = userMember.getRemarkOrNickname();
 			int power = PowerUtils.getPowerType(fromGroup, user, sender);
 			if (power == 1) {
 				sender.SETTER.setGroupAdmin(fromGroup, user, false);
@@ -216,7 +216,7 @@ public class GroupManagerListener {
 		StringBuilder str = new StringBuilder("添加管理员:");
 		for (String user : list) {
 			GroupMemberInfo userMember = sender.GETTER.getGroupMemberInfo(fromGroup, user);
-			String nickname = userMember.getNickOrName();
+			String nickname = userMember.getRemarkOrNickname();
 			if (administrator.contains(user)) {
 				str.append("\n\t\t添加管理员失败: QQ:[" + user + "](" + nickname + "),不需要添加我的主人!");
 				continue;
