@@ -15,6 +15,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.ConnectException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
@@ -67,7 +68,7 @@ public class BootClass {
         GlobalVariable.kouzi = kouzi.toString();
 
 
-		setu();
+//        setu();
 
     }
 
@@ -75,7 +76,7 @@ public class BootClass {
         BlockingQueue<String> setu = GlobalVariable.setuQueue;
         BlockingQueue<String> setuR18 = GlobalVariable.setuR18Queue;
 
-        Thread t1 = new Thread() {
+        new Thread() {
             @Override
             public void run() {
                 while (true) {
@@ -155,13 +156,13 @@ public class BootClass {
                             System.out.println("R18图片路径: " + path + fileName);
                         }
                     } catch (Exception e) {
-                        System.out.println("添加队列出现错误: " + e.getMessage());
+//                        System.out.println("添加队列出现错误: " + e.getMessage());
                         e.printStackTrace();
                     }
                 }
             }
-        };
-        Thread t2 = new Thread() {
+        }.start();
+        new Thread() {
             @Override
             public void run() {
                 while (true) {
@@ -186,7 +187,7 @@ public class BootClass {
                             if (g.getStat() == 1) {
                                 String CQCode = CQCodeUtil.build().getCQCode_Image(fileName).toString();
                                 setu.put(CQCode);
-                                System.out.println("已将CQ码添加至队列, 耗时: " + (System.currentTimeMillis() - start)+", 当前队列内有: " + setu.size() + "张图片");
+                                System.out.println("已将CQ码添加至队列, 耗时: " + (System.currentTimeMillis() - start) + ", 当前队列内有: " + setu.size() + "张图片");
                             } else {
                                 System.out.println("获取失败");
                                 GetFile g1 = new GetFile(url, fileName);
@@ -197,7 +198,7 @@ public class BootClass {
                                 if (g1.getStat() == 1) {
                                     String CQCode = CQCodeUtil.build().getCQCode_Image(fileName).toString();
                                     setuR18.put(CQCode);
-                                    System.out.println("已将R18CQ码添加至队列, 耗时: " + (System.currentTimeMillis() - start)+", 当前队列内有: " + setuR18.size() + "张图片");
+                                    System.out.println("已将R18CQ码添加至队列, 耗时: " + (System.currentTimeMillis() - start) + ", 当前队列内有: " + setuR18.size() + "张图片");
                                 }
                             }
                         } else if (json.getInteger("code") == 429) {
@@ -240,24 +241,28 @@ public class BootClass {
                     }
                 }
             }
-        };
-        t1.start();
-        t2.start();
+        }.start();
     }
 
-    private JSONObject getJson(String r18) throws IOException {
+    private JSONObject getJson(String r18) {
         JSONObject json = null;
-        String key1 = "820458705ebe071883b3c2";
-        String key2 = "198111555ec3242d2c6b42";
-        String web = Jsoup.connect("http://api.lolicon.app/setu/").ignoreContentType(true).data("apikey", key1)
-                .data("size1200", "true").data("r18", r18).get().text();
-        json = JSONUtils.toJsonObject(web);
-        if (json.getInteger("code") == 429) {
-            web = Jsoup.connect("http://api.lolicon.app/setu/").ignoreContentType(true).data("apikey", key2)
+        try {
+            String key1 = "820458705ebe071883b3c2";
+            String key2 = "198111555ec3242d2c6b42";
+            String web = Jsoup.connect("http://api.lolicon.app/setu/").ignoreContentType(true).data("apikey", key1)
                     .data("size1200", "true").data("r18", r18).get().text();
             json = JSONUtils.toJsonObject(web);
+            if (json.getInteger("code") == 429) {
+                web = Jsoup.connect("http://api.lolicon.app/setu/").ignoreContentType(true).data("apikey", key2)
+                        .data("size1200", "true").data("r18", r18).get().text();
+                json = JSONUtils.toJsonObject(web);
+            }
+        } catch (ConnectException e) {
+            System.out.println("获取json数据出现错误" + e.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-		System.out.println("获取到json数据: " + json);
+        System.out.println("获取到json数据: " + json);
         return json;
     }
 

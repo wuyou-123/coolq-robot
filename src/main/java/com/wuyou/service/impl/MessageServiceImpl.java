@@ -1,18 +1,17 @@
 package com.wuyou.service.impl;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.wuyou.entity.Message;
 import com.wuyou.exception.ObjectExistedException;
 import com.wuyou.exception.ObjectNotFoundException;
 import com.wuyou.exception.UpdateException;
 import com.wuyou.mapper.MessageMapper;
 import com.wuyou.service.MessageService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 自动回复控制器
@@ -74,7 +73,7 @@ public class MessageServiceImpl implements MessageService {
 	@Override
 	public Map<String, String> getAllByGroup(String groupId) {
 		List<Message> list = mapper.findAllByGroup(groupId);
-		Map<String, String> map = new HashMap<String, String>();
+		var map = new HashMap<String, String>();
 		for (Message message : list) {
 			map.put(message.getMessage(), message.getAnswer());
 		}

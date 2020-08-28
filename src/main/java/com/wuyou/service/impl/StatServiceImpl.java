@@ -1,15 +1,14 @@
 package com.wuyou.service.impl;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.wuyou.entity.Stat;
 import com.wuyou.mapper.StatMapper;
 import com.wuyou.service.StatService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 机器人开关机控制器
@@ -52,7 +51,7 @@ public class StatServiceImpl implements StatService {
 	@Override
 	public Map<String, Boolean> getAllStat() {
 		List<Stat> stat = mapper.findAllStat();
-		Map<String, Boolean> map = new HashMap<String, Boolean>();
+		var map = new HashMap<String, Boolean>();
 		for (Stat s : stat) {
 			map.put(s.getGroupId(), s.getStat() == 1 ? true : false);
 		}
