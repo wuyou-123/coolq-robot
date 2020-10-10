@@ -15,6 +15,7 @@ import com.wuyou.service.BanMessageService;
 import com.wuyou.utils.CQ;
 import com.wuyou.utils.PowerUtils;
 import com.wuyou.utils.SenderUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +31,7 @@ public class GroupBanMessageListener {
     @Depend
     BanMessageService service;
 
-    List<String> administrator = new ArrayList<String>();
+    List<String> administrator = new ArrayList<>();
 
     public GroupBanMessageListener() {
         administrator.add("1097810498");
@@ -50,7 +51,7 @@ public class GroupBanMessageListener {
         }
         StringBuilder mes = new StringBuilder(msg.getMsg() + ":");
         for (String str : list) {
-            mes.append("\n\t关键词: \"" + str + "\"");
+            mes.append("\n\t关键词: \"").append(str).append("\"");
         }
         SenderUtil.sendGroupMsg(sender, fromGroup, mes.toString().trim());
     }
@@ -87,11 +88,9 @@ public class GroupBanMessageListener {
                     SenderUtil.sendGroupMsg(sender, fromGroup,
                             CQ.at(fromQQ) + "发送关键词[" + banMessage + "]！ 抽中禁言" + a / 2 + "分");
                     sender.SETTER.setGroupBan(fromGroup, fromQQ, (a / 2) * 60);
-                    continue;
                 } else {
                     SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + "发送关键词[" + banMessage + "]， 抽中禁言" + a / 2
-                            + "分，可是我没有禁言你的权限" + CQCodeUtil.build().getCQCode_Face("174"));
-                    continue;
+                            + "分，可是我没有禁言你的权限" + CQ.getFace("174"));
                 }
             }
         }
@@ -120,7 +119,6 @@ public class GroupBanMessageListener {
                 }
             } catch (ObjectExistedException e) {
                 SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "\n更改失败: \n此条关键词已存在");
-                return;
             }
         } else {
             SenderUtil.sendGroupMsg(sender, group, "添加失败,你不是我的管理员!");
@@ -149,7 +147,6 @@ public class GroupBanMessageListener {
                 }
             } catch (ObjectNotFoundException e) {
                 SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "\n删除失败: \n没找到此条消息");
-                return;
             }
         } else {
             SenderUtil.sendGroupMsg(sender, group, "删除失败,你不是我的管理员!");
@@ -182,7 +179,7 @@ public class GroupBanMessageListener {
                 sender.SETTER.setGroupBan(fromGroup, fromQQ, min * 60);
             } else {
                 SenderUtil.sendGroupMsg(sender, fromGroup,
-                        CQ.at(fromQQ) + "抽中禁言" + min + "分，可是我没有禁言你的权限" + CQCodeUtil.build().getCQCode_Face("174"));
+                        CQ.at(fromQQ) + "抽中禁言" + min + "分，可是我没有禁言你的权限" + CQ.getFace("174"));
             }
         } else {
             SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + "恭喜轮空");

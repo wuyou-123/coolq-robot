@@ -7,7 +7,7 @@ import com.forte.qqrobot.beans.messages.msgget.MsgGet;
 import com.forte.qqrobot.listener.Filterable;
 import com.forte.qqrobot.listener.ListenContext;
 import com.forte.qqrobot.listener.invoker.AtDetection;
-import com.forte.qqrobot.utils.CQCodeUtil;
+import com.wuyou.utils.CQ;
 
 /**
  * 判断是否是开/关机指令
@@ -26,10 +26,8 @@ public class GroupBootFilter {
 			String str = msgget.getMsg();
 			if ("开机".equals(str.trim()))
 				return true;
-			str = CQCodeUtil.build().removeCQCodeFromMsg(str);
-			if ("开机".equals(str.trim()) && at.test())
-				return true;
-			return false;
+			str = CQ.utils.remove(str);
+			return "开机".equals(str.trim()) && at.test();
 		}
 	}
 
@@ -41,10 +39,8 @@ public class GroupBootFilter {
 			String str = msgget.getMsg();
 			if ("关机".equals(str.trim()))
 				return true;
-			str = CQCodeUtil.build().removeCQCodeFromMsg(str);
-			if ("关机".equals(str.trim()) && at.test())
-				return true;
-			return false;
+			str = CQ.utils.remove(str);
+			return "关机".equals(str.trim()) && at.test();
 		}
 
 	}

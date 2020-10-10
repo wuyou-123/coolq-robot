@@ -37,13 +37,13 @@ public class ContextListeners {
                     SenderUtil.sendGroupMsg(sender, fromGroup, message);
                 else if (ran == 5)
                     SenderUtil.sendGroupMsg(sender, fromGroup, "打断复读~~~");
-                else if (ran == 6)
-                    SenderUtil.sendGroupMsg(sender, fromGroup, "打断打断!!!");
+                else SenderUtil.sendGroupMsg(sender, fromGroup, "打断打断!!!");
                 ret = new String[]{"", "", "", "", message};
             }
             CQ.context.put(fromGroup, new String[]{ret[1], ret[2], ret[3], ret[4], message});
-            System.out.println(Arrays.toString(CQ.context.get(fromGroup)));
+//            System.out.println(Arrays.toString(CQ.context.get(fromGroup)));
         } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

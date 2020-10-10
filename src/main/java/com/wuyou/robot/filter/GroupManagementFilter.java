@@ -25,10 +25,7 @@ public class GroupManagementFilter {
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
 			String msg = msgget.getMsg();
-			if (msg.startsWith("踢") && CQ.getAt(msg) != null) {
-				return true;
-			}
-			return false;
+			return msg.startsWith("踢") && CQ.getAt(msg) != null;
 		}
 
 	}
@@ -39,10 +36,7 @@ public class GroupManagementFilter {
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
 			String msg = msgget.getMsg();
-			if (msg.startsWith("禁言") && CQ.getAt(msg) != null) {
-				return true;
-			}
-			return false;
+			return msg.startsWith("禁言") && CQ.getAt(msg) != null;
 		}
 
 	}
@@ -53,10 +47,7 @@ public class GroupManagementFilter {
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
 			String msg = msgget.getMsg();
-			if (msg.startsWith("解禁") && CQ.getAt(msg) != null) {
-				return true;
-			}
-			return false;
+			return msg.startsWith("解禁") && CQ.getAt(msg) != null;
 		}
 
 	}
@@ -121,10 +112,7 @@ public class GroupManagementFilter {
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
 			String msg = msgget.getMsg();
-			if (msg.startsWith("改名") && CQ.getAt(msg) != null) {
-				return true;
-			}
-			return false;
+			return msg.startsWith("改名") && CQ.getAt(msg) != null;
 		}
 
 	}
@@ -135,10 +123,7 @@ public class GroupManagementFilter {
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
 			String msg = msgget.getMsg();
-			if (msg.startsWith("给头衔") && CQ.getAt(msg) != null) {
-				return true;
-			}
-			return false;
+			return msg.startsWith("给头衔") && CQ.getAt(msg) != null;
 		}
 
 	}
@@ -150,10 +135,7 @@ public class GroupManagementFilter {
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
 			String msg = msgget.getMsg();
 
-			if ((msg.startsWith("添加管理") || msg.startsWith("设置管理") || msg.startsWith("给管理")) && CQ.getAt(msg) != null) {
-				return true;
-			}
-			return false;
+			return (msg.startsWith("添加管理") || msg.startsWith("设置管理") || msg.startsWith("给管理")) && CQ.getAt(msg) != null;
 		}
 
 	}
@@ -164,10 +146,7 @@ public class GroupManagementFilter {
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
 			String msg = msgget.getMsg();
-			if ((msg.startsWith("删除管理") || msg.startsWith("取消管理") || msg.startsWith("移除管理")) && CQ.getAt(msg) != null) {
-				return true;
-			}
-			return false;
+			return (msg.startsWith("删除管理") || msg.startsWith("取消管理") || msg.startsWith("移除管理")) && CQ.getAt(msg) != null;
 		}
 
 	}
@@ -179,11 +158,8 @@ public class GroupManagementFilter {
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
 			String msg = msgget.getMsg();
 
-			if ((msg.startsWith("添加群管理") || msg.startsWith("设置群管理") || msg.startsWith("给群管理"))
-					&& CQ.getAt(msg) != null) {
-				return true;
-			}
-			return false;
+			return (msg.startsWith("添加群管理") || msg.startsWith("设置群管理") || msg.startsWith("给群管理"))
+					&& CQ.getAt(msg) != null;
 		}
 
 	}
@@ -194,11 +170,8 @@ public class GroupManagementFilter {
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
 			String msg = msgget.getMsg();
-			if ((msg.startsWith("删除群管理") || msg.startsWith("取消群管理") || msg.startsWith("移除群管理"))
-					&& CQ.getAt(msg) != null) {
-				return true;
-			}
-			return false;
+			return (msg.startsWith("删除群管理") || msg.startsWith("取消群管理") || msg.startsWith("移除群管理"))
+					&& CQ.getAt(msg) != null;
 		}
 
 	}

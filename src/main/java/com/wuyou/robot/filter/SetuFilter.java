@@ -3,13 +3,11 @@ package com.wuyou.robot.filter;
 import com.forte.qqrobot.anno.DIYFilter;
 import com.forte.qqrobot.anno.data.Filter;
 import com.forte.qqrobot.anno.depend.Beans;
-import com.forte.qqrobot.beans.cqcode.CQCode;
 import com.forte.qqrobot.beans.messages.msgget.MsgGet;
-import com.forte.qqrobot.beans.types.CQCodeTypes;
 import com.forte.qqrobot.listener.Filterable;
 import com.forte.qqrobot.listener.ListenContext;
 import com.forte.qqrobot.listener.invoker.AtDetection;
-import com.forte.qqrobot.utils.CQCodeUtil;
+import com.simplerobot.modules.utils.KQCode;
 import com.wuyou.utils.CQ;
 
 import java.util.ArrayList;
@@ -29,10 +27,10 @@ public class SetuFilter {
 
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
-			String message = msgget.getMsg();
-			List<CQCode> list = CQCodeUtil.build().getCQCodeFromMsgByType(message, CQCodeTypes.image);
-			for (CQCode CQCode : list) {
-				return CQCode.getParam("file").equals("463FBD38F6A0BD4ED008D84D26DCE538.gif");
+		String message = msgget.getMsg();
+			List<KQCode> list = CQ.getKq(message, "image");
+			for (KQCode KQCode : list) {
+				return KQCode.get("file").equals("463FBD38F6A0BD4ED008D84D26DCE538.gif");
 			}
 			return false;
 
@@ -44,7 +42,7 @@ public class SetuFilter {
 
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
-			List<String> list = new ArrayList<String>();
+			List<String> list = new ArrayList<>();
 			list.add("r18色图");
 			list.add("r18涩图");
 			list.add("来点r18色图");
@@ -64,12 +62,10 @@ public class SetuFilter {
 			list.add("来点好看的");
 			list.add("来点好康的");
 			String message = msgget.getMsg();
-			String atThis = CQ.at(msgget.getThisCode());
-			if (list.contains(message.replace(atThis, "").trim().toLowerCase()))
+			String msg = CQ.utils.remove(message, true, true);
+			if (list.contains(msg.toLowerCase()))
 				return true;
-			if(message.contains("色")&&message.contains("图")&&message.length()<10)
-				return true;
-			return false;
+			return message.contains("色") && message.contains("图") && message.length() < 10;
 		}
 	}
 }

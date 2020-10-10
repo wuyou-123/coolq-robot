@@ -23,14 +23,12 @@ public class MenuFilter implements Filterable {
 
 	@Override
 	public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 		list.add("菜单");
 		list.add("功能");
 		String message = msgget.getMsg();
-		String atThis = CQ.at(msgget.getThisCode());
-		if (list.contains(message.replace(atThis, "").trim()))
-			return true;
-		return false;
+		String msg = CQ.utils.remove(message, true, true);
+		return list.contains(msg);
 	}
 
 }

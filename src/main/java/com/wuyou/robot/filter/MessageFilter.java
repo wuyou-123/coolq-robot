@@ -9,6 +9,8 @@ import com.forte.qqrobot.listener.ListenContext;
 import com.forte.qqrobot.listener.invoker.AtDetection;
 import com.wuyou.utils.CQ;
 
+import java.util.Objects;
+
 /**
  * @author Administrator<br>
  *         2020年5月2日
@@ -25,7 +27,7 @@ public class MessageFilter {
 			String message = msgget.getMsg();
 			String regex = ".*添加消息.*回复.*";
 			return message.matches(regex) && at.test()
-					&& message.startsWith(CQ.at(msgget.getThisCode()));
+					&& Objects.equals(CQ.getAt(message), msgget.getThisCode());
 		}
 
 	}
@@ -38,7 +40,7 @@ public class MessageFilter {
 			String message = msgget.getMsg();
 			String regex = ".*删除消息.*";
 			return message.matches(regex) && at.test()
-					&& message.startsWith(CQ.at(msgget.getThisCode()));
+					&& Objects.equals(CQ.getAt(message), msgget.getThisCode());
 		}
 
 	}

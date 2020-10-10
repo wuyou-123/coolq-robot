@@ -12,49 +12,47 @@ import java.util.Map;
 
 /**
  * 机器人开关机控制器
- * 
- * @author Administrator<br>
- *         2020年4月29日
  *
+ * @author Administrator<br>
+ * 2020年4月29日
  */
 @Service
 public class StatServiceImpl implements StatService {
-	@Autowired
-	StatMapper mapper;
+    @Autowired
+    StatMapper mapper;
 
-	/**
-	 * 开机/关机
-	 * 
-	 * @param groupId 群号
-	 * @param stat    开关机状态,1为开机,0为关机
-	 */
-	@Override
-	public void bootAndShutDown(String groupId, int stat) {
-		Integer nowstat = mapper.findStat(groupId);
-		if (nowstat == null && stat == 1) {
-			mapper.bootAndShutDown(groupId, stat);
-			return;
-		}
-		if (nowstat == stat) {
-			return;
-		}
-		mapper.changeStat(groupId, stat);
+    /**
+     * 开机/关机
+     *
+     * @param groupId 群号
+     * @param stat    开关机状态,1为开机,0为关机
+     */
+    @Override
+    public void bootAndShutDown(String groupId, int stat) {
+        Integer nowstat = mapper.findStat(groupId);
+        if (nowstat == null && stat == 1) {
+            mapper.bootAndShutDown(groupId, stat);
+            return;
+        } else if (nowstat != null && nowstat == stat) {
+            return;
+        }
+        mapper.changeStat(groupId, stat);
 
-	}
+    }
 
-	@Override
-	public int getStat(String groupId) {
-		Integer num = mapper.findStat(groupId);
-		return num == null ? -1 : num;
-	}
+    @Override
+    public int getStat(String groupId) {
+        Integer num = mapper.findStat(groupId);
+        return num == null ? -1 : num;
+    }
 
-	@Override
-	public Map<String, Boolean> getAllStat() {
-		List<Stat> stat = mapper.findAllStat();
-		var map = new HashMap<String, Boolean>();
-		for (Stat s : stat) {
-			map.put(s.getGroupId(), s.getStat() == 1 ? true : false);
-		}
-		return map;
-	}
+    @Override
+    public Map<String, Boolean> getAllStat() {
+        List<Stat> stat = mapper.findAllStat();
+        Map<String, Boolean> map = new HashMap<>();
+        for (Stat s : stat) {
+            map.put(s.getGroupId(), s.getStat() == 1);
+        }
+        return map;
+    }
 }

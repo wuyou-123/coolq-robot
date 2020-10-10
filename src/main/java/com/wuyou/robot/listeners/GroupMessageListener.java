@@ -5,15 +5,13 @@ import com.forte.qqrobot.anno.Filter;
 import com.forte.qqrobot.anno.Listen;
 import com.forte.qqrobot.anno.depend.Beans;
 import com.forte.qqrobot.anno.depend.Depend;
-import com.forte.qqrobot.beans.cqcode.CQCode;
 import com.forte.qqrobot.beans.messages.msgget.GroupMsg;
 import com.forte.qqrobot.beans.messages.types.MsgGetTypes;
-import com.forte.qqrobot.beans.types.CQCodeTypes;
 import com.forte.qqrobot.beans.types.MostDIYType;
 import com.forte.qqrobot.sender.MsgSender;
-import com.forte.qqrobot.utils.CQCodeUtil;
 import com.forte.qqrobot.utils.JSONUtils;
 import com.forte.utils.basis.MD5Utils;
+import com.simplerobot.modules.utils.KQCode;
 import com.wuyou.enums.FaceEnum;
 import com.wuyou.exception.ObjectExistedException;
 import com.wuyou.exception.ObjectNotFoundException;
@@ -23,6 +21,7 @@ import com.wuyou.utils.PowerUtils;
 import com.wuyou.utils.SenderUtil;
 import org.jsoup.Jsoup;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -37,41 +36,34 @@ import java.util.Base64.Decoder;
 public class GroupMessageListener {
     @Depend
     MessageService service;
-    List<String> administrator = new ArrayList<String>();
+
+    List<String> administrator = new ArrayList<>();
 
     public GroupMessageListener() {
         administrator.add("1097810498");
-        administrator.add("1041025733");
-        administrator.add("2973617637");
     }
 
     private static String getReqSign(Map<String, String> params, String appkey) throws UnsupportedEncodingException {
-        List<String> list = new ArrayList<String>();
-        for (String key : params.keySet()) {
-            list.add(key);
-        }
-        Collections.sort(list, new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                char[] chars1 = o1.toCharArray();
-                char[] chars2 = o2.toCharArray();
-                int i = 0;
-                while (i < chars1.length && i < chars2.length) {
-                    if (chars1[i] > chars2[i])
-                        return 1;
-                    else if (chars1[i] < chars2[i])
-                        return -1;
-                    else
-                        i++;
-                }
-                return i == chars1.length ? -1 : i == chars2.length ? 1 : 0;
+        List<String> list = new ArrayList<>(params.keySet());
+        list.sort((o1, o2) -> {
+            char[] chars1 = o1.toCharArray();
+            char[] chars2 = o2.toCharArray();
+            int i = 0;
+            while (i < chars1.length && i < chars2.length) {
+                if (chars1[i] > chars2[i])
+                    return 1;
+                else if (chars1[i] < chars2[i])
+                    return -1;
+                else
+                    i++;
             }
+            return i == chars1.length ? -1 : i == chars2.length ? 1 : 0;
         });
-        StringBuffer str = new StringBuffer();
+        StringBuilder str = new StringBuilder();
         for (String string : list) {
-            str.append(string + "=" + URLEncoder.encode(params.get(string), "utf-8") + "&");
+            str.append(string).append("=").append(URLEncoder.encode(params.get(string), "utf-8")).append("&");
         }
-        str.append("app_key=" + appkey);
+        str.append("app_key=").append(appkey);
         return MD5Utils.toMD5(str.toString()).toUpperCase();
     }
 
@@ -87,7 +79,7 @@ public class GroupMessageListener {
         }
         StringBuilder mes = new StringBuilder(msg.getMsg() + ":\n");
         for (String str : map.keySet()) {
-            mes.append("\t发送: \"" + str + "\"\t回复: \"" + map.get(str) + "\"\n");
+            mes.append("\t发送: \"").append(str).append("\"\t回复: \"").append(map.get(str)).append("\"\n");
         }
         SenderUtil.sendGroupMsg(sender, fromGroup, mes.toString().trim());
     }
@@ -113,42 +105,43 @@ public class GroupMessageListener {
     @Filter(diyFilter = {"boot", "ai"}, mostDIYType = MostDIYType.EVERY_MATCH)
     public void sendAiMessage(GroupMsg msg, MsgSender sender) {
         String fromGroup = msg.getGroup();
-        String atThis = CQ.at(msg.getThisCode());
-        String message = msg.getMsg().replace(atThis.trim(), "").trim();
+        String message = CQ.utils.removeByType("at", msg.getMsg(), true, true);
 
         Map<String, String> map = service.getAllByGroup(fromGroup);
         if (map.containsKey(msg.getMsg().trim())) {
             return;
         }
+        System.out.println(111 + message);
+        List<KQCode> fases = CQ.getKq(message, "face");
+        for (KQCode KQCode : fases) {
+            String str = FaceEnum.getString(KQCode.get("id"));
+            System.out.println(str);
+            message = message.replace(KQCode, str);
+        }
         if ("".equals(message))
             message = "在吗在吗";
-        List<CQCode> fases = CQCodeUtil.build().getCQCodeFromMsgByType(message, CQCodeTypes.face);
-        for (CQCode CQCode : fases) {
-            String str = FaceEnum.getString(CQCode.getParam("id"));
-            message = message.replace(CQCode, "".equals(str) ? CQCode : str);
-        }
+
+        System.out.println(message);
         try {
-            String signature = "";
+            String signature;
             String url = "https://api.ai.qq.com/fcgi-bin/nlp/nlp_textchat";
-            var params = new HashMap<String, String>();
+            Map<String, String> params = new HashMap<>();
             params.put("app_id", "2127860232");
             String time = Long.toString(System.currentTimeMillis() / 1000);
             String uuid = UUID.randomUUID().toString();
             String nonce_str = uuid.replaceAll("-", "");
-            String session = fromGroup;
-            String question = message;
             params.put("time_stamp", time);
             params.put("nonce_str", nonce_str);
-            params.put("session", session);
-            params.put("question", question);
+            params.put("session", fromGroup);
+            params.put("question", message);
             signature = getReqSign(params, "AEYJcmaShG0BokTZ");
             params.put("sign", signature);
-            System.out.println("请求消息: " + question);
+            System.out.println("请求消息: " + message);
             // 获取网页数据
             String web = Jsoup.connect(url).data(params).ignoreContentType(true).get().text();
             System.out.println("第1次请求");
             System.out.println("返回值: " + web);
-            JSONObject json = new JSONObject();
+            JSONObject json;
             json = JSONUtils.toJsonObject(web);
             for (int i = 2; i < 11; i++) {
                 // 请求成功直接跳出
@@ -178,8 +171,7 @@ public class GroupMessageListener {
     @Filter(diyFilter = {"boot", "aiVoice"}, mostDIYType = MostDIYType.EVERY_MATCH)
     public void sendAiVoice(GroupMsg msg, MsgSender sender) {
         String fromGroup = msg.getGroup();
-        String atThis = CQ.at(msg.getThisCode());
-        String message = msg.getMsg().replace(atThis.trim(), "").trim().substring(1);
+        String message = CQ.utils.remove(msg.getMsg(), true, true).substring(1);
 
         Map<String, String> map = service.getAllByGroup(fromGroup);
         if (map.containsKey(msg.getMsg().trim())) {
@@ -187,38 +179,37 @@ public class GroupMessageListener {
         }
         if ("说".equals(message))
             message = "你想让我说什么";
-        List<CQCode> fases = CQCodeUtil.build().getCQCodeFromMsgByType(message, CQCodeTypes.face);
-        for (CQCode CQCode : fases) {
-            String str = FaceEnum.getString(CQCode.getParam("id"));
-            message = message.replace(CQCode, "".equals(str) ? CQCode : str);
+        List<KQCode> fases = CQ.getKq(message, "face");
+        for (KQCode KQCode : fases) {
+            String str = FaceEnum.getString(KQCode.get("id"));
+            message = message.replace(KQCode, "".equals(str) ? KQCode : str);
         }
         try {
-            String signature = "";
+            String signature;
             String url = "https://api.ai.qq.com/fcgi-bin/aai/aai_tts";
-            var params = new HashMap<String, String>();
+            Map<String, String> params = new HashMap<>();
             params.put("app_id", "2127860232");
             String time = Long.toString(System.currentTimeMillis() / 1000);
             String uuid = UUID.randomUUID().toString();
             String nonce_str = uuid.replaceAll("-", "");
-            String question = message;
             params.put("time_stamp", time);
             params.put("nonce_str", nonce_str);
             params.put("speaker", "6");
             params.put("format", "2");
-            params.put("volume", "5");
+            params.put("volume", "8");
             params.put("speed", "95");
-            params.put("text", question);
+            params.put("text", message);
             params.put("aht", "10");
             params.put("apc", "40");
             signature = getReqSign(params, "AEYJcmaShG0BokTZ");
             params.put("sign", signature);
-            System.out.println("请求消息: " + question);
+            System.out.println("请求消息: " + message);
             // 获取网页数据
             JSONObject json = null;
             int num = 0;
             do {
                 num++;
-                String web = null;
+                String web;
                 try {
                     web = Jsoup.connect(url).data(params).ignoreContentType(true).get().text();
 //					System.out.println(web);
@@ -229,7 +220,7 @@ public class GroupMessageListener {
                 if (num > 5) {
                     break;
                 }
-            } while (json.getInteger("ret") != 0);
+            } while (Objects.requireNonNull(json).getInteger("ret") != 0);
             JSONObject data = json.getJSONObject("data");
             if (json.getInteger("ret") == 0) {
                 Decoder decoder = Base64.getDecoder();
@@ -239,14 +230,18 @@ public class GroupMessageListener {
                         d[i] += 256;
                     }
                 }
-                String path = CQ.getCQPath() + "/data/record/";
+                File path = new File(CQ.getCQPath() + "/data/record/");
+                if (!path.exists()) {
+                    System.out.println(path.mkdirs());
+                }
                 String filePath = data.getString("md5sum");
-                FileOutputStream fos = new FileOutputStream(path + filePath);
-                System.out.println(path + filePath);
+
+                FileOutputStream fos = new FileOutputStream(path + "/" + filePath);
+                System.out.println(path + "/" + filePath);
                 fos.write(d);
                 fos.flush();
                 fos.close();
-                SenderUtil.sendGroupMsg(sender, fromGroup, CQCodeUtil.build().getCQCode_Record(filePath).toString());
+                SenderUtil.sendGroupMsg(sender, fromGroup, CQ.getRecord(path + "/" + filePath).toString());
             } else {
                 SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(msg.getQQ()) + "小忧没有看懂你说的是什么~");
                 System.out.println("请求错误");
@@ -280,7 +275,6 @@ public class GroupMessageListener {
                 }
             } catch (ObjectExistedException e) {
                 SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "\n更改失败: \n此条消息已存在");
-                return;
             }
         } else {
             SenderUtil.sendGroupMsg(sender, group, "添加失败,你不是我的管理员!");
@@ -305,7 +299,6 @@ public class GroupMessageListener {
                 SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "\n删除成功: \n\t\t消息内容: " + message);
             } catch (ObjectNotFoundException e) {
                 SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "\n更改失败: \n没找到此条消息");
-                return;
             }
         } else {
             SenderUtil.sendGroupMsg(sender, group, "删除失败,你不是我的管理员!");

@@ -73,7 +73,7 @@ public class MessageServiceImpl implements MessageService {
 	@Override
 	public Map<String, String> getAllByGroup(String groupId) {
 		List<Message> list = mapper.findAllByGroup(groupId);
-		var map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		for (Message message : list) {
 			map.put(message.getMessage(), message.getAnswer());
 		}

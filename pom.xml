@@ -7,6 +7,7 @@
     <groupId>com.forte.test</groupId>
     <artifactId>starter.test</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <name>starter.test</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -32,8 +33,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>10</source>
-                    <target>10</target>
+                    <source>8</source>
+                    <target>8</target>
                 </configuration>
             </plugin>
         </plugins>
@@ -41,9 +42,9 @@
     <dependencies>
         <!-- cqhttp 快速启动器依赖 -->
         <dependency>
-            <groupId>io.github.ForteScarlet.simple-robot</groupId>
-            <artifactId>component-cqhttp-spring-boot-starter</artifactId>
-            <version>1.15.0</version>
+            <groupId>love.forte.simple-robot</groupId>
+            <artifactId>component-mirai-spring-boot-starter</artifactId>
+            <version>1.16.0-preview.3</version>
         </dependency>
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>

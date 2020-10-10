@@ -1,7 +1,5 @@
 package com.wuyou.robot.listeners;
 
-import com.forte.component.forcoolqhttpapi.CoolQHttpInteractionException;
-import com.forte.component.forcoolqhttpapi.server.CoolQHttpMsgSender;
 import com.forte.qqrobot.anno.Filter;
 import com.forte.qqrobot.anno.Listen;
 import com.forte.qqrobot.anno.depend.Beans;
@@ -16,6 +14,7 @@ import com.forte.qqrobot.beans.messages.types.MsgGetTypes;
 import com.forte.qqrobot.beans.messages.types.PowerType;
 import com.forte.qqrobot.beans.messages.types.SexType;
 import com.forte.qqrobot.sender.MsgSender;
+import com.forte.qqrobot.sender.senderlist.SenderGetList;
 import com.forte.qqrobot.utils.CQCodeUtil;
 import com.wuyou.service.AllBlackService;
 import com.wuyou.service.BlackUserService;
@@ -38,43 +37,39 @@ public class RequestListener {
     @Depend
     BlackUserService blackUserService;
 
-    List<String> administrator = new ArrayList<String>();
+    List<String> administrator = new ArrayList<>();
     String adminQQ = "1097810498";
 
     public RequestListener() {
         administrator.add("1097810498");
-        administrator.add("1041025733");
     }
 
     @Listen(MsgGetTypes.friendAddRequest)
     public void friendAddRequest(FriendAddRequest request, MsgSender sender) {
         // TODO: 好友添加的请求
-        adminQQ = request.getThisCode().equals("254826743") ? "1041025733" : "1097810498";
-        CoolQHttpMsgSender msg = (CoolQHttpMsgSender) sender.GETTER;
         sender.SETTER.setFriendAddRequest(request, "", true);
         sender.SENDER.sendPrivateMsg(adminQQ,
-                "已经添加[" + request.getQQ() + "](" + msg.getStrangerInfo(request.getQQ()).getName() + ")为好友,验证消息为"
+                "已经添加[" + request.getQQ() + "](" + sender.getPersonInfoByCode(request.getQQ()).getRemarkOrNickname() + ")为好友,验证消息为"
                         + (request.getMsg().equals("") ? "空" : ": " + request.getMsg()));
     }
 
     @Listen(MsgGetTypes.groupAddRequest)
     public void groupAddRequest(GroupAddRequest request, MsgSender sender) {
         // TODO: 群添加请求
-        adminQQ = request.getThisCode().equals("254826743") ? "1041025733" : "1097810498";
         String fromGroup = request.getGroup();
         String qq = request.getQQ();
-        CoolQHttpMsgSender msg = (CoolQHttpMsgSender) sender.GETTER;
+        SenderGetList msg = sender.GETTER;
 
         List<String> list = getAllBlackUser(fromGroup);
         // 判断是不是黑名单里的成员
         if (list.contains(qq)) {
             sender.SETTER.setGroupAddRequest(request, false, "");
             sender.SENDER.sendPrivateMsg(adminQQ, "已经拒绝黑名单成员[" + request.getQQ() + "]("
-                    + sender.getPersonInfoByCode(qq).getName() + ")加入群[" + request.getGroup() + "]("
+                    + sender.getPersonInfoByCode(qq).getRemarkOrNickname() + ")加入群[" + request.getGroup() + "]("
                     + msg.getGroupInfo(request.getGroup()).getName() + ")," + (request.getMsg().equals("") ? "附加消息为空"
                     : request.getMsg().contains("邀请人") ? request.getMsg() : "附加消息为: " + request.getMsg()));
             SenderUtil.sendGroupMsg(sender, fromGroup, "已经拒绝黑名单成员[" + request.getQQ() + "]("
-                    + sender.getPersonInfoByCode(qq).getName() + ")加入群, " + (request.getMsg().equals("") ? "附加消息为空"
+                    + sender.getPersonInfoByCode(qq).getRemarkOrNickname() + ")加入群, " + (request.getMsg().equals("") ? "附加消息为空"
                     : request.getMsg().contains("邀请人") ? request.getMsg() : "附加消息为: " + request.getMsg()));
             return;
         }
@@ -85,35 +80,36 @@ public class RequestListener {
             if (allBlackGroups.contains(request.getGroup())) {
                 sender.SETTER.setGroupAddRequest(request, false, "");
                 sender.SENDER.sendPrivateMsg(adminQQ,
-                        "[" + request.getQQ() + "](" + sender.getPersonInfoByCode(qq).getName() + ")邀请我加入群["
-                                + request.getGroup() + "](" + msg.getGroupInfo(request.getGroup()).getName()
+                        "[" + request.getQQ() + "](" + sender.getPersonInfoByCode(qq).getRemarkOrNickname() + ")邀请我加入群["
+                                + request.getGroup() + "](" + sender.getGroupInfoByCode(request.getGroup()).getName()
                                 + "),但是由于此群在黑名单内被我拒绝了");
                 return;
             }
             sender.SETTER.setGroupAddRequest(request, true, "");
             sender.SENDER.sendPrivateMsg(adminQQ,
-                    "[" + request.getQQ() + "](" + sender.getPersonInfoByCode(qq).getName() + ")已邀请我加入群["
+                    "[" + request.getQQ() + "](" + sender.getPersonInfoByCode(qq).getRemarkOrNickname() + ")已邀请我加入群["
                             + request.getGroup() + "](" + msg.getGroupInfo(request.getGroup()).getName() + ")");
-        } else {
-            // 同意群申请
-            // 邀请他人进群
-//			sender.SETTER.setGroupAddRequest(request, true, "");
-//			sender.SENDER.sendPrivateMsg(adminQQ, "已经同意[" + request.getQQ() + "]("
-//					+ sender.getPersonInfoByCode(qq).getName() + ")加入群[" + request.getGroup() + "]("
-//					+ msg.getGroupInfo(request.getGroup()).getName() + ")," + (request.getMsg().equals("") ? "附加消息为空"
-//							: request.getMsg().contains("邀请人") ? request.getMsg() : "附加消息为: " + request.getMsg()));
         }
+//        else {
+//            // 同意群申请
+//            // 邀请他人进群
+////			sender.SETTER.setGroupAddRequest(request, true, "");
+////			sender.SENDER.sendPrivateMsg(adminQQ, "已经同意[" + request.getQQ() + "]("
+////					+ sender.getPersonInfoByCode(qq).getName() + ")加入群[" + request.getGroup() + "]("
+////					+ msg.getGroupInfo(request.getGroup()).getName() + ")," + (request.getMsg().equals("") ? "附加消息为空"
+////							: request.getMsg().contains("邀请人") ? request.getMsg() : "附加消息为: " + request.getMsg()));
+//        }
     }
 
     @Listen(MsgGetTypes.groupMemberIncrease)
     public void groupMemberIncrease(GroupMemberIncrease increase, MsgSender sender) {
         // TODO: 新群员进群
-        CoolQHttpMsgSender msg = (CoolQHttpMsgSender) sender.GETTER;
+        SenderGetList msg = sender.GETTER;
         CQCodeUtil util = CQCodeUtil.build();
         String fromGroup = increase.getGroup();
 //		String qq = increase.
         String beingOperateQQ = increase.getBeOperatedQQ();
-        Integer level = msg.getVipInfo(beingOperateQQ).getLevel();
+        Integer level = msg.getStrangerInfo(msg.getGroupMemberInfo(fromGroup, beingOperateQQ)).getLevel();
         System.out.println("等级: " + level);
         String loginQQ = increase.getThisCode();
         if (loginQQ.equals(beingOperateQQ)) {
@@ -156,12 +152,10 @@ public class RequestListener {
                 util.getCQCode_At(beingOperateQQ);
                 SenderUtil.sendGroupMsg(sender, fromGroup, util.getCQCode_At(beingOperateQQ).toString() + welcomeMessage);
             }
-        } catch (CoolQHttpInteractionException e) {
-            System.out.println(e.getLangMessage());
-            sender.SENDER.sendPrivateMsg(adminQQ, "出现异常");
-            sender.SENDER.sendPrivateMsg(adminQQ, e.getLangMessage());
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
+            sender.SENDER.sendPrivateMsg(adminQQ, "出现异常");
+            sender.SENDER.sendPrivateMsg(adminQQ, e.getMessage());
         }
     }
 
@@ -169,7 +163,7 @@ public class RequestListener {
         List<String> allBlackUsers = allBlackUserService.getAllBlack(1);
         List<String> blackUsers = blackUserService.getUserByGroupId(fromGroup);
 
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         if (blackUsers.size() == 0 && allBlackUsers.size() == 0) {
             return list;
         }
