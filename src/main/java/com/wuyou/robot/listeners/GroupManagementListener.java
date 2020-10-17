@@ -16,10 +16,7 @@ import com.wuyou.exception.ObjectExistedException;
 import com.wuyou.exception.ObjectNotFoundException;
 import com.wuyou.service.BlackUserService;
 import com.wuyou.service.ClearService;
-import com.wuyou.utils.CQ;
-import com.wuyou.utils.PowerUtils;
-import com.wuyou.utils.RobotUtils;
-import com.wuyou.utils.SenderUtil;
+import com.wuyou.utils.*;
 import org.jsoup.Jsoup;
 
 import java.io.IOException;
@@ -36,13 +33,6 @@ public class GroupManagementListener {
     BlackUserService blackUserService;
     @Depend
     ClearService clearService;
-    List<String> administrator = new ArrayList<>();
-
-    public GroupManagementListener() {
-        administrator.add("1097810498");
-        administrator.add("1041025733");
-        administrator.add("2973617637");
-    }
 
     @Listen(MsgGetTypes.groupMsg)
     @Filter(diyFilter = {"boot", "kickMember"}, mostDIYType = MostDIYType.EVERY_MATCH)
@@ -62,7 +52,7 @@ public class GroupManagementListener {
                     str.append("\n\t\t踢出成员[").append(qq).append("](").append(nickname).append(")失败,我踢我自己？");
                     continue;
                 }
-                if (administrator.contains(qq)) {
+                if (GlobalVariable.administrator.contains(qq)) {
                     str.append("\n\t\t踢出成员[").append(qq).append("](").append(nickname).append(")失败,不可以踢我的主人!!");
                     continue;
                 }
@@ -106,12 +96,11 @@ public class GroupManagementListener {
                         str.append("\n\t\t禁言成员[").append(qq).append("](").append(nickname).append(")失败,我禁我自己？");
                         continue;
                     }
-                    if (administrator.contains(qq)) {
+                    if (GlobalVariable.administrator.contains(qq)) {
                         str.append("\n\t\t禁言成员[").append(qq).append("](").append(nickname).append(")失败,不可以禁言我的主人!!");
                         continue;
                     }
                     boolean a = PowerUtils.powerCompare(msg, qq, sender);
-                    System.out.println(a);
                     if (a) {
                         if (time > 1440 * 30) {
                             str.append("\n\t\t禁言成员[").append(qq).append("](").append(nickname).append(")失败,禁言时间不能超过30天!");
@@ -158,7 +147,9 @@ public class GroupManagementListener {
                     str.append("\n\t\t解禁成员[").append(qq).append("](").append(nickname).append(")失败,我要是被禁言了能发出这条消息?");
                     continue;
                 }
-                if (!banList.contains(member.getQQ()) || member.getBanTime() <= 0) {
+                System.out.println(banList);
+                System.out.println(member.getBanTime());
+                if (!banList.contains(member.getQQ())) {
                     str.append("\n\t\t解禁成员[").append(qq).append("](").append(nickname).append(")失败,此用户不需要解禁");
                     continue;
                 }
@@ -392,6 +383,8 @@ public class GroupManagementListener {
         String body = Jsoup.connect(url).ignoreContentType(true).cookies(cookies).get().text();
         JSONObject json = JSONUtils.toJsonObject(body);
         System.out.println(json);
+        System.out.println(bkn);
+        System.out.println(cookies);
         JSONObject shutup = json.getJSONObject("shutup");
         return shutup.getJSONArray("list");
     }
@@ -449,7 +442,7 @@ public class GroupManagementListener {
                 userMember = sender.GETTER.getGroupMemberInfo(fromGroup, user);
             } catch (Exception e) {
                 try {
-                    if (administrator.contains(user)) {
+                    if (GlobalVariable.administrator.contains(user)) {
                         str.append("\n\t\t添加黑名单失败: QQ:[").append(user).append("],不可以拉黑我的主人!");
                         continue;
                     }
@@ -461,7 +454,7 @@ public class GroupManagementListener {
                 continue;
             }
             String nickname = userMember.getRemarkOrNickname();
-            if (administrator.contains(user)) {
+            if (GlobalVariable.administrator.contains(user)) {
                 str.append("\n\t\t添加黑名单失败: QQ:[").append(user).append("](").append(nickname).append("),不可以拉黑我的主人!");
                 continue;
             }

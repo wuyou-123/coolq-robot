@@ -1,9 +1,5 @@
 package com.wuyou.jobs;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 import com.forte.qqrobot.anno.depend.Beans;
 import com.forte.qqrobot.anno.depend.Depend;
 import com.forte.qqrobot.anno.timetask.CronTask;
@@ -14,6 +10,10 @@ import com.forte.qqrobot.timetask.TimeJob;
 import com.forte.qqrobot.utils.CQCodeUtil;
 import com.wuyou.service.ClearService;
 import com.wuyou.service.StatService;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Administrator<br>
@@ -36,7 +36,7 @@ public class TimesJob implements TimeJob {
 		System.out.println("删除无用群信息");
 		GroupList groupList = msg.GETTER.getGroupList();
 		Set<String> set = statService.getAllStat().keySet();
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 		for (Group group : groupList) {
 			list.add(group.getCode());
 		}

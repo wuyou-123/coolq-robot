@@ -31,7 +31,6 @@ public class GroupBootListener {
         if (PowerUtils.getPowerType(fromGroup, fromQQ, sender) > 1) {
             service.bootAndShutDown(msg.getGroup(), 1);
             GlobalVariable.bootMap.put(msg.getGroup(), true);
-            System.out.println(1111);
             SenderUtil.sendGroupMsg(sender, msg.getGroup(), "已开机, 发送\"菜单\"查看帮助信息, 艾特我可以和我聊天哦");
         }
     }

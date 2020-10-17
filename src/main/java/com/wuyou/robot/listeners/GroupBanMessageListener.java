@@ -8,16 +8,13 @@ import com.forte.qqrobot.beans.messages.msgget.GroupMsg;
 import com.forte.qqrobot.beans.messages.types.MsgGetTypes;
 import com.forte.qqrobot.beans.types.MostDIYType;
 import com.forte.qqrobot.sender.MsgSender;
-import com.forte.qqrobot.utils.CQCodeUtil;
 import com.wuyou.exception.ObjectExistedException;
 import com.wuyou.exception.ObjectNotFoundException;
 import com.wuyou.service.BanMessageService;
 import com.wuyou.utils.CQ;
 import com.wuyou.utils.PowerUtils;
 import com.wuyou.utils.SenderUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -30,14 +27,6 @@ public class GroupBanMessageListener {
 
     @Depend
     BanMessageService service;
-
-    List<String> administrator = new ArrayList<>();
-
-    public GroupBanMessageListener() {
-        administrator.add("1097810498");
-        administrator.add("1041025733");
-        administrator.add("2973617637");
-    }
 
     @Listen(MsgGetTypes.groupMsg)
     @Filter(value = {"禁言关键词", "关键词列表"}, diyFilter = "boot")
@@ -106,13 +95,13 @@ public class GroupBanMessageListener {
         if (PowerUtils.getPowerType(group, qq, sender) > 1) {
             System.out.println("执行添加关键词代码");
             String message = mess.substring(mess.indexOf("添加关键词") + 5).trim();
-            if (message.equals("")) {
+            if ("".equals(message)) {
                 SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "添加失败: 内容不完整");
                 return;
             }
             try {
                 service.addBanMessage(group, message);
-                if (message.equals("抽奖")) {
+                if ("抽奖".equals(message)) {
                     SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "\n添加成功: \n\t\t已开启抽奖功能!");
                 } else {
                     SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "\n添加成功: \n\t\t消息内容: " + message);
@@ -134,13 +123,13 @@ public class GroupBanMessageListener {
         if (PowerUtils.getPowerType(group, qq, sender) > 1) {
             System.out.println("执行删除关键词代码");
             String message = mess.substring(mess.indexOf("删除关键词") + 5).trim();
-            if (message.equals("")) {
+            if ("".equals(message)) {
                 SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "删除失败: 内容不完整");
                 return;
             }
             try {
                 service.removeBanMessage(group, message);
-                if (message.equals("抽奖")) {
+                if ("抽奖".equals(message)) {
                     SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "\n删除成功: \n\t\t已关闭抽奖功能!");
                 } else {
                     SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "\n删除成功: \n\t\t关键词内容: " + message);

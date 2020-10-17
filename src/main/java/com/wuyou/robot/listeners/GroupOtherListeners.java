@@ -59,22 +59,27 @@ public class GroupOtherListeners {
 
     @Listen(MsgGetTypes.groupMsg)
     @Filter(diyFilter = "boot", value = "呼叫龙王")
-    public void findDargon(GroupMsg msg, MsgSender sender) throws IOException {
-        String fromGroup = msg.getGroup();
-        Map<String, String> cookies = RobotUtils.getCookies(sender);
-        String bkn = RobotUtils.getBkn(sender);
-        String url = "http://qun.qq.com/interactive/honorlist?gc=" + fromGroup + "&type=1&_wv=3&_wwv=129";
-        String body = Jsoup.connect(url).ignoreContentType(true).cookies(cookies).get().html();
-        String jsonStr = body.substring(body.indexOf("__INITIAL_STATE__=") + 18);
-        jsonStr = jsonStr.substring(0, jsonStr.indexOf("</script>"));
-        JSONObject json = JSONUtils.toJsonObject(jsonStr);
-        JSONObject currentTalkative = json.getJSONObject("currentTalkative");
-        if (currentTalkative != null) {
-            String qq = currentTalkative.getString("uin");
-            SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(qq));
-        } else {
-            SenderUtil.sendGroupMsg(sender, fromGroup, "当前暂无龙王");
-        }
+    public void findDargon(GroupMsg msg, MsgSender sender) {
+        new Thread(() -> {
+            try{
+            String fromGroup = msg.getGroup();
+            Map<String, String> cookies = RobotUtils.getCookies(sender);
+            String bkn = RobotUtils.getBkn(sender);
+            String url = "http://qun.qq.com/interactive/honorlist?gc=" + fromGroup + "&type=1&_wv=3&_wwv=129";
+            String body = Jsoup.connect(url).ignoreContentType(true).cookies(cookies).get().html();
+            String jsonStr = body.substring(body.indexOf("__INITIAL_STATE__=") + 18);
+            jsonStr = jsonStr.substring(0, jsonStr.indexOf("</script>"));
+            JSONObject json = JSONUtils.toJsonObject(jsonStr);
+            JSONObject currentTalkative = json.getJSONObject("currentTalkative");
+            if (currentTalkative != null) {
+                String qq = currentTalkative.getString("uin");
+                SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(qq));
+            } else {
+                SenderUtil.sendGroupMsg(sender, fromGroup, "当前暂无龙王");
+            }}catch (IOException e){
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     @Listen(MsgGetTypes.groupMsg)

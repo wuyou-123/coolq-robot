@@ -7,6 +7,7 @@ import java.util.Map;
 
 public class RobotUtils {
     public static Map<String, String> getCookies(MsgSender sender) {
+        String cooki = sender.GETTER.getAuthInfo().getCode();
         String cookiesStr = sender.GETTER.getAuthInfo().getCookies();
         Map<String, String> cookies = new HashMap<>();
         for (String cookie : cookiesStr.split(";")) {

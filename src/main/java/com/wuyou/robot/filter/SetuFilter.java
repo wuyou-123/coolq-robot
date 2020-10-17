@@ -30,7 +30,7 @@ public class SetuFilter {
 		String message = msgget.getMsg();
 			List<KQCode> list = CQ.getKq(message, "image");
 			for (KQCode KQCode : list) {
-				return KQCode.get("file").equals("463FBD38F6A0BD4ED008D84D26DCE538.gif");
+				return "463FBD38F6A0BD4ED008D84D26DCE538.gif".equals(KQCode.get("file"));
 			}
 			return false;
 

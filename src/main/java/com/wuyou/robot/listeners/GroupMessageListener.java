@@ -37,13 +37,7 @@ public class GroupMessageListener {
     @Depend
     MessageService service;
 
-    List<String> administrator = new ArrayList<>();
-
-    public GroupMessageListener() {
-        administrator.add("1097810498");
-    }
-
-    private static String getReqSign(Map<String, String> params, String appkey) throws UnsupportedEncodingException {
+    private static String getReqSign(Map<String, String> params) throws UnsupportedEncodingException {
         List<String> list = new ArrayList<>(params.keySet());
         list.sort((o1, o2) -> {
             char[] chars1 = o1.toCharArray();
@@ -61,9 +55,9 @@ public class GroupMessageListener {
         });
         StringBuilder str = new StringBuilder();
         for (String string : list) {
-            str.append(string).append("=").append(URLEncoder.encode(params.get(string), "utf-8")).append("&");
+            str.append(string).append("=").append(URLEncoder.encode(params.get(string), "UTF-8")).append("&");
         }
-        str.append("app_key=").append(appkey);
+        str.append("app_key=").append("AEYJcmaShG0BokTZ");
         return MD5Utils.toMD5(str.toString()).toUpperCase();
     }
 
@@ -111,11 +105,9 @@ public class GroupMessageListener {
         if (map.containsKey(msg.getMsg().trim())) {
             return;
         }
-        System.out.println(111 + message);
         List<KQCode> fases = CQ.getKq(message, "face");
         for (KQCode KQCode : fases) {
             String str = FaceEnum.getString(KQCode.get("id"));
-            System.out.println(str);
             message = message.replace(KQCode, str);
         }
         if ("".equals(message))
@@ -125,16 +117,10 @@ public class GroupMessageListener {
         try {
             String signature;
             String url = "https://api.ai.qq.com/fcgi-bin/nlp/nlp_textchat";
-            Map<String, String> params = new HashMap<>();
-            params.put("app_id", "2127860232");
-            String time = Long.toString(System.currentTimeMillis() / 1000);
-            String uuid = UUID.randomUUID().toString();
-            String nonce_str = uuid.replaceAll("-", "");
-            params.put("time_stamp", time);
-            params.put("nonce_str", nonce_str);
+            Map<String, String> params = params();
             params.put("session", fromGroup);
             params.put("question", message);
-            signature = getReqSign(params, "AEYJcmaShG0BokTZ");
+            signature = getReqSign(params);
             params.put("sign", signature);
             System.out.println("请求消息: " + message);
             // 获取网页数据
@@ -187,13 +173,7 @@ public class GroupMessageListener {
         try {
             String signature;
             String url = "https://api.ai.qq.com/fcgi-bin/aai/aai_tts";
-            Map<String, String> params = new HashMap<>();
-            params.put("app_id", "2127860232");
-            String time = Long.toString(System.currentTimeMillis() / 1000);
-            String uuid = UUID.randomUUID().toString();
-            String nonce_str = uuid.replaceAll("-", "");
-            params.put("time_stamp", time);
-            params.put("nonce_str", nonce_str);
+            Map<String, String> params = params();
             params.put("speaker", "6");
             params.put("format", "2");
             params.put("volume", "8");
@@ -201,7 +181,7 @@ public class GroupMessageListener {
             params.put("text", message);
             params.put("aht", "10");
             params.put("apc", "40");
-            signature = getReqSign(params, "AEYJcmaShG0BokTZ");
+            signature = getReqSign(params);
             params.put("sign", signature);
             System.out.println("请求消息: " + message);
             // 获取网页数据
@@ -251,6 +231,17 @@ public class GroupMessageListener {
         }
     }
 
+    private Map<String, String> params() {
+        Map<String, String> params = new HashMap<>();
+        params.put("app_id", "2127860232");
+        String time = Long.toString(System.currentTimeMillis() / 1000);
+        String uuid = UUID.randomUUID().toString();
+        String nonce_str = uuid.replaceAll("-", "");
+        params.put("time_stamp", time);
+        params.put("nonce_str", nonce_str);
+        return params;
+    }
+
     @Listen(MsgGetTypes.groupMsg)
     @Filter(diyFilter = {"boot", "addMessage"}, mostDIYType = MostDIYType.EVERY_MATCH)
     public void addMessage(GroupMsg msg, MsgSender sender) {
@@ -261,7 +252,7 @@ public class GroupMessageListener {
             System.out.println("执行添加消息代码");
             String message = mess.substring(mess.indexOf("添加消息") + 4, mess.indexOf("回复")).trim();
             String answer = mess.substring(mess.indexOf("回复") + 2).trim();
-            if (message.equals("") || answer.equals("")) {
+            if ("".equals(message) || "".equals(answer)) {
                 SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "添加失败: 内容不完整");
                 return;
             }
@@ -290,7 +281,7 @@ public class GroupMessageListener {
         if (PowerUtils.getPowerType(group, qq, sender) > 1) {
             System.out.println("执行删除消息代码");
             String message = mess.substring(mess.indexOf("删除消息") + 4).trim();
-            if (message.equals("")) {
+            if ("".equals(message)) {
                 SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "删除失败: 内容不完整");
                 return;
             }

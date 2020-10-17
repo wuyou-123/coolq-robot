@@ -20,11 +20,8 @@ import java.io.IOException;
 public class BotRunApplication {
 
 	public static void main(String[] args) {
-//		BaseApplication.runAuto(BotRunApplication.class, args);
-		// new 一个cqhttp组件的启动器，并将你的启动器类放进去。
-		ConfigurableApplicationContext a = SpringApplication.run(BotRunApplication.class, args);
-
-		BootClass boot = a.getBean(BootClass.class);
+		ConfigurableApplicationContext context = SpringApplication.run(BotRunApplication.class, args);
+		BootClass boot = context.getBean(BootClass.class);
 		boot.boot();
 	}
 }

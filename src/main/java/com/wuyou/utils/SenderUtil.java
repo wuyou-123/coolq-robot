@@ -13,14 +13,12 @@ public class SenderUtil {
 
     public static void sendGroupMsg(MsgSender sender, String fromGroup, String msg) {
         if (CQ.context.get(fromGroup) == null) {
-            System.out.println(Arrays.toString(CQ.context.get(fromGroup)));
             CQ.context.put(fromGroup, new String[]{"", "", "", "", msg});
             sender.SENDER.sendGroupMsg(fromGroup, msg);
             return;
         }
         String[] ret = getList(fromGroup);
         CQ.context.put(fromGroup, new String[]{ret[1], ret[2], ret[3], ret[4], msg});
-        System.out.println(Arrays.toString(CQ.context.get(fromGroup)));
         sender.SENDER.sendGroupMsg(fromGroup, msg);
     }
 

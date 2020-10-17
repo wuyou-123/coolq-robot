@@ -1,6 +1,9 @@
 package com.wuyou.utils;
 
-import com.simplerobot.modules.utils.*;
+import com.simplerobot.modules.utils.CodeTemplate;
+import com.simplerobot.modules.utils.KQCode;
+import com.simplerobot.modules.utils.KQCodeUtils;
+import com.simplerobot.modules.utils.MutableKQCode;
 
 import java.util.*;
 
@@ -62,8 +65,11 @@ public class CQ {
         return stringTemplate.face(id);
     }
 
-    public static KQCode getRecord(String id) {
-        return stringTemplate.record(id);
+    public static KQCode getRecord(String path) {
+        return stringTemplate.record(path);
+    }
+    public static KQCode getImage(String path) {
+        return stringTemplate.image(path);
     }
 
     public static String getCQPath() {

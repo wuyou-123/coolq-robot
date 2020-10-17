@@ -1,7 +1,6 @@
 package com.wuyou.robot.listeners;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,14 +15,14 @@ import com.forte.qqrobot.beans.messages.result.GroupList;
 import com.forte.qqrobot.beans.messages.result.GroupMemberInfo;
 import com.forte.qqrobot.beans.messages.result.inner.Group;
 import com.forte.qqrobot.beans.messages.types.MsgGetTypes;
-import com.forte.qqrobot.beans.types.CQCodeTypes;
 import com.forte.qqrobot.sender.MsgSender;
-import com.forte.qqrobot.utils.CQCodeUtil;
 import com.wuyou.exception.ObjectExistedException;
 import com.wuyou.exception.ObjectNotFoundException;
 import com.wuyou.service.AllBlackService;
 import com.wuyou.service.ClearService;
 import com.wuyou.utils.CQ;
+import com.wuyou.utils.GetLevelUtils;
+import com.wuyou.utils.GlobalVariable;
 
 /**
  * @author Administrator<br>
@@ -35,21 +34,15 @@ public class PrivateMsgListener {
     ClearService clearService;
     @Depend
     AllBlackService allBlackUserService;
-    List<String> administrator = new ArrayList<>();
     String adminQQ = "1097810498";
 
-    public PrivateMsgListener() {
-        administrator.add("1097810498");
-    }
-
     @Listen(MsgGetTypes.privateMsg)
-    public void PrivateMsg(PrivateMsg msg, MsgSender sender) {
-        adminQQ = msg.getThisCode().equals("254826743") ? "1041025733" : "1097810498";
+    public void privateMsg(PrivateMsg msg, MsgSender sender) {
         String qq = msg.getQQ();
         String message = msg.getMsg();
         System.out.println(message);
-        if (administrator.contains(qq)) {
-            // TODO: 自己给机器人发送代码
+        if (GlobalVariable.administrator.contains(qq)) {
+            sender.SENDER.sendPrivateMsg(qq, GetLevelUtils.getLevel("2984131619") + "");
             try {
                 if (message.indexOf("给") == 0 && message.contains("发送消息")) {
                     // 发送消息
@@ -60,16 +53,13 @@ public class PrivateMsgListener {
                             + sender.getPersonInfoByCode(toqq).getRemarkOrNickname() + ")");
                 }
             } catch (Exception e) {
-                if (e.getMessage().contains("-23")) {
-                    sender.SENDER.sendPrivateMsg(qq, "发送失败,找不到与目标帐号的关系，消息无法发送 (-23)");
-                } else {
-                    sender.SENDER.sendPrivateMsg(qq, "出现异常\n" + e.getMessage());
-                }
+                sender.SENDER.sendPrivateMsg(qq, "出现异常\n" + e.getMessage());
+
             }
             return;
         }
         // 收到他人发送的消息, 转发至自己
-        Thread t = new Thread(() -> {
+        new Thread(() -> {
             if (msg.getType().isFromSystem()) {
                 return;
             }
@@ -79,15 +69,14 @@ public class PrivateMsgListener {
             sender.SENDER.sendPrivateMsg(adminQQ,
                     "收到来自[" + qq + "](" + sender.getPersonInfoByCode(qq).getRemarkOrNickname() + ")的一条消息");
             sender.SENDER.sendPrivateMsg(adminQQ, msg.getMsg());
-        });
-        t.start();
+        }).start();
 
     }
 
     @Listen(MsgGetTypes.privateMsg)
     public void cancelGroupBan(PrivateMsg msg, MsgSender sender) {
         String message = msg.getMsg();
-        if (administrator.contains(msg.getQQ()) && message.startsWith("解禁群")) {
+        if (GlobalVariable.administrator.contains(msg.getQQ()) && message.startsWith("解禁群")) {
             String group = message.substring(3);
             if (sender.SETTER.setGroupBan(group, msg.getQQ(), 0)) {
                 sender.SENDER.sendPrivateMsg(msg.getQQ(), "解禁成功");
@@ -101,7 +90,7 @@ public class PrivateMsgListener {
     public void leaveGroupBan(PrivateMsg msg, MsgSender sender) {
         try {
             String message = msg.getMsg();
-            if (administrator.contains(msg.getQQ()) && message.startsWith("退群")) {
+            if (GlobalVariable.administrator.contains(msg.getQQ()) && message.startsWith("退群")) {
                 String group = message.substring(2);
                 if (sender.GETTER.getGroupMemberInfo(group, msg.getThisCode()).getPowerType().isOwner()) {
                     sender.SENDER.sendPrivateMsg(msg.getQQ(), "退出失败,不能退出我的群");
@@ -123,7 +112,7 @@ public class PrivateMsgListener {
     @Listen(MsgGetTypes.privateMsg)
     public void CancelGroupAllBan(PrivateMsg msg, MsgSender sender) {
         String message = msg.getMsg();
-        if (administrator.contains(msg.getQQ()) && message.startsWith("全体解禁")) {
+        if (GlobalVariable.administrator.contains(msg.getQQ()) && message.startsWith("全体解禁")) {
             String group = message.substring(4);
             if (sender.SETTER.setGroupWholeBan(group, false)) {
                 sender.SENDER.sendPrivateMsg(msg.getQQ(), "解禁成功");
@@ -136,7 +125,7 @@ public class PrivateMsgListener {
     @Listen(MsgGetTypes.privateMsg)
     @Filter("群列表")
     public void groupList(PrivateMsg msg, MsgSender sender) {
-        if (administrator.contains(msg.getQQ())) {
+        if (GlobalVariable.administrator.contains(msg.getQQ())) {
             // 发送群列表
             GroupList groupList = sender.GETTER.getGroupList();
             StringBuilder groupInfo = new StringBuilder("群列表:\n");
@@ -152,7 +141,7 @@ public class PrivateMsgListener {
     public void groupDetail(PrivateMsg msg, MsgSender sender) {
         try {
             String message = msg.getMsg();
-            if (administrator.contains(msg.getQQ()) && message.startsWith("群信息")) {
+            if (GlobalVariable.administrator.contains(msg.getQQ()) && message.startsWith("群信息")) {
                 String group = message.substring(3);
                 GroupInfo groupInfo = sender.GETTER.getGroupInfo(group, true);
                 if (groupInfo == null) {
@@ -176,7 +165,7 @@ public class PrivateMsgListener {
     @Listen(MsgGetTypes.privateMsg)
     public void restartServer(PrivateMsg msg, MsgSender sender) {
         String message = msg.getMsg();
-        if (administrator.contains(msg.getQQ()) && message.equals("重启")) {
+        if (GlobalVariable.administrator.contains(msg.getQQ()) && "重启".equals(message)) {
             String commandStr = "cmd /c C:/Users/Administrator/Desktop/restart.bat";
             try {
                 Runtime.getRuntime().exec(commandStr);
@@ -193,7 +182,7 @@ public class PrivateMsgListener {
     public void setAllBlackUser(PrivateMsg msg, MsgSender sender) {
         String message = msg.getMsg();
         String qq = msg.getQQ();
-        if (administrator.contains(qq) && message.startsWith("拉黑")) {
+        if (GlobalVariable.administrator.contains(qq) && message.startsWith("拉黑")) {
             StringBuilder str = new StringBuilder("添加黑名单:");
             try {
                 Set<String> list = new HashSet<>();
@@ -217,7 +206,7 @@ public class PrivateMsgListener {
     public void cancelAllBlackUser(PrivateMsg msg, MsgSender sender) {
         String message = msg.getMsg();
         String qq = msg.getQQ();
-        if (administrator.contains(qq) && message.startsWith("取消拉黑")) {
+        if (GlobalVariable.administrator.contains(qq) && message.startsWith("取消拉黑")) {
             StringBuilder str = new StringBuilder("取消拉黑:");
             try {
                 Set<String> list = new HashSet<>();
@@ -241,7 +230,7 @@ public class PrivateMsgListener {
     public void setAllBlackGroup(PrivateMsg msg, MsgSender sender) {
         String message = msg.getMsg();
         String qq = msg.getQQ();
-        if (administrator.contains(qq) && message.startsWith("群拉黑")) {
+        if (GlobalVariable.administrator.contains(qq) && message.startsWith("群拉黑")) {
             StringBuilder str = new StringBuilder("添加群黑名单:");
             try {
                 Set<String> list = new HashSet<>();
@@ -266,7 +255,7 @@ public class PrivateMsgListener {
     public void cancelAllBlackGroup(PrivateMsg msg, MsgSender sender) {
         String message = msg.getMsg();
         String qq = msg.getQQ();
-        if (administrator.contains(qq) && message.startsWith("取消群拉黑")) {
+        if (GlobalVariable.administrator.contains(qq) && message.startsWith("取消群拉黑")) {
             StringBuilder str = new StringBuilder("取消群拉黑:");
             try {
                 Set<String> list = new HashSet<>();
@@ -293,13 +282,13 @@ public class PrivateMsgListener {
         String qq = msg.getQQ();
         String message = msg.getMsg();
         int type = 0;
-        if (message.equals("黑名单"))
+        if ("黑名单".equals(message))
             type = 1;
-        else if ((message.equals("群黑名单")))
+        else if (("群黑名单".equals(message)))
             type = 2;
         if (type == 0)
             return;
-        if (administrator.contains(qq)) {
+        if (GlobalVariable.administrator.contains(qq)) {
             StringBuilder str = new StringBuilder(type == 1 ? "黑名单:" : "群黑名单:");
             List<String> list = allBlackUserService.getAllBlack(type);
             if (list.size() == 0) {
@@ -316,7 +305,7 @@ public class PrivateMsgListener {
     private String setBlackUsers(Set<String> list, MsgSender sender) {
         StringBuilder str = new StringBuilder();
         for (String user : list) {
-            if (administrator.contains(user + "")) {
+            if (GlobalVariable.administrator.contains(user + "")) {
                 str.append("\n\t\t添加黑名单失败: QQ:[").append(user).append("],你拉黑自己干嘛?");
                 continue;
             }
@@ -342,7 +331,7 @@ public class PrivateMsgListener {
             return "取消失败,黑名单为空";
         }
         for (String user : list) {
-            if (administrator.contains(user + "")) {
+            if (GlobalVariable.administrator.contains(user + "")) {
                 str.append("\n\t\t移除黑名单失败: QQ:[").append(user).append("],你不在黑名单!");
                 continue;
             }
@@ -403,7 +392,7 @@ public class PrivateMsgListener {
         return str.toString();
     }
 
-//	Map<String, String[]> m = new HashMap<String, String[]>();
+//	Map<String, String> m = new HashMap<String, String[]>();
 //
 //	/**
 //	 * 测试记录上下文
