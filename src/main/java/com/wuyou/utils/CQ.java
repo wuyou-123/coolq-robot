@@ -6,6 +6,7 @@ import com.simplerobot.modules.utils.KQCodeUtils;
 import com.simplerobot.modules.utils.MutableKQCode;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Administrator<br>
@@ -31,24 +32,24 @@ public class CQ {
     /**
      * 获取所有艾特的QQ号
      *
-     * @param msg
-     * @return
      */
     public static Set<String> getAts(String msg) {
         final List<KQCode> list = utils.getKqs(msg, "at");
-        System.out.println(list);
-        Set<String> set = new HashSet<>();
-        for (KQCode KQCode : list) {
-            set.add(KQCode.get("qq"));
-        }
-        return set;
+        return list.stream().map(item-> item.get("qq")).collect(Collectors.toSet());
+    }
+
+    /**
+     * 获取所有艾特的QQ号的KQ码
+     *
+     */
+    public static Set<KQCode> getAtKqs(String msg) {
+        final List<KQCode> list = utils.getKqs(msg, "at");
+        return new HashSet<>(list);
     }
 
     /**
      * 获取第一个艾特的QQ号
      *
-     * @param msg
-     * @return
      */
     public static String getAt(String msg) {
         final List<KQCode> list = utils.getKqs(msg, "at");

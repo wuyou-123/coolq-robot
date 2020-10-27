@@ -1,40 +1,48 @@
 package com.wuyou.robot.listeners;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import com.forte.qqrobot.anno.Filter;
 import com.forte.qqrobot.anno.Listen;
 import com.forte.qqrobot.anno.depend.Beans;
 import com.forte.qqrobot.anno.depend.Depend;
 import com.forte.qqrobot.beans.messages.msgget.PrivateMsg;
 import com.forte.qqrobot.beans.messages.result.GroupInfo;
-import com.forte.qqrobot.beans.messages.result.GroupList;
 import com.forte.qqrobot.beans.messages.result.GroupMemberInfo;
-import com.forte.qqrobot.beans.messages.result.inner.Group;
 import com.forte.qqrobot.beans.messages.types.MsgGetTypes;
 import com.forte.qqrobot.sender.MsgSender;
+import com.wuyou.entity.GroupEntity;
 import com.wuyou.exception.ObjectExistedException;
 import com.wuyou.exception.ObjectNotFoundException;
 import com.wuyou.service.AllBlackService;
 import com.wuyou.service.ClearService;
-import com.wuyou.utils.CQ;
-import com.wuyou.utils.GetLevelUtils;
 import com.wuyou.utils.GlobalVariable;
+import com.wuyou.utils.GroupUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Administrator<br>
  * 2020年3月13日
  */
 @Beans
+@Component
 public class PrivateMsgListener {
     @Depend
-    ClearService clearService;
+    private ClearService clearService;
     @Depend
-    AllBlackService allBlackUserService;
-    String adminQQ = "1097810498";
+    private AllBlackService allBlackUserService;
+
+    @Value("${command}")
+    private String commandStr;
+
+    private String adminQQ = "1097810498";
 
     @Listen(MsgGetTypes.privateMsg)
     public void privateMsg(PrivateMsg msg, MsgSender sender) {
@@ -42,7 +50,6 @@ public class PrivateMsgListener {
         String message = msg.getMsg();
         System.out.println(message);
         if (GlobalVariable.administrator.contains(qq)) {
-            sender.SENDER.sendPrivateMsg(qq, GetLevelUtils.getLevel("2984131619") + "");
             try {
                 if (message.indexOf("给") == 0 && message.contains("发送消息")) {
                     // 发送消息
@@ -59,17 +66,12 @@ public class PrivateMsgListener {
             return;
         }
         // 收到他人发送的消息, 转发至自己
-        new Thread(() -> {
-            if (msg.getType().isFromSystem()) {
-                return;
-            }
-            if (CQ.getKq(msg.getMsg(), "rich").size() > 0) {
-                return;
-            }
-            sender.SENDER.sendPrivateMsg(adminQQ,
-                    "收到来自[" + qq + "](" + sender.getPersonInfoByCode(qq).getRemarkOrNickname() + ")的一条消息");
-            sender.SENDER.sendPrivateMsg(adminQQ, msg.getMsg());
-        }).start();
+        if (msg.getType().isFromSystem()) {
+            return;
+        }
+        sender.SENDER.sendPrivateMsg(adminQQ,
+                "收到来自[" + qq + "](" + sender.getPersonInfoByCode(qq).getRemarkOrNickname() + ")的一条消息");
+        sender.SENDER.sendPrivateMsg(adminQQ, msg.getMsg());
 
     }
 
@@ -126,14 +128,26 @@ public class PrivateMsgListener {
     @Filter("群列表")
     public void groupList(PrivateMsg msg, MsgSender sender) {
         if (GlobalVariable.administrator.contains(msg.getQQ())) {
-            // 发送群列表
-            GroupList groupList = sender.GETTER.getGroupList();
-            StringBuilder groupInfo = new StringBuilder("群列表:\n");
-            for (Group group : groupList) {
-                groupInfo.append("\t").append(group.getCode()).append("(").append(group.getName()).append(")\n");
-            }
-            System.out.println("发送群列表");
-            System.out.println(sender.SENDER.sendPrivateMsg(msg.getQQ(), groupInfo.toString()));
+            GlobalVariable.threadPool.execute(() -> {
+                // 发送群列表
+                List<GroupEntity> groupList = GroupUtils.getGroupList(sender);
+                System.out.println(groupList.size());
+                StringBuilder groupInfo = new StringBuilder("群列表:\n");
+                AtomicInteger num = new AtomicInteger(0);
+                groupList.forEach(group -> {
+                    System.out.println(group);
+                    groupInfo.append(num.getAndIncrement() + 1).append(". ").append(group.getGroupName()).append("(").append(group.getUin()).append(")  ").append(group.getRole()).append("\n");
+                    groupInfo.append("\t群主信息: ").append(group.getOwner().getNick()).append("(").append(group.getOwner().getUin()).append(")\n\n");
+                    if (num.get() % 10 == 0) {
+                        groupInfo.append("\n\n\n");
+                    }
+                });
+                String[] messageArray = groupInfo.toString().split("\n\n\n");
+                for (String message : messageArray) {
+                    sender.SENDER.sendPrivateMsg(msg.getQQ(), message.trim());
+                }
+            });
+
         }
     }
 
@@ -166,14 +180,24 @@ public class PrivateMsgListener {
     public void restartServer(PrivateMsg msg, MsgSender sender) {
         String message = msg.getMsg();
         if (GlobalVariable.administrator.contains(msg.getQQ()) && "重启".equals(message)) {
-            String commandStr = "cmd /c C:/Users/Administrator/Desktop/restart.bat";
+            List<String> sb = new ArrayList<>();
             try {
-                Runtime.getRuntime().exec(commandStr);
-                System.exit(0);
-            } catch (IOException e) {
+                System.out.println(commandStr);
+                if (commandStr == null) {
+                    return;
+                }
+                Process ps = Runtime.getRuntime().exec(commandStr);
+
+                BufferedReader br = new BufferedReader(new InputStreamReader(ps.getInputStream()));
+                String line;
+                while ((line = br.readLine()) != null) {
+                    sb.add(line);
+                }
+                System.out.println(sb);
+            } catch (Exception e) {
                 sender.SENDER.sendPrivateMsg(adminQQ, "捕获到异常");
                 e.printStackTrace();
-                System.exit(0);
+//                System.exit(0);
             }
         }
     }

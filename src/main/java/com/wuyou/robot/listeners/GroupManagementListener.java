@@ -17,9 +17,7 @@ import com.wuyou.exception.ObjectNotFoundException;
 import com.wuyou.service.BlackUserService;
 import com.wuyou.service.ClearService;
 import com.wuyou.utils.*;
-import org.jsoup.Jsoup;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -127,7 +125,7 @@ public class GroupManagementListener {
 
     @Listen(MsgGetTypes.groupMsg)
     @Filter(diyFilter = {"boot", "cancelBanMember"}, mostDIYType = MostDIYType.EVERY_MATCH)
-    public void cancelBanMember(GroupMsg msg, MsgSender sender) throws IOException {
+    public void cancelBanMember(GroupMsg msg, MsgSender sender) {
         if (getPower(msg, sender)) {
             String message = msg.getMsg();
             String fromGroup = msg.getGroup();
@@ -353,7 +351,7 @@ public class GroupManagementListener {
 
     @Listen(MsgGetTypes.groupMsg)
     @Filter(diyFilter = "boot", value = "禁言列表")
-    public void banList(GroupMsg msg, MsgSender sender) throws IOException {
+    public void banList(GroupMsg msg, MsgSender sender) {
         String fromGroup = msg.getGroup();
         String fromQQ = msg.getQQ();
         StringBuilder str = new StringBuilder("\n禁言列表: ");
@@ -375,12 +373,12 @@ public class GroupManagementListener {
         SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + str);
     }
 
-    public JSONArray banList(String fromGroup, MsgSender sender) throws IOException {
-        Map<String, String> cookies = RobotUtils.getCookies(sender);
-        String bkn = sender.GETTER.getAuthInfo().getCsrfToken();
+    public JSONArray banList(String fromGroup, MsgSender sender) {
+        Map<String, String> cookies = CookiesUtils.getCookies(sender);
+        String bkn = CookiesUtils.getBkn(sender);
         String url = "https://qinfo.clt.qq.com/cgi-bin/qun_info/get_group_setting_v2?src=qinfo_v3&gc=" + fromGroup
                 + "&bkn=" + bkn;
-        String body = Jsoup.connect(url).ignoreContentType(true).cookies(cookies).get().text();
+        String body = HttpUtils.get(url, null, cookies).getResponse();
         JSONObject json = JSONUtils.toJsonObject(body);
         System.out.println(json);
         System.out.println(bkn);
@@ -414,8 +412,6 @@ public class GroupManagementListener {
     /**
      * 判断权限
      *
-     * @param msg
-     * @param sender
      * @return 发送人有机器人管理权限或是群主, 并且机器人是管理员/群主时返回true
      */
     private boolean getPower(GroupMsg msg, MsgSender sender) {

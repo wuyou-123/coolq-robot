@@ -15,12 +15,13 @@ import com.forte.qqrobot.beans.messages.types.PowerType;
 import com.forte.qqrobot.beans.messages.types.SexType;
 import com.forte.qqrobot.sender.MsgSender;
 import com.forte.qqrobot.sender.senderlist.SenderGetList;
-import com.forte.qqrobot.utils.CQCodeUtil;
+import com.wuyou.entity.GroupMemberEntity;
 import com.wuyou.service.AllBlackService;
 import com.wuyou.service.BlackUserService;
 import com.wuyou.service.StatService;
 import com.wuyou.utils.CQ;
 import com.wuyou.utils.GetLevelUtils;
+import com.wuyou.utils.GroupUtils;
 import com.wuyou.utils.SenderUtil;
 
 import java.util.ArrayList;
@@ -102,7 +103,6 @@ public class RequestListener {
     public void groupMemberIncrease(GroupMemberIncrease increase, MsgSender sender) {
         // TODO: 新群员进群
         SenderGetList msg = sender.GETTER;
-        CQCodeUtil util = CQCodeUtil.build();
         String fromGroup = increase.getGroup();
         String beingOperateqq = increase.getBeOperatedQQ();
         int level = GetLevelUtils.getLevel(beingOperateqq);
@@ -136,13 +136,18 @@ public class RequestListener {
             }
             // 新人不是黑名单成员
             if (statService.getStat(fromGroup) == 1) {
-                GroupMemberInfo beingOperateMember = msg.getGroupMemberInfo(fromGroup, beingOperateqq);
+                List<GroupMemberEntity> groupMemberEntityList = GroupUtils.getGroupMembers(sender, fromGroup, beingOperateqq);
+                GroupMemberEntity groupMemberEntity = new GroupMemberEntity();
+                if (groupMemberEntityList.size() != 0) {
+                    groupMemberEntity = groupMemberEntityList.get(0);
+                    System.out.println(groupMemberEntity);
+                }
                 String end = "\uD83C\uDF89\uD83C\uDF89\uD83C\uDF89";
-                String welcomeMessage = "欢迎" + (beingOperateMember.getSex() == SexType.MALE ? "新来的小哥哥"
-                        : beingOperateMember.getSex() == SexType.FEMALE ? "新来的小姐姐" : "新人") +
+                String welcomeMessage = "欢迎" + (groupMemberEntity.getSex() == SexType.MALE ? "新来的小哥哥"
+                        : groupMemberEntity.getSex() == SexType.FEMALE ? "新来的小姐姐" : "新人") +
                         (level <= 3 && level > 0 ? "，你的等级小于三级,该不会是谁的小号吧"
-                                : level <= 5 ? "，你的等级为" + level + "级,有一点点低哦"
-                                : level <= 10 ? "，你的等级为" + level + "级,有一点低哦" : end);
+                                : level >= 3 && level <= 5 ? "，你的等级为" + level + "级,有一点点低哦"
+                                : level >= 5 && level <= 10 ? "，你的等级为" + level + "级,有一点低哦" : end);
                 SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(beingOperateqq) + welcomeMessage);
             }
         } catch (Exception e) {

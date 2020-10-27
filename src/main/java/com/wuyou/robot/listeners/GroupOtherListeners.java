@@ -1,5 +1,6 @@
 package com.wuyou.robot.listeners;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.forte.qqrobot.anno.Filter;
 import com.forte.qqrobot.anno.Listen;
@@ -9,16 +10,13 @@ import com.forte.qqrobot.beans.messages.types.MsgGetTypes;
 import com.forte.qqrobot.beans.types.MostDIYType;
 import com.forte.qqrobot.sender.MsgSender;
 import com.forte.qqrobot.utils.JSONUtils;
-import com.wuyou.utils.CQ;
-import com.wuyou.utils.PowerUtils;
-import com.wuyou.utils.RobotUtils;
-import com.wuyou.utils.SenderUtil;
+import com.wuyou.utils.*;
 import org.jetbrains.annotations.NotNull;
-import org.jsoup.Jsoup;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -59,27 +57,15 @@ public class GroupOtherListeners {
 
     @Listen(MsgGetTypes.groupMsg)
     @Filter(diyFilter = "boot", value = "呼叫龙王")
-    public void findDargon(GroupMsg msg, MsgSender sender) {
-        new Thread(() -> {
-            try{
-            String fromGroup = msg.getGroup();
-            Map<String, String> cookies = RobotUtils.getCookies(sender);
-            String bkn = RobotUtils.getBkn(sender);
-            String url = "http://qun.qq.com/interactive/honorlist?gc=" + fromGroup + "&type=1&_wv=3&_wwv=129";
-            String body = Jsoup.connect(url).ignoreContentType(true).cookies(cookies).get().html();
-            String jsonStr = body.substring(body.indexOf("__INITIAL_STATE__=") + 18);
-            jsonStr = jsonStr.substring(0, jsonStr.indexOf("</script>"));
-            JSONObject json = JSONUtils.toJsonObject(jsonStr);
-            JSONObject currentTalkative = json.getJSONObject("currentTalkative");
-            if (currentTalkative != null) {
-                String qq = currentTalkative.getString("uin");
-                SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(qq));
-            } else {
-                SenderUtil.sendGroupMsg(sender, fromGroup, "当前暂无龙王");
-            }}catch (IOException e){
-                e.printStackTrace();
+    public synchronized void findDragon(GroupMsg msg, MsgSender sender) {
+        Map<String, Object> map = GlobalVariable.groupDragon.get(msg.getGroup());
+        if (map != null) {
+            if (((Calendar) map.get("time")).getTimeInMillis() - System.currentTimeMillis() > 0) {
+                SenderUtil.sendGroupMsg(sender, msg.getGroup(), map.get("qq") != null ? CQ.at(map.get("qq") + "") : "当前暂无龙王");
+                return;
             }
-        }).start();
+        }
+        GroupUtils.getDragon(sender, msg.getGroup());
     }
 
     @Listen(MsgGetTypes.groupMsg)
@@ -91,47 +77,16 @@ public class GroupOtherListeners {
     @Listen(MsgGetTypes.groupMsg)
     @Filter(diyFilter = {"boot", "setu"}, mostDIYType = MostDIYType.EVERY_MATCH)
     public void sendSetu(GroupMsg msg, MsgSender sender) {
-//        System.out.println("任务数: " + setuNum);
-//        setuNum++;
-//        if (setuNum > 5) {
-//            try {
-//                SenderUtil.sendGroupMsg(sender, msg.getGroup(), "任务太多啦!人家忙不过来啦~~");
-//            } catch (Exception ignored) {
-//            }
-//            setuNum--;
-//            return;
-//        }
-//        new Thread(() -> {
-//            boolean r18 = msg.getMsg().toLowerCase().contains("r18");
-//            long start = System.currentTimeMillis();
-//            String CQCode;
-//            System.out.println("开始获取图片");
-//            try {
-//                CQCode = r18 ? GlobalVariable.setuR18Queue.poll() : GlobalVariable.setuQueue.poll();
-//                if (CQCode == null) {
-//                    CQCode = r18 ? GlobalVariable.setuR18Queue.poll() : GlobalVariable.setuQueue.poll();
-//                    if (CQCode == null) {
-//                        System.out.println("获取到null");
-//                        SenderUtil.sendGroupMsg(sender, msg.getGroup(), "色图已经发完啦,请稍等片刻~");
-//                        return;
-//                    }
-//                }
-//                System.out.println("获取到的CQCode" + CQCode);
-//                if (CQCode.equals("0000")) {
-//                    SenderUtil.sendGroupMsg(sender, msg.getGroup(), "今天的色图已经发完啦,明天再来吧~");
-//                    return;
-//                }
-//                System.out.println("获取到的图片: " + CQCode);
-//                System.out.println("图片CQ码: " + CQCode);
-//                SenderUtil.sendGroupMsg(sender, msg.getGroup(), CQCode);
-//                System.out.println("发送成功,耗时: " + (System.currentTimeMillis() - start));
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            } finally {
-//                setuNum--;
-//            }
-//        }).start();
-        SenderUtil.sendGroupMsg(sender, msg.getGroup(), "涩图功能关闭啦,可以去http://wuyourj.club/apk/lolicon.apk下载app使用哦~");
+        boolean r18 = msg.getMsg().toLowerCase().contains("r18");
+        JSONObject json = getJson(r18 ? "1" : "0");
+        JSONObject data = JSON.parseObject(json.getJSONArray("data").getString(0));
+        System.out.println(data);
+        String url = data.getString("url");
+        String title = data.getString("title");
+        String stringBuilder = "标题: " + title + "\n链接: " + url +
+                "\n\napk链接: http://ii096.cn/IvS6lo";
+        SenderUtil.sendGroupMsg(sender, msg.getGroup(), stringBuilder);
+//        SenderUtil.sendGroupMsg(sender, msg.getGroup(), "涩图功能关闭啦,可以去http://wuyourj.club/apk/lolicon.apk下载app使用哦~");
 
     }
 
@@ -213,4 +168,26 @@ public class GroupOtherListeners {
         return timeStr;
     }
 
+    private JSONObject getJson(String r18) {
+        JSONObject json = null;
+        try {
+            String key1 = "820458705ebe071883b3c2";
+            String key2 = "198111555ec3242d2c6b42";
+            Map<String, String> params = new HashMap<>();
+            params.put("apikey", key1);
+            params.put("size1200", "true");
+            params.put("r18", r18);
+            String web = HttpUtils.get("http://api.lolicon.app/setu/", params, null).getResponse();
+            json = JSONUtils.toJsonObject(web);
+            if (json.getInteger("code") == 429) {
+                params.put("apikey", key2);
+                web = HttpUtils.get("http://api.lolicon.app/setu/", params, null).getResponse();
+                json = JSONUtils.toJsonObject(web);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println("获取到json数据: " + json);
+        return json;
+    }
 }

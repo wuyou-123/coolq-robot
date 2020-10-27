@@ -53,8 +53,6 @@ public class GetWebCookiesUtils {
         }
         uin = code;
         pwd = path;
-        System.out.println("账号: " + uin);
-        System.out.println("密码: " + pwd);
     }
 
     public static Map<String, String> getCookies() {
@@ -77,26 +75,23 @@ public class GetWebCookiesUtils {
                 map.put("ptdrvs", web[5]);
                 map.put("sessionID", web[6]);
                 // 执行js代码加密密码并获取登录链接
-                ScriptEngineManager sem = new ScriptEngineManager();
-                ScriptEngine engine = sem.getEngineByName("javascript");
                 long start = System.currentTimeMillis();
                 InputStream in = GetLevelUtils.class.getClassLoader().getResourceAsStream("js/getPSkey.js");
                 if (in == null) {
                     System.out.println("js文件获取失败!");
                     throw new JavaScriptNotFoundException();
                 }
+                ScriptEngine engine = new ScriptEngineManager().getEngineByName("javascript");
                 engine.eval(new BufferedReader(new InputStreamReader(in)));
                 Invocable inv = (Invocable) engine;
                 String loginUrl = inv.invokeFunction("getUrl", map.get("qq"), map.get("pwd"), map.get("code"), map.get("verifysession"), map.get("ptdrvs"), map.get("sessionID")).toString();
                 System.out.println("JS执行耗时: " + (System.currentTimeMillis() - start));
                 String[] result = getArr(loginUrl, 7);
-                System.out.println(result[2]);
                 // 设置Cookie
                 if (Integer.parseInt(result[0]) == 0) {
                     RequestEntity requestEntity = HttpUtils.get(result[2]);
                     List<Cookie> cookieList = requestEntity.getCookies();
                     cookieList.forEach(cookie -> cookies.put(cookie.getName(), cookie.getValue()));
-
                 }
             }
         } catch (Exception e) {

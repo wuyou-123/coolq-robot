@@ -6,6 +6,8 @@ import com.forte.qqrobot.anno.Listen;
 import com.forte.qqrobot.anno.depend.Beans;
 import com.forte.qqrobot.anno.depend.Depend;
 import com.forte.qqrobot.beans.messages.msgget.GroupMsg;
+import com.forte.qqrobot.beans.messages.result.GroupMemberList;
+import com.forte.qqrobot.beans.messages.result.inner.GroupMember;
 import com.forte.qqrobot.beans.messages.types.MsgGetTypes;
 import com.forte.qqrobot.beans.types.MostDIYType;
 import com.forte.qqrobot.sender.MsgSender;
@@ -17,9 +19,9 @@ import com.wuyou.exception.ObjectExistedException;
 import com.wuyou.exception.ObjectNotFoundException;
 import com.wuyou.service.MessageService;
 import com.wuyou.utils.CQ;
+import com.wuyou.utils.HttpUtils;
 import com.wuyou.utils.PowerUtils;
 import com.wuyou.utils.SenderUtil;
-import org.jsoup.Jsoup;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -27,6 +29,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
 import java.util.Base64.Decoder;
+import java.util.stream.Collectors;
 
 /**
  * @author Administrator<br>
@@ -71,11 +74,34 @@ public class GroupMessageListener {
             SenderUtil.sendGroupMsg(sender, fromGroup, "暂无回复记录");
             return;
         }
+        GroupMemberList groupMemberList = sender.GETTER.getGroupMemberList(fromGroup);
+        Set<String> qqSet = groupMemberList.stream().map(GroupMember::getQQ).collect(Collectors.toSet());
+        map.forEach((key, str) -> {
+            String newStr = getStr(sender, fromGroup, qqSet, str);
+            map.put(key, newStr);
+        });
+        Map<String, String> newMap = new HashMap<>(map);
+        map.forEach((key, str) -> {
+            String newStr = getStr(sender, fromGroup, qqSet, key);
+            newMap.remove(key);
+            newMap.put(newStr, map.get(key));
+        });
         StringBuilder mes = new StringBuilder(msg.getMsg() + ":\n");
-        for (String str : map.keySet()) {
-            mes.append("\t发送: \"").append(str).append("\"\t回复: \"").append(map.get(str)).append("\"\n");
+        for (String str : newMap.keySet()) {
+            mes.append("\t发送: \"").append(str).append("\"\t回复: \"").append(newMap.get(str)).append("\"\n");
         }
         SenderUtil.sendGroupMsg(sender, fromGroup, mes.toString().trim());
+    }
+
+    private String getStr(MsgSender sender, String fromGroup, Set<String> qqSet, String str) {
+        Set<KQCode> stringSet = CQ.getAtKqs(str);
+        final String[] newStr = {str};
+        stringSet.forEach(kqCode -> {
+            if (qqSet.contains(kqCode.get("qq"))) {
+                newStr[0] = newStr[0].replace(kqCode, "@" + sender.GETTER.getGroupMemberInfo(fromGroup, kqCode.get("qq")).getRemarkOrNickname());
+            }
+        });
+        return newStr[0];
     }
 
     @Listen(MsgGetTypes.groupMsg)
@@ -113,45 +139,83 @@ public class GroupMessageListener {
         if ("".equals(message))
             message = "在吗在吗";
 
-        System.out.println(message);
-        try {
-            String signature;
-            String url = "https://api.ai.qq.com/fcgi-bin/nlp/nlp_textchat";
-            Map<String, String> params = params();
-            params.put("session", fromGroup);
-            params.put("question", message);
-            signature = getReqSign(params);
-            params.put("sign", signature);
-            System.out.println("请求消息: " + message);
-            // 获取网页数据
-            String web = Jsoup.connect(url).data(params).ignoreContentType(true).get().text();
-            System.out.println("第1次请求");
-            System.out.println("返回值: " + web);
-            JSONObject json;
-            json = JSONUtils.toJsonObject(web);
-            for (int i = 2; i < 11; i++) {
-                // 请求成功直接跳出
-                if (json.getInteger("ret") == 0)
-                    break;
-                // 请求失败重试
-                web = Jsoup.connect(url).data(params).ignoreContentType(true).get().text();
-                json = JSONUtils.toJsonObject(web);
-                System.out.println("第" + i + "次请求");
-                System.out.println("返回值: " + web);
+        String url = "http://api.tianapi.com/txapi/tuling/index";
+        Map<String, String> params = params();
+        params.put("key", "9845b4e0442683f1f8ab813c35180fc5");
+        params.put("question", message);
+        params.put("user", fromGroup);
+        String web = HttpUtils.get(url, params, null).getResponse();
+        System.out.println("请求: " + message);
+        System.out.println("返回值: " + web);
+        JSONObject json = JSONUtils.toJsonObject(web);
+        if (json.getInteger("code") == 200) {
+            String reply = json.getJSONArray("newslist").getJSONObject(0).getString("reply");
+            if (!reply.isEmpty()) {
+                SenderUtil.sendGroupMsg(sender, fromGroup, reply);
+                return;
             }
-            JSONObject data = json.getJSONObject("data");
-            if (json.getInteger("ret") == 0)
-                SenderUtil.sendGroupMsg(sender, fromGroup, data.getString("answer"));
-            else if (json.getInteger("ret") == 16394)
-                SenderUtil.sendGroupMsg(sender, fromGroup, "我没有听懂你的话");
-            else {
-                System.out.println(web);
-                System.out.println("请求错误");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+        System.out.println("请求错误");
+        sender.SENDER.sendPrivateMsg("1097810498", "聊天接口调用失败! 群号: " + fromGroup + ", 请求消息: " + message);
     }
+//    @Listen(MsgGetTypes.groupMsg)
+//    @Filter(diyFilter = {"boot", "ai"}, mostDIYType = MostDIYType.EVERY_MATCH)
+//    public void sendAiMessage(GroupMsg msg, MsgSender sender) {
+//        String fromGroup = msg.getGroup();
+//        String message = CQ.utils.removeByType("at", msg.getMsg(), true, true);
+//
+//        Map<String, String> map = service.getAllByGroup(fromGroup);
+//        if (map.containsKey(msg.getMsg().trim())) {
+//            return;
+//        }
+//        List<KQCode> fases = CQ.getKq(message, "face");
+//        for (KQCode KQCode : fases) {
+//            String str = FaceEnum.getString(KQCode.get("id"));
+//            message = message.replace(KQCode, str);
+//        }
+//        if ("".equals(message))
+//            message = "在吗在吗";
+//
+//        System.out.println(message);
+//        try {
+//            String signature;
+//            String url = "http://api.tianapi.com/txapi/tuling/index";
+//            Map<String, String> params = params();
+//            params.put("session", fromGroup);
+//            params.put("question", message);
+//            signature = getReqSign(params);
+//            params.put("sign", signature);
+//            System.out.println("请求消息: " + message);
+//            // 获取网页数据
+//            String web = HttpUtils.get(url, params, null).getResponse();
+//            System.out.println("第1次请求");
+//            System.out.println("返回值: " + web);
+//            JSONObject json;
+//            json = JSONUtils.toJsonObject(web);
+//            for (int i = 2; i < 11; i++) {
+//                // 请求成功直接跳出
+//                if (json.getInteger("ret") == 0)
+//                    break;
+//                // 请求失败重试
+//                web = HttpUtils.get(url, params, null).getResponse();
+//                json = JSONUtils.toJsonObject(web);
+//                System.out.println("第" + i + "次请求");
+//                System.out.println("返回值: " + web);
+//            }
+//            JSONObject data = json.getJSONObject("data");
+//            if (json.getInteger("ret") == 0)
+//                SenderUtil.sendGroupMsg(sender, fromGroup, data.getString("answer"));
+//            else if (json.getInteger("ret") == 16394)
+//                SenderUtil.sendGroupMsg(sender, fromGroup, "我没有听懂你的话");
+//            else {
+//                System.out.println(web);
+//                System.out.println("请求错误");
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
+
 
     @Listen(MsgGetTypes.groupMsg)
     @Filter(diyFilter = {"boot", "aiVoice"}, mostDIYType = MostDIYType.EVERY_MATCH)
@@ -165,8 +229,8 @@ public class GroupMessageListener {
         }
         if ("说".equals(message))
             message = "你想让我说什么";
-        List<KQCode> fases = CQ.getKq(message, "face");
-        for (KQCode KQCode : fases) {
+        List<KQCode> faces = CQ.getKq(message, "face");
+        for (KQCode KQCode : faces) {
             String str = FaceEnum.getString(KQCode.get("id"));
             message = message.replace(KQCode, "".equals(str) ? KQCode : str);
         }
@@ -191,7 +255,7 @@ public class GroupMessageListener {
                 num++;
                 String web;
                 try {
-                    web = Jsoup.connect(url).data(params).ignoreContentType(true).get().text();
+                    web = HttpUtils.get(url, params, null).getResponse();
 //					System.out.println(web);
                 } catch (Exception e) {
                     continue;
@@ -248,6 +312,11 @@ public class GroupMessageListener {
         String mess = msg.getMsg();
         String group = msg.getGroup();
         String qq = msg.getQQ();
+        System.out.println(mess);
+        if (mess.toLowerCase().contains("atall")) {
+            SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "添加失败: 不允许有艾特全体");
+            return;
+        }
         if (PowerUtils.getPowerType(group, qq, sender) > 1) {
             System.out.println("执行添加消息代码");
             String message = mess.substring(mess.indexOf("添加消息") + 4, mess.indexOf("回复")).trim();
