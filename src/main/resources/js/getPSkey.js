@@ -1,11 +1,10 @@
 function getUrl(uin, pwd, code, verifysession, ptdrvs, sessionID) {
     var salt = uin2hex(uin);
     var p = getEncryption(pwd, salt, code, false);
-    var url = "http://ssl.ptlogin2.qq.com/login?u=" + uin +
+    return "http://ssl.ptlogin2.qq.com/login?u=" + uin +
         "&pt_vcode_v1=0&pt_randsalt=2&from_ui=1&pt_uistyle=40&aid=8000201&daid=18" +
         "&verifycode=" + code + "&pt_verifysession_v1=" + verifysession + "&p=" + p +
         "&u1=https%3A%2F%2Fvip.qq.com%2F&ptdrvs=" + ptdrvs + "&sid=" + sessionID
-    return url
 }
 
 RSA = function () {
@@ -36,8 +35,7 @@ RSA = function () {
         var ba = new Array;
         var i = s.length - 1;
         while (i >= 0 && n > 0) {
-            var c = s.charCodeAt(i--);
-            ba[--n] = c
+            ba[--n] = s.charCodeAt(i--)
         }
         ba[--n] = 0;
         var rng = new SecureRandom;

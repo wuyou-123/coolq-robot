@@ -21,8 +21,8 @@ public class BootFilter implements Filterable {
     @Override
     public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
         if (msgget instanceof GroupMsg) {
-            GroupMsg sender = (GroupMsg) msgget;
-            Boolean ret = GlobalVariable.bootMap.get(sender.getGroup());
+            GroupMsg msg = (GroupMsg) msgget;
+            Boolean ret = GlobalVariable.BOOT_MAP.get(msg.getGroup());
             return ret != null && ret;
         }
         return false;

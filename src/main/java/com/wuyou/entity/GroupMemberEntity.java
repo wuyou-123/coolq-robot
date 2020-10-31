@@ -2,7 +2,8 @@ package com.wuyou.entity;
 
 import com.forte.qqrobot.beans.messages.types.PowerType;
 import com.forte.qqrobot.beans.messages.types.SexType;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Date;
 import java.util.Objects;
@@ -12,7 +13,8 @@ import java.util.Objects;
  *
  * @author wuyou
  */
-@Data
+@Getter
+@Setter
 public class GroupMemberEntity {
     /**
      * QQ号
@@ -64,7 +66,7 @@ public class GroupMemberEntity {
     /**
      * 获取名片或者昵称,如果名片为空则返回昵称
      *
-     * @return 名片或者昵称,如果名片为空则返回昵称
+     * @return 名片或者昵称, 如果名片为空则返回昵称
      */
     public String getCardOrNick() {
         if (card != null && !Objects.equals(card, "")) {
@@ -73,4 +75,19 @@ public class GroupMemberEntity {
         return nick;
     }
 
+    public Date getJoinTime() {
+        return new Date(this.joinTime.getTime());
+    }
+
+    public void setJoinTime(Date joinTime) {
+        this.joinTime = new Date(joinTime.getTime());
+    }
+
+    public Date getLastSpeakTime() {
+        return new Date(this.lastSpeakTime.getTime());
+    }
+
+    public void setLastSpeakTime(Date lastSpeakTime) {
+        this.lastSpeakTime = new Date(lastSpeakTime.getTime());
+    }
 }

@@ -1,15 +1,15 @@
 package com.wuyou.service.impl;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.wuyou.exception.ObjectExistedException;
 import com.wuyou.exception.ObjectNotFoundException;
 import com.wuyou.exception.UpdateException;
 import com.wuyou.mapper.BanMessageMapper;
 import com.wuyou.service.BanMessageService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+
+import java.util.List;
 
 /**
  * 禁言关键词控制器
@@ -20,9 +20,12 @@ import com.wuyou.service.BanMessageService;
  */
 @Service
 public class BanMessageServiceImpl implements BanMessageService {
-	@Autowired
-	BanMessageMapper mapper;
+	private final BanMessageMapper mapper;
 
+	@Autowired
+	public BanMessageServiceImpl(BanMessageMapper mapper) {
+		this.mapper = mapper;
+	}
 	/**
 	 * 添加禁言关键词
 	 * 

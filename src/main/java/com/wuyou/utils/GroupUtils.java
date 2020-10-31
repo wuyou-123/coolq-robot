@@ -24,7 +24,7 @@ public class GroupUtils {
     public static List<GroupEntity> getGroupList(MsgSender sender) {
         try {
             String url = "https://qun.qq.com/cgi-bin/qun_mgr/get_group_list";
-            Map<String, String> params = new HashMap<>();
+            Map<String, String> params = new HashMap<>(2);
             params.put("bkn", CookiesUtils.getBkn(sender));
             String request = HttpUtils.post(url, params, CookiesUtils.getCookies(sender)).getResponse();
             JSONObject jsonObject = JSONObject.parseObject(request);
@@ -37,8 +37,8 @@ public class GroupUtils {
             setGroupList(sender, join, list, PowerType.MEMBER);
             return list;
         } catch (Exception e) {
-            sender.SENDER.sendPrivateMsg(GlobalVariable.administrator.get(0), "出现异常");
-            sender.SENDER.sendPrivateMsg(GlobalVariable.administrator.get(0), e.getMessage());
+            sender.SENDER.sendPrivateMsg(GlobalVariable.ADMINISTRATOR.get(0), "出现异常");
+            sender.SENDER.sendPrivateMsg(GlobalVariable.ADMINISTRATOR.get(0), e.getMessage());
             return new ArrayList<>();
         }
     }
@@ -53,7 +53,7 @@ public class GroupUtils {
      */
     public static List<GroupMemberEntity> getGroupMembers(MsgSender sender, String group, String key) {
         String url = "https://qun.qq.com/cgi-bin/qun_mgr/search_group_members";
-        Map<String, String> params = new HashMap<>();
+        Map<String, String> params = new HashMap<>(8);
         params.put("bkn", CookiesUtils.getBkn(sender));
         params.put("st", "0");
         params.put("end", "40");
@@ -80,8 +80,8 @@ public class GroupUtils {
             });
             return list;
         } catch (Exception e) {
-            sender.SENDER.sendPrivateMsg(GlobalVariable.administrator.get(0), "出现异常");
-            sender.SENDER.sendPrivateMsg(GlobalVariable.administrator.get(0), e.getMessage());
+            sender.SENDER.sendPrivateMsg(GlobalVariable.ADMINISTRATOR.get(0), "出现异常");
+            sender.SENDER.sendPrivateMsg(GlobalVariable.ADMINISTRATOR.get(0), e.getMessage());
             return new ArrayList<>();
         }
     }
@@ -100,25 +100,25 @@ public class GroupUtils {
             jsonStr = jsonStr.substring(0, jsonStr.indexOf("</script>"));
             JSONObject json = JSONUtils.toJsonObject(jsonStr);
             JSONObject currentTalkative = json.getJSONObject("currentTalkative");
-            Map<String, Object> map = new HashMap<>();
+            Map<String, Object> map = new HashMap<>(4);
             Calendar cal = Calendar.getInstance();
             cal.add(Calendar.MINUTE, 1);
             map.put("time", cal);
             if (currentTalkative != null) {
                 String qq = currentTalkative.getString("uin");
                 map.put("qq", qq);
-                GlobalVariable.groupDragon.put(group, map);
+                GlobalVariable.GROUP_DRAGON.put(group, map);
                 if (qq != null) {
                     SenderUtil.sendGroupMsg(sender, group, CQ.at(qq));
                     return;
                 }
             }
-            GlobalVariable.groupDragon.put(group, map);
+            GlobalVariable.GROUP_DRAGON.put(group, map);
             SenderUtil.sendGroupMsg(sender, group, "当前暂无龙王");
         } catch (Exception e) {
             SenderUtil.sendGroupMsg(sender, group, "获取失败");
-            sender.SENDER.sendPrivateMsg(GlobalVariable.administrator.get(0), "出现异常");
-            sender.SENDER.sendPrivateMsg(GlobalVariable.administrator.get(0), e.getMessage());
+            sender.SENDER.sendPrivateMsg(GlobalVariable.ADMINISTRATOR.get(0), "出现异常");
+            sender.SENDER.sendPrivateMsg(GlobalVariable.ADMINISTRATOR.get(0), e.getMessage());
         }
     }
 

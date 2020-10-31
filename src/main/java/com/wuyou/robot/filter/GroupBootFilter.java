@@ -19,27 +19,29 @@ import com.wuyou.utils.CQ;
 @Beans
 public class GroupBootFilter {
 	@DIYFilter("groupBoot")
-	public class Boot implements Filterable {
+	public static class Boot implements Filterable {
 
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
 			String str = msgget.getMsg();
-			if ("开机".equals(str.trim()))
+			if ("开机".equals(str.trim())) {
 				return true;
-			str = CQ.utils.remove(str);
+			}
+			str = CQ.UTILS.remove(str);
 			return "开机".equals(str.trim()) && at.test();
 		}
 	}
 
 	@DIYFilter("groupShutDown")
-	public class ShutDown implements Filterable {
+	public static class ShutDown implements Filterable {
 
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
 			String str = msgget.getMsg();
-			if ("关机".equals(str.trim()))
+			if ("关机".equals(str.trim())) {
 				return true;
-			str = CQ.utils.remove(str);
+			}
+			str = CQ.UTILS.remove(str);
 			return "关机".equals(str.trim()) && at.test();
 		}
 

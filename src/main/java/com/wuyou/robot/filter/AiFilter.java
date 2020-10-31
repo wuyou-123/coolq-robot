@@ -8,15 +8,15 @@ import com.forte.qqrobot.beans.messages.msgget.MsgGet;
 import com.forte.qqrobot.listener.Filterable;
 import com.forte.qqrobot.listener.ListenContext;
 import com.forte.qqrobot.listener.invoker.AtDetection;
-import com.simplerobot.modules.utils.KQCodeUtils;
 import com.wuyou.service.MessageService;
 import com.wuyou.utils.CQ;
 
 import java.util.Objects;
 
 /**
- * @author Administrator<br>
- * 2020年5月2日
+ * AI相关过滤器
+ *
+ * @author wuyou
  */
 @Beans
 public class AiFilter {
@@ -24,37 +24,37 @@ public class AiFilter {
     MessageService service;
 
     @DIYFilter("ai")
-    public class AiMessage implements Filterable {
+    public static class AiMessage implements Filterable {
         @Override
         public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
             String message = msgget.getMsg().trim();
-            final String msg = CQ.utils.remove(message, true, true);
+            final String msg = CQ.UTILS.remove(message, true, true);
             String regex1 = ".*添加消息.*回复.*";
             String regex2 = ".*(删除关键词|添加关键词|删除消息|百度|菜单|功能|色图|来点涩图|来点色图|艾特全体).*";
-            if ((message.matches(regex1) || message.matches(regex2) || msg.equals("自闭")
-                    || msg.equals("开机")
-                    || msg.equals("关机")
-                    || msg.startsWith("领取套餐")) && at.test()
-                    && Objects.equals(CQ.getAt(message), msgget.getThisCode()))
+            if ((message.matches(regex1) || message.matches(regex2) || "自闭".equals(msg)
+                    || "开机".equals(msg)
+                    || "关机".equals(msg)
+                    || msg.startsWith("领取套餐"))) {
                 return false;
+            }
             return at.test() && Objects.equals(CQ.getAt(message), msgget.getThisCode()) && message.startsWith("[") && !msg.startsWith("说");
         }
     }
 
     @DIYFilter("aiVoice")
-    public class AiVoice implements Filterable {
+    public static class AiVoice implements Filterable {
         @Override
         public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
             String message = msgget.getMsg();
-            final String msg = CQ.utils.remove(message, true, true);
+            final String msg = CQ.UTILS.remove(message, true, true);
             String regex1 = ".*添加消息.*回复.*";
             String regex2 = ".*(删除关键词|添加关键词|删除消息|百度).*";
-            if ((message.matches(regex1) || message.matches(regex2) || msg.equals("自闭")
-                    || msg.equals("开机")
-                    || msg.equals("关机")
-                    || msg.startsWith("领取套餐")) && at.test()
-                    && Objects.equals(CQ.getAt(message), msgget.getThisCode()))
+            if (message.matches(regex1) || message.matches(regex2) || "自闭".equals(msg)
+                    || "开机".equals(msg)
+                    || "关机".equals(msg)
+                    || msg.startsWith("领取套餐")) {
                 return false;
+            }
             return at.test() && Objects.equals(CQ.getAt(message), msgget.getThisCode()) && message.startsWith("[") && msg.startsWith("说");
         }
     }

@@ -47,12 +47,13 @@ public class GroupMessageListener {
             char[] chars2 = o2.toCharArray();
             int i = 0;
             while (i < chars1.length && i < chars2.length) {
-                if (chars1[i] > chars2[i])
+                if (chars1[i] > chars2[i]) {
                     return 1;
-                else if (chars1[i] < chars2[i])
+                } else if (chars1[i] < chars2[i]) {
                     return -1;
-                else
+                } else {
                     i++;
+                }
             }
             return i == chars1.length ? -1 : i == chars2.length ? 1 : 0;
         });
@@ -87,8 +88,8 @@ public class GroupMessageListener {
             newMap.put(newStr, map.get(key));
         });
         StringBuilder mes = new StringBuilder(msg.getMsg() + ":\n");
-        for (String str : newMap.keySet()) {
-            mes.append("\t发送: \"").append(str).append("\"\t回复: \"").append(newMap.get(str)).append("\"\n");
+        for (Map.Entry<String, String> entry : newMap.entrySet()) {
+            mes.append("\t发送: \"").append(entry.getKey()).append("\"\t回复: \"").append(entry.getValue()).append("\"\n");
         }
         SenderUtil.sendGroupMsg(sender, fromGroup, mes.toString().trim());
     }
@@ -113,9 +114,9 @@ public class GroupMessageListener {
         if (map.size() == 0) {
             return;
         }
-        for (String str : map.keySet()) {
-            if (message.trim().equals(str)) {
-                SenderUtil.sendGroupMsg(sender, fromGroup, map.get(str));
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            if (message.trim().equals(entry.getKey())) {
+                SenderUtil.sendGroupMsg(sender, fromGroup, entry.getValue());
                 return;
             }
         }
@@ -125,7 +126,7 @@ public class GroupMessageListener {
     @Filter(diyFilter = {"boot", "ai"}, mostDIYType = MostDIYType.EVERY_MATCH)
     public void sendAiMessage(GroupMsg msg, MsgSender sender) {
         String fromGroup = msg.getGroup();
-        String message = CQ.utils.removeByType("at", msg.getMsg(), true, true);
+        String message = CQ.UTILS.removeByType("at", msg.getMsg(), true, true);
 
         Map<String, String> map = service.getAllByGroup(fromGroup);
         if (map.containsKey(msg.getMsg().trim())) {
@@ -136,8 +137,9 @@ public class GroupMessageListener {
             String str = FaceEnum.getString(KQCode.get("id"));
             message = message.replace(KQCode, str);
         }
-        if ("".equals(message))
+        if ("".equals(message)) {
             message = "在吗在吗";
+        }
 
         String url = "http://api.tianapi.com/txapi/tuling/index";
         Map<String, String> params = params();
@@ -158,77 +160,78 @@ public class GroupMessageListener {
         System.out.println("请求错误");
         sender.SENDER.sendPrivateMsg("1097810498", "聊天接口调用失败! 群号: " + fromGroup + ", 请求消息: " + message);
     }
-//    @Listen(MsgGetTypes.groupMsg)
-//    @Filter(diyFilter = {"boot", "ai"}, mostDIYType = MostDIYType.EVERY_MATCH)
-//    public void sendAiMessage(GroupMsg msg, MsgSender sender) {
-//        String fromGroup = msg.getGroup();
-//        String message = CQ.utils.removeByType("at", msg.getMsg(), true, true);
-//
-//        Map<String, String> map = service.getAllByGroup(fromGroup);
-//        if (map.containsKey(msg.getMsg().trim())) {
-//            return;
-//        }
-//        List<KQCode> fases = CQ.getKq(message, "face");
-//        for (KQCode KQCode : fases) {
-//            String str = FaceEnum.getString(KQCode.get("id"));
-//            message = message.replace(KQCode, str);
-//        }
-//        if ("".equals(message))
-//            message = "在吗在吗";
-//
-//        System.out.println(message);
-//        try {
-//            String signature;
-//            String url = "http://api.tianapi.com/txapi/tuling/index";
-//            Map<String, String> params = params();
-//            params.put("session", fromGroup);
-//            params.put("question", message);
-//            signature = getReqSign(params);
-//            params.put("sign", signature);
-//            System.out.println("请求消息: " + message);
-//            // 获取网页数据
-//            String web = HttpUtils.get(url, params, null).getResponse();
-//            System.out.println("第1次请求");
-//            System.out.println("返回值: " + web);
-//            JSONObject json;
-//            json = JSONUtils.toJsonObject(web);
-//            for (int i = 2; i < 11; i++) {
-//                // 请求成功直接跳出
-//                if (json.getInteger("ret") == 0)
-//                    break;
-//                // 请求失败重试
-//                web = HttpUtils.get(url, params, null).getResponse();
-//                json = JSONUtils.toJsonObject(web);
-//                System.out.println("第" + i + "次请求");
-//                System.out.println("返回值: " + web);
-//            }
-//            JSONObject data = json.getJSONObject("data");
-//            if (json.getInteger("ret") == 0)
-//                SenderUtil.sendGroupMsg(sender, fromGroup, data.getString("answer"));
-//            else if (json.getInteger("ret") == 16394)
-//                SenderUtil.sendGroupMsg(sender, fromGroup, "我没有听懂你的话");
-//            else {
-//                System.out.println(web);
-//                System.out.println("请求错误");
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
+///    @Listen(MsgGetTypes.groupMsg)
+///    @Filter(diyFilter = {"boot", "ai"}, mostDIYType = MostDIYType.EVERY_MATCH)
+///    public void sendAiMessage(GroupMsg msg, MsgSender sender) {
+///        String fromGroup = msg.getGroup();
+///        String message = CQ.utils.removeByType("at", msg.getMsg(), true, true);
+///
+///        Map<String, String> map = service.getAllByGroup(fromGroup);
+///        if (map.containsKey(msg.getMsg().trim())) {
+///            return;
+///        }
+///        List<KQCode> fases = CQ.getKq(message, "face");
+///        for (KQCode KQCode : fases) {
+///            String str = FaceEnum.getString(KQCode.get("id"));
+///            message = message.replace(KQCode, str);
+///        }
+///        if ("".equals(message))
+///            message = "在吗在吗";
+///
+///        System.out.println(message);
+///        try {
+///            String signature;
+///            String url = "http://api.tianapi.com/txapi/tuling/index";
+///            Map<String, String> params = params();
+///            params.put("session", fromGroup);
+///            params.put("question", message);
+///            signature = getReqSign(params);
+///            params.put("sign", signature);
+///            System.out.println("请求消息: " + message);
+///            // 获取网页数据
+///            String web = HttpUtils.get(url, params, null).getResponse();
+///            System.out.println("第1次请求");
+///            System.out.println("返回值: " + web);
+///            JSONObject json;
+///            json = JSONUtils.toJsonObject(web);
+///            for (int i = 2; i < 11; i++) {
+///                // 请求成功直接跳出
+///                if (json.getInteger("ret") == 0)
+///                    break;
+///                // 请求失败重试
+///                web = HttpUtils.get(url, params, null).getResponse();
+///                json = JSONUtils.toJsonObject(web);
+///                System.out.println("第" + i + "次请求");
+///                System.out.println("返回值: " + web);
+///            }
+///            JSONObject data = json.getJSONObject("data");
+///            if (json.getInteger("ret") == 0)
+///                SenderUtil.sendGroupMsg(sender, fromGroup, data.getString("answer"));
+///            else if (json.getInteger("ret") == 16394)
+///                SenderUtil.sendGroupMsg(sender, fromGroup, "我没有听懂你的话");
+///            else {
+///                System.out.println(web);
+///                System.out.println("请求错误");
+///            }
+///        } catch (Exception e) {
+///            e.printStackTrace();
+///        }
+///    }
 
 
     @Listen(MsgGetTypes.groupMsg)
     @Filter(diyFilter = {"boot", "aiVoice"}, mostDIYType = MostDIYType.EVERY_MATCH)
     public void sendAiVoice(GroupMsg msg, MsgSender sender) {
         String fromGroup = msg.getGroup();
-        String message = CQ.utils.remove(msg.getMsg(), true, true).substring(1);
+        String message = CQ.UTILS.remove(msg.getMsg(), true, true).substring(1);
 
         Map<String, String> map = service.getAllByGroup(fromGroup);
         if (map.containsKey(msg.getMsg().trim())) {
             return;
         }
-        if ("说".equals(message))
+        if ("说".equals(message)) {
             message = "你想让我说什么";
+        }
         List<KQCode> faces = CQ.getKq(message, "face");
         for (KQCode KQCode : faces) {
             String str = FaceEnum.getString(KQCode.get("id"));
@@ -256,7 +259,6 @@ public class GroupMessageListener {
                 String web;
                 try {
                     web = HttpUtils.get(url, params, null).getResponse();
-//					System.out.println(web);
                 } catch (Exception e) {
                     continue;
                 }
@@ -296,13 +298,13 @@ public class GroupMessageListener {
     }
 
     private Map<String, String> params() {
-        Map<String, String> params = new HashMap<>();
+        Map<String, String> params = new HashMap<>(8);
         params.put("app_id", "2127860232");
         String time = Long.toString(System.currentTimeMillis() / 1000);
         String uuid = UUID.randomUUID().toString();
-        String nonce_str = uuid.replaceAll("-", "");
+        String nonceStr = uuid.replaceAll("-", "");
         params.put("time_stamp", time);
-        params.put("nonce_str", nonce_str);
+        params.put("nonce_str", nonceStr);
         return params;
     }
 

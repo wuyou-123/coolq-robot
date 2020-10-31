@@ -11,7 +11,6 @@ import com.forte.qqrobot.beans.types.MostDIYType;
 import com.forte.qqrobot.sender.MsgSender;
 import com.forte.qqrobot.utils.JSONUtils;
 import com.wuyou.utils.*;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -27,22 +26,22 @@ import java.util.Random;
 @Beans
 public class GroupOtherListeners {
 
-//    int setuNum = 0;
+///    int setuNum = 0;
 
 
-//    @Listen(MsgGetTypes.groupMsg)
-//    @Filter(diyFilter = "boot", value = {"点赞", "名片赞"})
-//    public void sendLike(GroupMsg msg, MsgSender sender) {
-//        String fromGroup = msg.getGroup();
-//        String fromQQ = msg.getQQ();
-//        try {
-//            boolean isSucc = sender.SENDER.sendLike(fromQQ, 10);
-//            SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + (isSucc ? "已点赞" : "点赞失败"));
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + "点赞失败");
-//        }
-//    }
+///    @Listen(MsgGetTypes.groupMsg)
+///    @Filter(diyFilter = "boot", value = {"点赞", "名片赞"})
+///    public void sendLike(GroupMsg msg, MsgSender sender) {
+///        String fromGroup = msg.getGroup();
+///        String fromQQ = msg.getQQ();
+///        try {
+///            boolean isSucc = sender.SENDER.sendLike(fromQQ, 10);
+///            SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + (isSucc ? "已点赞" : "点赞失败"));
+///        } catch (Exception e) {
+///            e.printStackTrace();
+///            SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + "点赞失败");
+///        }
+///    }
 
     @Listen(MsgGetTypes.groupMsg)
     @Filter(diyFilter = "boot", value = ".*百度.*", at = true)
@@ -58,7 +57,7 @@ public class GroupOtherListeners {
     @Listen(MsgGetTypes.groupMsg)
     @Filter(diyFilter = "boot", value = "呼叫龙王")
     public synchronized void findDragon(GroupMsg msg, MsgSender sender) {
-        Map<String, Object> map = GlobalVariable.groupDragon.get(msg.getGroup());
+        Map<String, Object> map = GlobalVariable.GROUP_DRAGON.get(msg.getGroup());
         if (map != null) {
             if (((Calendar) map.get("time")).getTimeInMillis() - System.currentTimeMillis() > 0) {
                 SenderUtil.sendGroupMsg(sender, msg.getGroup(), map.get("qq") != null ? CQ.at(map.get("qq") + "") : "当前暂无龙王");
@@ -155,7 +154,6 @@ public class GroupOtherListeners {
         }
     }
 
-    @NotNull
     static String getTime(int time) {
         String timeStr;
         if (time > 1440 * 60) {
@@ -173,7 +171,7 @@ public class GroupOtherListeners {
         try {
             String key1 = "820458705ebe071883b3c2";
             String key2 = "198111555ec3242d2c6b42";
-            Map<String, String> params = new HashMap<>();
+            Map<String, String> params = new HashMap<>(8);
             params.put("apikey", key1);
             params.put("size1200", "true");
             params.put("r18", r18);

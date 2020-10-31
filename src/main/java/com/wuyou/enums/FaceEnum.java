@@ -6,6 +6,9 @@ package com.wuyou.enums;
  *
  */
 public enum FaceEnum {
+	/**
+	 * 表情对应id
+	 */
 	Face1(1, "/撇嘴"), Face2(2, "/色"), Face3(3, "/发呆"), Face4(4, "/得意"), 
 	Face5(5, "/流泪"), Face6(6, "/害羞"), Face7(7, "/住嘴"), Face8(8, "/瞌睡"), 
 	Face9(9, "/大哭"), Face10(10, "/尴尬"), Face11(11, "/发怒"), Face12(12, "/调皮"),
@@ -48,10 +51,10 @@ public enum FaceEnum {
 	Face208(208, "/小样儿"), Face209(209, "/拜托"), Face210(210, "/飙泪"), Face211(211, "/我不看"), 
 	Face212(212, "/托腮");
 	
-	private int id;
-	private String string;
+	private final int id;
+	private final String string;
 
-	private FaceEnum(int id, String string) {
+	FaceEnum(int id, String string) {
 		this.id = id;
 		this.string = string;
 	}
@@ -66,13 +69,8 @@ public enum FaceEnum {
 	}
 	
 	public static String getString(String idString) {
-		int id = Integer.valueOf(idString);
-		for (FaceEnum value : values()) {
-			if (value.id == id) {
-				return value.string;
-			}
-		}
-		return "";
+		int id = Integer.parseInt(idString);
+		return getString(id);
 	}
 
 	@Override

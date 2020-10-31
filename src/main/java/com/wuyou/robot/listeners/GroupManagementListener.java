@@ -50,7 +50,7 @@ public class GroupManagementListener {
                     str.append("\n\t\t踢出成员[").append(qq).append("](").append(nickname).append(")失败,我踢我自己？");
                     continue;
                 }
-                if (GlobalVariable.administrator.contains(qq)) {
+                if (GlobalVariable.ADMINISTRATOR.contains(qq)) {
                     str.append("\n\t\t踢出成员[").append(qq).append("](").append(nickname).append(")失败,不可以踢我的主人!!");
                     continue;
                 }
@@ -94,7 +94,7 @@ public class GroupManagementListener {
                         str.append("\n\t\t禁言成员[").append(qq).append("](").append(nickname).append(")失败,我禁我自己？");
                         continue;
                     }
-                    if (GlobalVariable.administrator.contains(qq)) {
+                    if (GlobalVariable.ADMINISTRATOR.contains(qq)) {
                         str.append("\n\t\t禁言成员[").append(qq).append("](").append(nickname).append(")失败,不可以禁言我的主人!!");
                         continue;
                     }
@@ -117,7 +117,7 @@ public class GroupManagementListener {
                     }
                 }
                 SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + str);
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + "指令不合法");
             }
         }
@@ -267,7 +267,7 @@ public class GroupManagementListener {
                     }
                 }
                 SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + str);
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + "\n指令不合法");
             }
         }
@@ -324,7 +324,7 @@ public class GroupManagementListener {
                     }
                 }
                 SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + str);
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + "\n指令不合法");
             }
         } else {
@@ -343,7 +343,7 @@ public class GroupManagementListener {
 
     @Listen(MsgGetTypes.groupMsg)
     @Filter(diyFilter = "boot", value = "全体解禁")
-    public void cancleBanAll(GroupMsg msg, MsgSender sender) {
+    public void cancelBanAll(GroupMsg msg, MsgSender sender) {
         if (getPower(msg, sender)) {
             sender.SETTER.setGroupWholeBan(msg.getGroup(), false);
         }
@@ -420,10 +420,12 @@ public class GroupManagementListener {
             int power = PowerUtils.getPowerType(group, msg.getThisCode(), sender);
             if (power == 3 || power == 1) {
                 return true;
-            } else
+            } else {
                 SenderUtil.sendGroupMsg(sender, group, "操作失败,我没有管理员权限!");
-        } else
+            }
+        } else {
             SenderUtil.sendGroupMsg(sender, group, "操作失败,你不是我的管理员!");
+        }
         return false;
     }
 
@@ -438,7 +440,7 @@ public class GroupManagementListener {
                 userMember = sender.GETTER.getGroupMemberInfo(fromGroup, user);
             } catch (Exception e) {
                 try {
-                    if (GlobalVariable.administrator.contains(user)) {
+                    if (GlobalVariable.ADMINISTRATOR.contains(user)) {
                         str.append("\n\t\t添加黑名单失败: QQ:[").append(user).append("],不可以拉黑我的主人!");
                         continue;
                     }
@@ -450,7 +452,7 @@ public class GroupManagementListener {
                 continue;
             }
             String nickname = userMember.getRemarkOrNickname();
-            if (GlobalVariable.administrator.contains(user)) {
+            if (GlobalVariable.ADMINISTRATOR.contains(user)) {
                 str.append("\n\t\t添加黑名单失败: QQ:[").append(user).append("](").append(nickname).append("),不可以拉黑我的主人!");
                 continue;
             }

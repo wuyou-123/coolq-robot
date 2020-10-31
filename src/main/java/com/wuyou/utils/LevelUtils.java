@@ -11,13 +11,13 @@ import java.util.Map;
  *
  * @author wuyou
  */
-public class GetLevelUtils {
+public class LevelUtils {
     private static int num = 1;
 
-    public static int getLevel(String qq) {
+    public static Integer getLevel(String qq) {
         System.out.println("开始获取 " + qq + "的QQ等级");
-        String psKey = GlobalVariable.webCookie.get("p_skey");
-        String uin = GlobalVariable.webCookie.get("uin");
+        String psKey = GlobalVariable.WEB_COOKIE.get("p_skey");
+        String uin = GlobalVariable.WEB_COOKIE.get("uin");
         String url = "https://club.vip.qq.com/api/vip/getQQLevelInfo?requestBody=%7B%22sClientIp%22:%22127.0.0.1%22,%22sSessionKey%22:%22MQNYKeEUyV%22,%22iKeyType%22:1,%22iAppId%22:0,%22iUin%22:" + qq + "%7D";
         Map<String, String> cookie = new HashMap<>(2);
         cookie.put("uin", uin);
@@ -34,7 +34,8 @@ public class GetLevelUtils {
                 return -1;
             }
             System.out.println("Cookie失效, 重新登录获取");
-            GlobalVariable.webCookie = GetWebCookiesUtils.getCookies();
+            GlobalVariable.WEB_COOKIE.clear();
+            GlobalVariable.WEB_COOKIE.putAll(WebCookiesUtils.getCookies());
             return getLevel(qq);
         }
         Integer level = json.getJSONObject("data").getJSONObject("mRes").getInteger("iQQLevel");

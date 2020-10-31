@@ -20,7 +20,7 @@ import com.wuyou.service.AllBlackService;
 import com.wuyou.service.BlackUserService;
 import com.wuyou.service.StatService;
 import com.wuyou.utils.CQ;
-import com.wuyou.utils.GetLevelUtils;
+import com.wuyou.utils.LevelUtils;
 import com.wuyou.utils.GroupUtils;
 import com.wuyou.utils.SenderUtil;
 
@@ -40,20 +40,18 @@ public class RequestListener {
     @Depend
     BlackUserService blackUserService;
 
-    String adminqq = "1097810498";
+    final String adminQQ = "1097810498";
 
     @Listen(MsgGetTypes.friendAddRequest)
     public void friendAddRequest(FriendAddRequest request, MsgSender sender) {
-        // TODO: 好友添加的请求
         sender.SETTER.setFriendAddRequest(request, "", true);
-        sender.SENDER.sendPrivateMsg(adminqq,
+        sender.SENDER.sendPrivateMsg(adminQQ,
                 "已经添加[" + request.getQQ() + "](" + sender.getPersonInfoByCode(request.getQQ()).getRemarkOrNickname() + ")为好友,验证消息为"
                         + ("".equals(request.getMsg()) ? "空" : ": " + request.getMsg()));
     }
 
     @Listen(MsgGetTypes.groupAddRequest)
     public void groupAddRequest(GroupAddRequest request, MsgSender sender) {
-        // TODO: 群添加请求
         String fromGroup = request.getGroup();
         String qq = request.getQQ();
         SenderGetList msg = sender.GETTER;
@@ -62,7 +60,7 @@ public class RequestListener {
         // 判断是不是黑名单里的成员
         if (list.contains(qq)) {
             sender.SETTER.setGroupAddRequest(request, false, "");
-            sender.SENDER.sendPrivateMsg(adminqq, "已经拒绝黑名单成员[" + request.getQQ() + "]("
+            sender.SENDER.sendPrivateMsg(adminQQ, "已经拒绝黑名单成员[" + request.getQQ() + "]("
                     + sender.getPersonInfoByCode(qq).getRemarkOrNickname() + ")加入群[" + request.getGroup() + "]("
                     + msg.getGroupInfo(request.getGroup()).getName() + ")," + ("".equals(request.getMsg()) ? "附加消息为空"
                     : request.getMsg().contains("邀请人") ? request.getMsg() : "附加消息为: " + request.getMsg()));
@@ -77,14 +75,14 @@ public class RequestListener {
             List<String> allBlackGroups = allBlackUserService.getAllBlack(2);
             if (allBlackGroups.contains(request.getGroup())) {
                 sender.SETTER.setGroupAddRequest(request, false, "");
-                sender.SENDER.sendPrivateMsg(adminqq,
+                sender.SENDER.sendPrivateMsg(adminQQ,
                         "[" + request.getQQ() + "](" + sender.getPersonInfoByCode(qq).getRemarkOrNickname() + ")邀请我加入群["
                                 + request.getGroup() + "](" + sender.getGroupInfoByCode(request.getGroup()).getName()
                                 + "),但是由于此群在黑名单内被我拒绝了");
                 return;
             }
             sender.SETTER.setGroupAddRequest(request, true, "");
-            sender.SENDER.sendPrivateMsg(adminqq,
+            sender.SENDER.sendPrivateMsg(adminQQ,
                     "[" + request.getQQ() + "](" + sender.getPersonInfoByCode(qq).getRemarkOrNickname() + ")已邀请我加入群["
                             + request.getGroup() + "](" + msg.getGroupInfo(request.getGroup()).getName() + ")");
         }
@@ -101,18 +99,17 @@ public class RequestListener {
 
     @Listen(MsgGetTypes.groupMemberIncrease)
     public void groupMemberIncrease(GroupMemberIncrease increase, MsgSender sender) {
-        // TODO: 新群员进群
         SenderGetList msg = sender.GETTER;
         String fromGroup = increase.getGroup();
-        String beingOperateqq = increase.getBeOperatedQQ();
-        int level = GetLevelUtils.getLevel(beingOperateqq);
+        String beingOperateQQ = increase.getBeOperatedQQ();
+        int level = LevelUtils.getLevel(beingOperateQQ);
         System.out.println("等级: " + level);
-        String loginqq = increase.getThisCode();
-        if (loginqq.equals(beingOperateqq)) {
+        String loginQQ = increase.getThisCode();
+        if (loginQQ.equals(beingOperateQQ)) {
             // 如果新成员是自己
             List<String> allBlackUsers = allBlackUserService.getAllBlack(2);
             if (allBlackUsers.contains(fromGroup)) {
-                sender.SENDER.sendPrivateMsg(adminqq,
+                sender.SENDER.sendPrivateMsg(adminQQ,
                         "有人邀请我加入群[" + fromGroup + "](" + msg.getGroupInfo(fromGroup).getName() + "),但是由于此群在黑名单内我退出了");
                 sender.SETTER.setGroupLeave(fromGroup);
             }
@@ -121,14 +118,14 @@ public class RequestListener {
         try {
             List<String> list = getAllBlackUser(fromGroup);
             // 判断是不是黑名单里的成员
-            if (list.contains(beingOperateqq)) {
-                GroupMemberInfo beingOperateMember = msg.getGroupMemberInfo(fromGroup, beingOperateqq);
-                if (msg.getGroupMemberInfo(fromGroup, loginqq).getPowerType() != PowerType.MEMBER) {
-                    sender.SETTER.setGroupMemberKick(fromGroup, beingOperateqq, true);
+            if (list.contains(beingOperateQQ)) {
+                GroupMemberInfo beingOperateMember = msg.getGroupMemberInfo(fromGroup, beingOperateQQ);
+                if (msg.getGroupMemberInfo(fromGroup, loginQQ).getPowerType() != PowerType.MEMBER) {
+                    sender.SETTER.setGroupMemberKick(fromGroup, beingOperateQQ, true);
                     SenderUtil.sendGroupMsg(sender, fromGroup,
-                            "发现黑名单成员[" + beingOperateqq + "](" + beingOperateMember.getRemarkOrNickname() + ")入群,已将他移除此群");
+                            "发现黑名单成员[" + beingOperateQQ + "](" + beingOperateMember.getRemarkOrNickname() + ")入群,已将他移除此群");
                 } else {
-                    SenderUtil.sendGroupMsg(sender, fromGroup, "发现黑名单成员[" + beingOperateqq + "]("
+                    SenderUtil.sendGroupMsg(sender, fromGroup, "发现黑名单成员[" + beingOperateQQ + "]("
                             + beingOperateMember.getRemarkOrNickname() + ")入群,但是我没有权限将他移除此群");
                 }
                 return;
@@ -136,7 +133,7 @@ public class RequestListener {
             }
             // 新人不是黑名单成员
             if (statService.getStat(fromGroup) == 1) {
-                List<GroupMemberEntity> groupMemberEntityList = GroupUtils.getGroupMembers(sender, fromGroup, beingOperateqq);
+                List<GroupMemberEntity> groupMemberEntityList = GroupUtils.getGroupMembers(sender, fromGroup, beingOperateQQ);
                 GroupMemberEntity groupMemberEntity = new GroupMemberEntity();
                 if (groupMemberEntityList.size() != 0) {
                     groupMemberEntity = groupMemberEntityList.get(0);
@@ -148,12 +145,12 @@ public class RequestListener {
                         (level <= 3 && level > 0 ? "，你的等级小于三级,该不会是谁的小号吧"
                                 : level >= 3 && level <= 5 ? "，你的等级为" + level + "级,有一点点低哦"
                                 : level >= 5 && level <= 10 ? "，你的等级为" + level + "级,有一点低哦" : end);
-                SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(beingOperateqq) + welcomeMessage);
+                SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(beingOperateQQ) + welcomeMessage);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            sender.SENDER.sendPrivateMsg(adminqq, "出现异常");
-            sender.SENDER.sendPrivateMsg(adminqq, e.getMessage());
+            sender.SENDER.sendPrivateMsg(adminQQ, "出现异常");
+            sender.SENDER.sendPrivateMsg(adminQQ, e.getMessage());
         }
     }
 

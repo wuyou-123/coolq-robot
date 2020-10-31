@@ -20,7 +20,7 @@ import java.util.Objects;
 public class BanMessageFilter {
 
 	@DIYFilter("addBanMessage")
-	public class addBanMessage implements Filterable {
+	public static class AddBanMessage implements Filterable {
 
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
@@ -32,7 +32,7 @@ public class BanMessageFilter {
 	}
 
 	@DIYFilter("removeBanMessage")
-	public class removeBanMessage implements Filterable {
+	public static class RemoveBanMessage implements Filterable {
 
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
@@ -44,7 +44,7 @@ public class BanMessageFilter {
 	}
 
 	@DIYFilter("sendBanMessage")
-	public class sendBanMessage implements Filterable {
+	public static class SendBanMessage implements Filterable {
 
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {

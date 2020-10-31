@@ -13,11 +13,15 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class PowerUtils {
-    static ManagerService service;
+    private static ManagerService service;
 
     @Autowired
-    public void setService(ManagerService service) {
-        PowerUtils.service = service;
+    public void setService(final ManagerService managerService) {
+        setServiceStatic(managerService);
+    }
+
+    public static void setServiceStatic(final ManagerService managerService) {
+        PowerUtils.service = managerService;
     }
 
     /**
@@ -26,10 +30,10 @@ public class PowerUtils {
      * @return 0:群员 1:管理员 2:机器人管理员 3:群主 4:主人
      */
     public static int getPowerType(String group, String user, MsgSender sender) {
-        if (GlobalVariable.administrator.contains(user)) {
+        if (GlobalVariable.ADMINISTRATOR.contains(user)) {
             return 4;
         }
-        PowerType power = GroupUtils.getGroupMembers(sender,group,user).get(0).getRole();
+        PowerType power = GroupUtils.getGroupMembers(sender, group, user).get(0).getRole();
         if (power.isOwner()) {
             return 3;
         }
@@ -49,10 +53,12 @@ public class PowerUtils {
      */
     public static boolean powerCompare(GroupMsg msg, String user, MsgSender sender) {
         String group = msg.getGroup();
-        PowerType userPower = GroupUtils.getGroupMembers(sender,group,user).get(0).getRole();
-        PowerType thisPower = GroupUtils.getGroupMembers(sender,group,msg.getThisCode()).get(0).getRole();
-        if (userPower.isMember() && (thisPower.isAdmin() || thisPower.isOwner())) {
-            return true;
+        PowerType userPower = GroupUtils.getGroupMembers(sender, group, user).get(0).getRole();
+        PowerType thisPower = GroupUtils.getGroupMembers(sender, group, msg.getThisCode()).get(0).getRole();
+        if (userPower.isMember()) {
+            if (thisPower.isAdmin() || thisPower.isOwner()) {
+                return true;
+            }
         }
         return userPower.isAdmin() && thisPower.isOwner();
     }

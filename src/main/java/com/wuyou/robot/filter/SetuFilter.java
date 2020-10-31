@@ -23,7 +23,7 @@ import java.util.List;
 @Beans
 public class SetuFilter {
 	@DIYFilter("setuImage")
-	public class SetuImage implements Filterable {
+	public static class SetuImage implements Filterable {
 
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
@@ -38,7 +38,7 @@ public class SetuFilter {
 	}
 
 	@DIYFilter("setu")
-	public class Setu implements Filterable {
+	public static class Setu implements Filterable {
 
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
@@ -62,9 +62,10 @@ public class SetuFilter {
 			list.add("来点好看的");
 			list.add("来点好康的");
 			String message = msgget.getMsg();
-			String msg = CQ.utils.remove(message, true, true);
-			if (list.contains(msg.toLowerCase()))
+			String msg = CQ.UTILS.remove(message, true, true);
+			if (list.contains(msg.toLowerCase())) {
 				return true;
+			}
 			return message.contains("色") && message.contains("图") && message.length() < 10;
 		}
 	}

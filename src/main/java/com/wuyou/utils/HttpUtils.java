@@ -26,12 +26,12 @@ import java.util.*;
  * @author wuyou
  */
 public class HttpUtils {
-    static CookieStore store;
-    static CloseableHttpClient closeableHttpClient;
+    private static final CookieStore STORE;
+    private static final CloseableHttpClient CLOSEABLE_HTTP_CLIENT;
 
     static {
-        store = new BasicCookieStore();
-        closeableHttpClient = HttpClients.custom().setDefaultCookieStore(store).build();
+        STORE = new BasicCookieStore();
+        CLOSEABLE_HTTP_CLIENT = HttpClients.custom().setDefaultCookieStore(STORE).build();
     }
 
     public static RequestEntity get(String url) {
@@ -92,13 +92,13 @@ public class HttpUtils {
 
     private static RequestEntity request(HttpRequestBase httpRequestBase) {
         try {
-            return GlobalVariable.threadPool.submit(() -> {
+            return GlobalVariable.THREAD_POOL.submit(() -> {
                 RequestEntity requestEntity = new RequestEntity();
                 httpRequestBase.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.122 Safari/537.36 SE 2.X MetaSr 1.0");
                 System.out.println(Arrays.toString(httpRequestBase.getHeaders("Cookie")));
-                try (CloseableHttpResponse closeableHttpResponse = closeableHttpClient.execute(httpRequestBase)) {
+                try (CloseableHttpResponse closeableHttpResponse = CLOSEABLE_HTTP_CLIENT.execute(httpRequestBase)) {
                     requestEntity.setResponse(EntityUtils.toString(closeableHttpResponse.getEntity(), "UTF-8"));
-                    requestEntity.setCookies(store.getCookies());
+                    requestEntity.setCookies(STORE.getCookies());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

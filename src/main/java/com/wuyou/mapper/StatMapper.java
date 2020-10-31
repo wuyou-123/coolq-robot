@@ -1,22 +1,45 @@
 package com.wuyou.mapper;
 
-import java.util.List;
-
-import org.apache.ibatis.annotations.Param;
-
 import com.wuyou.entity.Stat;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * @author Administrator<br>
- *         2020年5月11日
- *
+ * 2020年5月11日
  */
+@Repository
 public interface StatMapper {
-	void bootAndShutDown(@Param("groupId") String groupId, @Param("stat") int stat);
+    /**
+     * 设置开关机状态
+     *
+     * @param groupId 群号
+     * @param stat    状态
+     */
+    void bootAndShutDown(@Param("groupId") String groupId, @Param("stat") int stat);
 
-	Integer findStat(String groupId);
+    /**
+     * 查询状态
+     *
+     * @param groupId 群号
+     * @return 开关机状态
+     */
+    Integer findStat(String groupId);
 
-	void changeStat(@Param("groupId") String groupId, @Param("stat") int stat);
+    /**
+     * 改变开关机状态
+     *
+     * @param groupId 群号
+     * @param stat    状态
+     */
+    void changeStat(@Param("groupId") String groupId, @Param("stat") int stat);
 
-	List<Stat> findAllStat();
+    /**
+     * 获取所有群开关机状态
+     *
+     * @return 状态列表
+     */
+    List<Stat> findAllStat();
 }

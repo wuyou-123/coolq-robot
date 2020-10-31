@@ -1,15 +1,14 @@
 package com.wuyou.service.impl;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.wuyou.exception.ObjectExistedException;
 import com.wuyou.exception.ObjectNotFoundException;
 import com.wuyou.exception.UpdateException;
 import com.wuyou.mapper.AllBlackMapper;
 import com.wuyou.service.AllBlackService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * 全局黑名单控制器
@@ -20,14 +19,16 @@ import com.wuyou.service.AllBlackService;
  */
 @Service
 public class AllBlackServiceImpl implements AllBlackService {
-	@Autowired
-	AllBlackMapper mapper;
+	private final AllBlackMapper mapper;
 
+	@Autowired
+	public AllBlackServiceImpl(AllBlackMapper mapper) {
+		this.mapper = mapper;
+	}
 	/**
 	 * 添加全局黑名单
 	 * 
 	 * @param user 用户QQ号
-	 * @return
 	 */
 	@Override
 	public void addAllBlack(int type, String user) {

@@ -57,7 +57,6 @@
         </plugins>
     </build>
     <dependencies>
-        <!-- cqhttp 快速启动器依赖 -->
         <dependency>
             <groupId>love.forte.simple-robot</groupId>
             <artifactId>component-mirai-spring-boot-starter</artifactId>

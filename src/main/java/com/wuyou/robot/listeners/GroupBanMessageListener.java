@@ -151,13 +151,15 @@ public class GroupBanMessageListener {
         String fromGroup = msg.getGroup();
         String fromQQ = msg.getQQ();
 
-        String[] context = CQ.context.get(fromGroup);
+        String[] context = CQ.CONTEXT.get(fromGroup);
         int probability = 100;
         int max = 10;
 
-        if (context != null && (context[2].contains("轮空") || context[3].contains("轮空"))) {
-            probability = 150;
-            max = 5;
+        if (context != null) {
+            if (context[2].contains("轮空") || context[3].contains("轮空")){
+                probability = 150;
+                max = 5;
+            }
         }
         System.out.println("概率: " + probability);
         int a = ran.nextInt(probability);

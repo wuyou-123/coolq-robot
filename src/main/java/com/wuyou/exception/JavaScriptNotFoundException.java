@@ -13,34 +13,18 @@ public class JavaScriptNotFoundException extends RuntimeException {
         super();
     }
 
-    /**
-     * @param message
-     * @param cause
-     * @param enableSuppression
-     * @param writableStackTrace
-     */
     public JavaScriptNotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 
-    /**
-     * @param message
-     * @param cause
-     */
     public JavaScriptNotFoundException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    /**
-     * @param message
-     */
     public JavaScriptNotFoundException(String message) {
         super(message);
     }
 
-    /**
-     * @param cause
-     */
     public JavaScriptNotFoundException(Throwable cause) {
         super(cause);
     }

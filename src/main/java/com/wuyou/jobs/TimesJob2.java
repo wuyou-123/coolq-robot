@@ -8,14 +8,14 @@ import com.wuyou.service.ClearService;
 import com.wuyou.service.StatService;
 
 
+//@CronTask("0 0 0 * * ? ")
+//@CronTask("0/5 * * * * ? ")
+//@Beans
 /**
  * @author Administrator<br>
  *         2020年5月11日
  *
  */
-//@CronTask("0 0 0 * * ? ")
-//@CronTask("0/5 * * * * ? ")
-//@Beans
 public class TimesJob2 implements TimeJob {
 
 	@Depend

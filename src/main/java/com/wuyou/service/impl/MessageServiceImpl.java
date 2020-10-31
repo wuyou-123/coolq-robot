@@ -21,8 +21,13 @@ import java.util.Map;
  */
 @Service
 public class MessageServiceImpl implements MessageService {
+
+    private final MessageMapper mapper;
+
     @Autowired
-    MessageMapper mapper;
+    public MessageServiceImpl(MessageMapper mapper) {
+        this.mapper = mapper;
+    }
 
     /**
      * 添加自动回复消息
@@ -43,7 +48,8 @@ public class MessageServiceImpl implements MessageService {
         } else if (ans.equals(answer)) {
             throw new ObjectExistedException("此条消息已存在");
         } else {
-            return changeMessage(groupId, message, answer);
+            changeMessage(groupId, message, answer);
+            return 2;
         }
     }
 
@@ -72,7 +78,7 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public Map<String, String> getAllByGroup(String groupId) {
         List<Message> list = mapper.findAllByGroup(groupId);
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>(256);
         for (Message message : list) {
             map.put(message.getMessage(), message.getAnswer());
         }
@@ -97,11 +103,9 @@ public class MessageServiceImpl implements MessageService {
      * @param groupId 群号
      * @param message 消息内容
      * @param answer  修改之后的回复内容
-     * @return
      */
-    private int changeMessage(String groupId, String message, String answer) {
+    private void changeMessage(String groupId, String message, String answer) {
         removeMessage(groupId, message);
         addMessage(groupId, message, answer);
-        return 2;
     }
 }

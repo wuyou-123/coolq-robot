@@ -27,7 +27,7 @@ public class MenuFilter implements Filterable {
 		list.add("菜单");
 		list.add("功能");
 		String message = msgget.getMsg();
-		String msg = CQ.utils.remove(message, true, true);
+		String msg = CQ.UTILS.remove(message, true, true);
 		return list.contains(msg);
 	}
 

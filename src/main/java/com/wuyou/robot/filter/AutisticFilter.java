@@ -19,21 +19,21 @@ import java.util.Objects;
 public class AutisticFilter {
 
     @DIYFilter("autistic1")
-    public class Autistic1 implements Filterable {
+    public static class Autistic1 implements Filterable {
 
         @Override
         public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
             String message = msgget.getMsg();
-            if (message.equals("自闭")) {
+            if ("自闭".equals(message)) {
                 return true;
             }
-            final String msg = CQ.utils.remove(message, true, true);
-            return at.test() && Objects.equals(CQ.getAt(message), msgget.getThisCode()) && msg.equals("自闭");
+            final String msg = CQ.UTILS.remove(message, true, true);
+            return at.test() && Objects.equals(CQ.getAt(message), msgget.getThisCode()) && "自闭".equals(msg);
         }
     }
 
     @DIYFilter("autistic2")
-    public class Autistic2 implements Filterable {
+    public static class Autistic2 implements Filterable {
 
         @Override
         public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
@@ -41,7 +41,7 @@ public class AutisticFilter {
             if (message.startsWith("领取套餐")) {
                 return true;
             }
-            final String msg = CQ.utils.remove(message, true, true);
+            final String msg = CQ.UTILS.remove(message, true, true);
             return at.test() && Objects.equals(CQ.getAt(message), msgget.getThisCode()) && msg.startsWith("领取套餐");
         }
 

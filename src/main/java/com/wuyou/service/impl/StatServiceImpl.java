@@ -18,8 +18,13 @@ import java.util.Map;
  */
 @Service
 public class StatServiceImpl implements StatService {
+
+    private final StatMapper mapper;
+
     @Autowired
-    StatMapper mapper;
+    public StatServiceImpl(StatMapper mapper) {
+        this.mapper = mapper;
+    }
 
     /**
      * 开机/关机
@@ -49,7 +54,7 @@ public class StatServiceImpl implements StatService {
     @Override
     public Map<String, Boolean> getAllStat() {
         List<Stat> stat = mapper.findAllStat();
-        Map<String, Boolean> map = new HashMap<>();
+        Map<String, Boolean> map = new HashMap<>(256);
         for (Stat s : stat) {
             map.put(s.getGroupId(), s.getStat() == 1);
         }

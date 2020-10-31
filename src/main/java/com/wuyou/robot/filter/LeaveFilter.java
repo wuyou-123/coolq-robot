@@ -21,7 +21,7 @@ public class LeaveFilter implements Filterable {
 	@Override
 	public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
 		String str = msgget.getMsg();
-		str = CQ.utils.remove(str);
+		str = CQ.UTILS.remove(str);
 		return "退群".equals(str.trim()) && at.test();
 	}
 

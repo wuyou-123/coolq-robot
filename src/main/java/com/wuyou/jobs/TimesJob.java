@@ -15,19 +15,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+///@CronTask("0/5 * * * * ? ")
 /**
  * @author Administrator<br>
  *         2020年5月11日
  *
  */
-@CronTask("0 0 0 * * ? ")
-//@CronTask("0/5 * * * * ? ")
 @Beans
+@CronTask("0 0 0 * * ? ")
 public class TimesJob implements TimeJob {
 
 	@Depend
 	StatService statService;
-
 	@Depend
 	ClearService clearService;
 
@@ -45,7 +44,8 @@ public class TimesJob implements TimeJob {
 				clearService.clearAllData(string);
 			}
 		}
-
+//		BotManager botManager = BotRuntime.getRuntime().getBotManager();
+//		botManager.defaultBot().getSender().SENDER.sendGroupMsg();
 	}
 
 }

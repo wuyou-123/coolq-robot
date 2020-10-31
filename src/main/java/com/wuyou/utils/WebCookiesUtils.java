@@ -25,15 +25,19 @@ import java.util.Map;
  */
 @Beans
 @Component
-public class GetWebCookiesUtils {
+public class WebCookiesUtils {
 
     private static String botInfo;
     private static String uin;
     private static String pwd;
 
     @Value("${core.bots}")
-    public void setBotInfo(String bot) {
-        botInfo = bot;
+    public void setBotInfo(final String botInfo) {
+        setBotInfoStatic(botInfo);
+    }
+
+    public static void setBotInfoStatic(final String botInfo) {
+        WebCookiesUtils.botInfo = botInfo;
     }
 
     public static void registerBotsFormatter(String registerBots) {
@@ -56,7 +60,7 @@ public class GetWebCookiesUtils {
     }
 
     public static Map<String, String> getCookies() {
-        Map<String, String> cookies = new HashMap<>();
+        Map<String, String> cookies = new HashMap<>(32);
         try {
 
             registerBotsFormatter(botInfo);
@@ -76,7 +80,7 @@ public class GetWebCookiesUtils {
                 map.put("sessionID", web[6]);
                 // 执行js代码加密密码并获取登录链接
                 long start = System.currentTimeMillis();
-                InputStream in = GetLevelUtils.class.getClassLoader().getResourceAsStream("js/getPSkey.js");
+                InputStream in = LevelUtils.class.getClassLoader().getResourceAsStream("js/getPSkey.js");
                 if (in == null) {
                     System.out.println("js文件获取失败!");
                     throw new JavaScriptNotFoundException();
@@ -97,6 +101,7 @@ public class GetWebCookiesUtils {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        System.out.println("获取到的cookie: " + cookies);
         return cookies;
     }
 

@@ -20,7 +20,7 @@ import com.wuyou.utils.CQ;
 public class GroupManagementFilter {
 
 	@DIYFilter("kickMember")
-	public class KickMember implements Filterable {
+	public static class KickMember implements Filterable {
 
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
@@ -31,7 +31,7 @@ public class GroupManagementFilter {
 	}
 
 	@DIYFilter("banMember")
-	public class BanMember implements Filterable {
+	public static class BanMember implements Filterable {
 
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
@@ -42,7 +42,7 @@ public class GroupManagementFilter {
 	}
 
 	@DIYFilter("cancelBanMember")
-	public class CancelBanMember implements Filterable {
+	public static class CancelBanMember implements Filterable {
 
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
@@ -53,7 +53,7 @@ public class GroupManagementFilter {
 	}
 
 	@DIYFilter("blackMember")
-	public class BlackMember implements Filterable {
+	public static class BlackMember implements Filterable {
 
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
@@ -80,7 +80,7 @@ public class GroupManagementFilter {
 	}
 
 	@DIYFilter("cancelBlackMember")
-	public class CancelBlackMember implements Filterable {
+	public static class CancelBlackMember implements Filterable {
 
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
@@ -107,7 +107,7 @@ public class GroupManagementFilter {
 	}
 
 	@DIYFilter("changeNick")
-	public class ChangeNick implements Filterable {
+	public static class ChangeNick implements Filterable {
 
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
@@ -118,7 +118,7 @@ public class GroupManagementFilter {
 	}
 
 	@DIYFilter("changeTitle")
-	public class ChangeTitle implements Filterable {
+	public static class ChangeTitle implements Filterable {
 
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
@@ -129,7 +129,7 @@ public class GroupManagementFilter {
 	}
 
 	@DIYFilter("addManager")
-	public class AddManager implements Filterable {
+	public static class AddManager implements Filterable {
 
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
@@ -141,7 +141,7 @@ public class GroupManagementFilter {
 	}
 
 	@DIYFilter("removeManager")
-	public class RemoveManager implements Filterable {
+	public static class RemoveManager implements Filterable {
 
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
@@ -152,7 +152,7 @@ public class GroupManagementFilter {
 	}
 
 	@DIYFilter("addGroupManager")
-	public class AddGroupManager implements Filterable {
+	public static class AddGroupManager implements Filterable {
 
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
@@ -165,7 +165,7 @@ public class GroupManagementFilter {
 	}
 
 	@DIYFilter("removeGroupManager")
-	public class RemoveGroupManager implements Filterable {
+	public static class RemoveGroupManager implements Filterable {
 
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {

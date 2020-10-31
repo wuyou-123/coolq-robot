@@ -147,9 +147,9 @@ public class GroupManagerListener {
     }
 
     /**
-     * @param list
-     * @param fromGroup
-     * @param sender
+     * @param list      删除管理员的列表
+     * @param fromGroup 群号
+     * @param sender    sender
      */
     private void removeGroupManager(Set<String> list, String fromGroup, MsgSender sender) {
         StringBuilder str = new StringBuilder("取消群管理员:");
@@ -194,7 +194,7 @@ public class GroupManagerListener {
         for (String user : list) {
             GroupMemberInfo userMember = sender.GETTER.getGroupMemberInfo(fromGroup, user);
             String nickname = userMember.getRemarkOrNickname();
-            if (GlobalVariable.administrator.contains(user)) {
+            if (GlobalVariable.ADMINISTRATOR.contains(user)) {
                 str.append("\n\t\t添加管理员失败: QQ:[").append(user).append("](").append(nickname).append("),不需要添加我的主人!");
                 continue;
             }
@@ -222,7 +222,7 @@ public class GroupManagerListener {
                 continue;
             }
             str.append("\n\t取消成功: QQ:[").append(user).append("]已取消管理员");
-//			managers.get(fromGroup).remove(user);
+///			managers.get(fromGroup).remove(user);
         }
         SenderUtil.sendGroupMsg(sender, fromGroup, str.toString());
     }

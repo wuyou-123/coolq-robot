@@ -1,15 +1,14 @@
 package com.wuyou.service.impl;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.wuyou.exception.ObjectExistedException;
 import com.wuyou.exception.ObjectNotFoundException;
 import com.wuyou.exception.UpdateException;
 import com.wuyou.mapper.BlackUserMapper;
 import com.wuyou.service.BlackUserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * 黑名单控制器
@@ -20,10 +19,13 @@ import com.wuyou.service.BlackUserService;
  */
 @Service
 public class BlackUserServiceImpl implements BlackUserService {
+
+	private final BlackUserMapper mapper;
+
 	@Autowired
-	BlackUserMapper mapper;
-
-
+	public BlackUserServiceImpl(BlackUserMapper mapper) {
+		this.mapper = mapper;
+	}
 	/**
 	 * 添加黑名单
 	 * 

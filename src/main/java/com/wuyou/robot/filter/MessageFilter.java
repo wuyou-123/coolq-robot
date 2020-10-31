@@ -20,7 +20,7 @@ import java.util.Objects;
 public class MessageFilter {
 
 	@DIYFilter("addMessage")
-	public class addMessage implements Filterable {
+	public static class AddMessage implements Filterable {
 
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
@@ -33,7 +33,7 @@ public class MessageFilter {
 	}
 
 	@DIYFilter("removeMessage")
-	public class removeMessage implements Filterable {
+	public static class RemoveMessage implements Filterable {
 
 		@Override
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {

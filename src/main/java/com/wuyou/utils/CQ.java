@@ -4,6 +4,8 @@ import com.simplerobot.modules.utils.CodeTemplate;
 import com.simplerobot.modules.utils.KQCode;
 import com.simplerobot.modules.utils.KQCodeUtils;
 import com.simplerobot.modules.utils.MutableKQCode;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -12,21 +14,27 @@ import java.util.stream.Collectors;
  * @author Administrator<br>
  * 2020年5月3日
  */
+@Component
 public class CQ {
-    public static Map<String, String[]> context = new HashMap<>();
+    public static final Map<String, String[]> CONTEXT = new HashMap<>();
+    private static String cqPath;
+    public static final KQCodeUtils UTILS = KQCodeUtils.getInstance();
+    final static CodeTemplate<KQCode> STRING_TEMPLATE = UTILS.getKqCodeTemplate();
 
-    public static String cqPath;
-    public final static KQCodeUtils utils = KQCodeUtils.getInstance();
-    final static CodeTemplate<KQCode> stringTemplate = utils.getKqCodeTemplate();
+    @Value("${cqPath}")
+    public static void setCqPath(String cq) {
+        cqPath = cq;
+    }
 
+    
     public static String at(String qq, String name) {
-        final MutableKQCode at = stringTemplate.at(qq).mutable();
+        final MutableKQCode at = STRING_TEMPLATE.at(qq).mutable();
         at.put("name", name);
         return at + " ";
     }
 
     public static String at(String qq) {
-        return stringTemplate.at(qq) + " ";
+        return STRING_TEMPLATE.at(qq) + " ";
     }
 
     /**
@@ -34,7 +42,7 @@ public class CQ {
      *
      */
     public static Set<String> getAts(String msg) {
-        final List<KQCode> list = utils.getKqs(msg, "at");
+        final List<KQCode> list = UTILS.getKqs(msg, "at");
         return list.stream().map(item-> item.get("qq")).collect(Collectors.toSet());
     }
 
@@ -43,7 +51,7 @@ public class CQ {
      *
      */
     public static Set<KQCode> getAtKqs(String msg) {
-        final List<KQCode> list = utils.getKqs(msg, "at");
+        final List<KQCode> list = UTILS.getKqs(msg, "at");
         return new HashSet<>(list);
     }
 
@@ -52,25 +60,26 @@ public class CQ {
      *
      */
     public static String getAt(String msg) {
-        final List<KQCode> list = utils.getKqs(msg, "at");
-        if (list.size() == 0)
+        final List<KQCode> list = UTILS.getKqs(msg, "at");
+        if (list.size() == 0) {
             return null;
+        }
         return list.get(0).get("qq");
     }
 
     public static List<KQCode> getKq(String msg, String type) {
-        return utils.getKqs(msg, type);
+        return UTILS.getKqs(msg, type);
     }
 
     public static KQCode getFace(String id) {
-        return stringTemplate.face(id);
+        return STRING_TEMPLATE.face(id);
     }
 
     public static KQCode getRecord(String path) {
-        return stringTemplate.record(path);
+        return STRING_TEMPLATE.record(path);
     }
     public static KQCode getImage(String path) {
-        return stringTemplate.image(path);
+        return STRING_TEMPLATE.image(path);
     }
 
     public static String getCQPath() {

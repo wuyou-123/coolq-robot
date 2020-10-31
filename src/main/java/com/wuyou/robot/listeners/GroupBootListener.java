@@ -30,7 +30,7 @@ public class GroupBootListener {
         String fromQQ = msg.getQQ();
         if (PowerUtils.getPowerType(fromGroup, fromQQ, sender) > 1) {
             service.bootAndShutDown(msg.getGroup(), 1);
-            GlobalVariable.bootMap.put(msg.getGroup(), true);
+            GlobalVariable.BOOT_MAP.put(msg.getGroup(), true);
             SenderUtil.sendGroupMsg(sender, msg.getGroup(), "已开机, 发送\"菜单\"查看帮助信息, 艾特我可以和我聊天哦");
         }
     }
@@ -42,7 +42,7 @@ public class GroupBootListener {
         String fromQQ = msg.getQQ();
         if (PowerUtils.getPowerType(fromGroup, fromQQ, sender) > 1) {
             service.bootAndShutDown(msg.getGroup(), 0);
-            GlobalVariable.bootMap.put(msg.getGroup(), false);
+            GlobalVariable.BOOT_MAP.put(msg.getGroup(), false);
             SenderUtil.sendGroupMsg(sender, msg.getGroup(), "已关机");
         }
     }

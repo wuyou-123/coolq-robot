@@ -4,13 +4,30 @@ import java.util.List;
 
 /**
  * @author Administrator<br>
- *         2020年5月11日
- *
+ * 2020年5月11日
  */
 public interface BlackUserService {
-	void addBlackUser(String groupId, String user);
+    /**
+     * 添加黑名单
+     *
+     * @param groupId 群号
+     * @param user    QQ号
+     */
+    void addBlackUser(String groupId, String user);
 
-	void removeBlackUser(String groupId, String user);
+    /**
+     * 删除黑名单
+     *
+     * @param groupId 群号
+     * @param user    QQ号
+     */
+    void removeBlackUser(String groupId, String user);
 
-	List<String> getUserByGroupId(String groupId);
+    /**
+     * 获取黑名单
+     *
+     * @param groupId 群号
+     * @return 查询到的QQ号
+     */
+    List<String> getUserByGroupId(String groupId);
 }
