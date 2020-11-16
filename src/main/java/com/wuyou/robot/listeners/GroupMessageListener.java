@@ -127,97 +127,82 @@ public class GroupMessageListener {
     public void sendAiMessage(GroupMsg msg, MsgSender sender) {
         String fromGroup = msg.getGroup();
         String message = CQ.UTILS.removeByType("at", msg.getMsg(), true, true);
-
         Map<String, String> map = service.getAllByGroup(fromGroup);
         if (map.containsKey(msg.getMsg().trim())) {
             return;
         }
-        List<KQCode> fases = CQ.getKq(message, "face");
-        for (KQCode KQCode : fases) {
+        List<KQCode> faces = CQ.getKq(message, "face");
+        for (KQCode KQCode : faces) {
             String str = FaceEnum.getString(KQCode.get("id"));
             message = message.replace(KQCode, str);
         }
         if ("".equals(message)) {
             message = "在吗在吗";
         }
-
-        String url = "http://api.tianapi.com/txapi/tuling/index";
-        Map<String, String> params = params();
-        params.put("key", "9845b4e0442683f1f8ab813c35180fc5");
-        params.put("question", message);
-        params.put("user", fromGroup);
-        String web = HttpUtils.get(url, params, null).getResponse();
-        System.out.println("请求: " + message);
-        System.out.println("返回值: " + web);
-        JSONObject json = JSONUtils.toJsonObject(web);
-        if (json.getInteger("code") == 200) {
-            String reply = json.getJSONArray("newslist").getJSONObject(0).getString("reply");
-            if (!reply.isEmpty()) {
-                SenderUtil.sendGroupMsg(sender, fromGroup, reply);
-                return;
+        if (!"783140627".equals(fromGroup)) {
+            String url = "http://api.tianapi.com/txapi/tuling/index";
+            Map<String, String> params = new HashMap<>(4);
+            params.put("key", "9845b4e0442683f1f8ab813c35180fc5");
+            params.put("question", message);
+            params.put("user", fromGroup);
+            String web = HttpUtils.get(url, params, null).getResponse();
+            System.out.println("请求: " + message);
+            System.out.println("返回值: " + web);
+            JSONObject json = JSONUtils.toJsonObject(web);
+            if (json.getInteger("code") == 200) {
+                String reply = json.getJSONArray("newslist").getJSONObject(0).getString("reply");
+                if (!reply.isEmpty()) {
+                    SenderUtil.sendGroupMsg(sender, fromGroup, reply);
+                    return;
+                }
             }
-        }
-        System.out.println("请求错误");
-        sender.SENDER.sendPrivateMsg("1097810498", "聊天接口调用失败! 群号: " + fromGroup + ", 请求消息: " + message);
-    }
+            System.out.println("请求错误");
+            sender.SENDER.sendPrivateMsg("1097810498", "聊天接口调用失败! 群号: " + fromGroup + ", 请求消息: " + message);
+        } else {
 ///    @Listen(MsgGetTypes.groupMsg)
 ///    @Filter(diyFilter = {"boot", "ai"}, mostDIYType = MostDIYType.EVERY_MATCH)
-///    public void sendAiMessage(GroupMsg msg, MsgSender sender) {
-///        String fromGroup = msg.getGroup();
-///        String message = CQ.utils.removeByType("at", msg.getMsg(), true, true);
-///
-///        Map<String, String> map = service.getAllByGroup(fromGroup);
-///        if (map.containsKey(msg.getMsg().trim())) {
-///            return;
-///        }
-///        List<KQCode> fases = CQ.getKq(message, "face");
-///        for (KQCode KQCode : fases) {
-///            String str = FaceEnum.getString(KQCode.get("id"));
-///            message = message.replace(KQCode, str);
-///        }
-///        if ("".equals(message))
-///            message = "在吗在吗";
-///
-///        System.out.println(message);
-///        try {
-///            String signature;
-///            String url = "http://api.tianapi.com/txapi/tuling/index";
-///            Map<String, String> params = params();
-///            params.put("session", fromGroup);
-///            params.put("question", message);
-///            signature = getReqSign(params);
-///            params.put("sign", signature);
-///            System.out.println("请求消息: " + message);
-///            // 获取网页数据
-///            String web = HttpUtils.get(url, params, null).getResponse();
-///            System.out.println("第1次请求");
-///            System.out.println("返回值: " + web);
-///            JSONObject json;
-///            json = JSONUtils.toJsonObject(web);
-///            for (int i = 2; i < 11; i++) {
-///                // 请求成功直接跳出
-///                if (json.getInteger("ret") == 0)
-///                    break;
-///                // 请求失败重试
-///                web = HttpUtils.get(url, params, null).getResponse();
-///                json = JSONUtils.toJsonObject(web);
-///                System.out.println("第" + i + "次请求");
-///                System.out.println("返回值: " + web);
-///            }
-///            JSONObject data = json.getJSONObject("data");
-///            if (json.getInteger("ret") == 0)
-///                SenderUtil.sendGroupMsg(sender, fromGroup, data.getString("answer"));
-///            else if (json.getInteger("ret") == 16394)
-///                SenderUtil.sendGroupMsg(sender, fromGroup, "我没有听懂你的话");
-///            else {
-///                System.out.println(web);
-///                System.out.println("请求错误");
-///            }
-///        } catch (Exception e) {
-///            e.printStackTrace();
-///        }
-///    }
-
+///    public void sendAiMessage2(GroupMsg msg, MsgSender sender) {
+            System.out.println(message);
+            try {
+                String signature;
+                String url = "https://api.ai.qq.com/fcgi-bin/nlp/nlp_textchat";
+                Map<String, String> params = params();
+                params.put("session", fromGroup);
+                params.put("question", message);
+                signature = getReqSign(params);
+                params.put("sign", signature);
+                System.out.println("请求消息: " + message);
+                // 获取网页数据
+                String web = HttpUtils.get(url, params, null).getResponse();
+                System.out.println("第1次请求");
+                System.out.println("返回值: " + web);
+                JSONObject json;
+                json = JSONUtils.toJsonObject(web);
+                for (int i = 2; i < 11; i++) {
+                    // 请求成功直接跳出
+                    if (json.getInteger("ret") == 0) {
+                        break;
+                    }
+                    // 请求失败重试
+                    web = HttpUtils.get(url, params, null).getResponse();
+                    json = JSONUtils.toJsonObject(web);
+                    System.out.println("第" + i + "次请求");
+                    System.out.println("返回值: " + web);
+                }
+                JSONObject data = json.getJSONObject("data");
+                if (json.getInteger("ret") == 0) {
+                    SenderUtil.sendGroupMsg(sender, fromGroup, data.getString("answer"));
+                } else if (json.getInteger("ret") == 16394) {
+                    SenderUtil.sendGroupMsg(sender, fromGroup, "我没有听懂你的话");
+                } else {
+                    System.out.println(web);
+                    System.out.println("请求错误");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     @Listen(MsgGetTypes.groupMsg)
     @Filter(diyFilter = {"boot", "aiVoice"}, mostDIYType = MostDIYType.EVERY_MATCH)

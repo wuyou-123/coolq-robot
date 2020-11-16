@@ -32,6 +32,7 @@ public class HttpUtils {
     static {
         STORE = new BasicCookieStore();
         CLOSEABLE_HTTP_CLIENT = HttpClients.custom().setDefaultCookieStore(STORE).build();
+        /*.setProxy(new HttpHost("172.24.58.136",5553))*/
     }
 
     public static RequestEntity get(String url) {
@@ -85,7 +86,8 @@ public class HttpUtils {
     private static void setCookies(HttpRequestBase httpRequestBase, Map<String, String> cookies) {
         if (cookies != null) {
             StringBuilder cookie = new StringBuilder();
-            cookies.forEach((key, value) -> cookie.append(key).append("=").append(value).append(";"));
+            cookies.forEach((key, value) -> {cookie.append(key).append("=").append(value).append(";");
+                System.out.println(key+": "+value);});
             httpRequestBase.setHeader("Cookie", cookie.toString());
         }
     }
@@ -99,6 +101,8 @@ public class HttpUtils {
                 try (CloseableHttpResponse closeableHttpResponse = CLOSEABLE_HTTP_CLIENT.execute(httpRequestBase)) {
                     requestEntity.setResponse(EntityUtils.toString(closeableHttpResponse.getEntity(), "UTF-8"));
                     requestEntity.setCookies(STORE.getCookies());
+                    httpRequestBase.setHeader("Cookie","");
+                    STORE.clear();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

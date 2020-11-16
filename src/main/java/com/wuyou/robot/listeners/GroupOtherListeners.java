@@ -64,7 +64,7 @@ public class GroupOtherListeners {
                 return;
             }
         }
-        GroupUtils.getDragon(sender, msg.getGroup());
+        GroupUtils.getDragon(sender, msg.getGroup(), 0);
     }
 
     @Listen(MsgGetTypes.groupMsg)

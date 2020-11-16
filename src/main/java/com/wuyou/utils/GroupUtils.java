@@ -90,15 +90,17 @@ public class GroupUtils {
         return getGroupMembers(sender, group, null);
     }
 
-    public static void getDragon(MsgSender sender, String group) {
+    public static void getDragon(final MsgSender sender, final String group, int type) {
         System.out.println("获取" + group + "的龙王");
         try {
             Map<String, String> cookies = CookiesUtils.getCookies(sender);
+            System.out.println("请求的cookie: "+cookies);
             String url = "http://qun.qq.com/interactive/honorlist?gc=" + group + "&type=1&_wv=3&_wwv=129";
-            String body = HttpUtils.get(url, null, cookies).getResponse();
-            String jsonStr = body.substring(body.indexOf("__INITIAL_STATE__=") + 18);
-            jsonStr = jsonStr.substring(0, jsonStr.indexOf("</script>"));
-            JSONObject json = JSONUtils.toJsonObject(jsonStr);
+            String url1 = "http://qun.qq.com/interactive/qunhonor?gc=" + group + "&_wv=3&&_wwv=128&dragon_gray1";
+
+            String body = HttpUtils.get(type == 0 ? url : url1, null, cookies).getResponse();
+            JSONObject json = getJson(body);
+            System.out.println(json);
             JSONObject currentTalkative = json.getJSONObject("currentTalkative");
             Map<String, Object> map = new HashMap<>(4);
             Calendar cal = Calendar.getInstance();
@@ -111,6 +113,11 @@ public class GroupUtils {
                 if (qq != null) {
                     SenderUtil.sendGroupMsg(sender, group, CQ.at(qq));
                     return;
+                } else {
+                    if (type == 0) {
+                        getDragon(sender, group, 1);
+                        return;
+                    }
                 }
             }
             GlobalVariable.GROUP_DRAGON.put(group, map);
@@ -120,6 +127,12 @@ public class GroupUtils {
             sender.SENDER.sendPrivateMsg(GlobalVariable.ADMINISTRATOR.get(0), "出现异常");
             sender.SENDER.sendPrivateMsg(GlobalVariable.ADMINISTRATOR.get(0), e.getMessage());
         }
+    }
+
+    private static JSONObject getJson(String body) {
+        String jsonStr = body.substring(body.indexOf("__INITIAL_STATE__=") + 18);
+        jsonStr = jsonStr.substring(0, jsonStr.indexOf("</script>"));
+        return JSONUtils.toJsonObject(jsonStr);
     }
 
     private static void setGroupList(MsgSender sender, JSONArray array, List<GroupEntity> list, PowerType powerType) {

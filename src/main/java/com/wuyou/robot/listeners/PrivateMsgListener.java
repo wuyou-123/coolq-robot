@@ -1,5 +1,6 @@
 package com.wuyou.robot.listeners;
 
+import com.alibaba.fastjson.JSONObject;
 import com.forte.qqrobot.anno.Filter;
 import com.forte.qqrobot.anno.Listen;
 import com.forte.qqrobot.anno.depend.Beans;
@@ -9,18 +10,21 @@ import com.forte.qqrobot.beans.messages.result.GroupInfo;
 import com.forte.qqrobot.beans.messages.result.GroupMemberInfo;
 import com.forte.qqrobot.beans.messages.types.MsgGetTypes;
 import com.forte.qqrobot.sender.MsgSender;
+import com.forte.qqrobot.utils.JSONUtils;
+import com.simplerobot.modules.utils.KQCode;
 import com.wuyou.entity.GroupEntity;
+import com.wuyou.enums.FaceEnum;
 import com.wuyou.exception.ObjectExistedException;
 import com.wuyou.exception.ObjectNotFoundException;
 import com.wuyou.service.AllBlackService;
 import com.wuyou.service.ClearService;
+import com.wuyou.utils.CQ;
 import com.wuyou.utils.GlobalVariable;
 import com.wuyou.utils.GroupUtils;
+import com.wuyou.utils.HttpUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -58,14 +62,38 @@ public class PrivateMsgListener {
             }
             return;
         }
-        // 收到他人发送的消息, 转发至自己
         if (msg.getType().isFromSystem()) {
             return;
         }
+///     收到他人发送的消息, 转发至自己
         String adminQQ = "1097810498";
         sender.SENDER.sendPrivateMsg(adminQQ,
                 "收到来自[" + qq + "](" + sender.getPersonInfoByCode(qq).getRemarkOrNickname() + ")的一条消息");
         sender.SENDER.sendPrivateMsg(adminQQ, msg.getMsg());
+        List<KQCode> faces = CQ.getKq(message, "face");
+        for (KQCode KQCode : faces) {
+            String str = FaceEnum.getString(KQCode.get("id"));
+            message = message.replace(KQCode, str);
+        }
+        String url = "http://api.tianapi.com/txapi/tuling/index";
+        Map<String, String> params = new HashMap<>(4);
+        params.put("key", "9845b4e0442683f1f8ab813c35180fc5");
+        params.put("question", message);
+        params.put("user", qq);
+        String web = HttpUtils.get(url, params, null).getResponse();
+        System.out.println("请求: " + message);
+        System.out.println("返回值: " + web);
+        JSONObject json = JSONUtils.toJsonObject(web);
+        if (json.getInteger("code") == 200) {
+            String reply = json.getJSONArray("newslist").getJSONObject(0).getString("reply");
+            if (!reply.isEmpty()) {
+                sender.SENDER.sendPrivateMsg(qq, reply);
+                sender.SENDER.sendPrivateMsg("1097810498", "向[" + qq + "](" + sender.getPersonInfoByCode(qq).getRemarkOrNickname() + ")发送消息: " + reply);
+                return;
+            }
+        }
+        System.out.println("请求错误");
+        sender.SENDER.sendPrivateMsg("1097810498", "聊天接口调用失败! QQ号: " + qq + ", 请求消息: " + message);
 
     }
 
