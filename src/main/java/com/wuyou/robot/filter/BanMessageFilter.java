@@ -26,7 +26,7 @@ public class BanMessageFilter {
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
 			String message = msgget.getMsg();
 			String regex = ".*添加关键词.*";
-			return message.matches(regex) && at.test() && message.startsWith("[") && Objects.equals(CQ.getAt(message), msgget.getThisCode());
+			return message.matches(regex) && at.test() && Objects.equals(CQ.startsWithAt(message), msgget.getThisCode());
 		}
 
 	}
@@ -38,7 +38,7 @@ public class BanMessageFilter {
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
 			String message = msgget.getMsg();
 			String regex = ".*删除关键词.*";
-			return message.matches(regex) && at.test() && message.startsWith("[") && Objects.equals(CQ.getAt(message), msgget.getThisCode());
+			return message.matches(regex) && at.test() && Objects.equals(CQ.startsWithAt(message), msgget.getThisCode());
 		}
 
 	}
@@ -50,7 +50,7 @@ public class BanMessageFilter {
 		public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
 			String message = msgget.getMsg();
 			String regex = ".*(删除关键词|添加关键词).*";
-			return !(message.matches(regex) && at.test() && Objects.equals(CQ.getAt(message), msgget.getThisCode()));
+			return !(message.matches(regex) && at.test() && Objects.equals(CQ.startsWithAt(message), msgget.getThisCode()));
 		}
 
 	}

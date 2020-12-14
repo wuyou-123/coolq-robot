@@ -36,6 +36,14 @@ public class CQ {
     public static String at(String qq) {
         return STRING_TEMPLATE.at(qq) + " ";
     }
+    public static String startsWithAt(String msg){
+        List<String> list = UTILS.split(msg);
+        KQCode code = UTILS.getKq(list.get(0),"at");
+        if(code!=null) {
+            return code.get("qq");
+        }
+        return "";
+    }
 
     /**
      * 获取所有艾特的QQ号

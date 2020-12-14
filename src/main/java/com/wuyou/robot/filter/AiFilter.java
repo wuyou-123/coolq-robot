@@ -37,7 +37,7 @@ public class AiFilter {
                     || msg.startsWith("领取套餐"))) {
                 return false;
             }
-            return at.test() && Objects.equals(CQ.getAt(message), msgget.getThisCode()) && message.startsWith("[") && !msg.startsWith("说");
+            return at.test() && Objects.equals(CQ.startsWithAt(message), msgget.getThisCode()) && !msg.startsWith("说");
         }
     }
 
@@ -55,7 +55,7 @@ public class AiFilter {
                     || msg.startsWith("领取套餐")) {
                 return false;
             }
-            return at.test() && Objects.equals(CQ.getAt(message), msgget.getThisCode()) && message.startsWith("[") && msg.startsWith("说");
+            return at.test() && Objects.equals(CQ.startsWithAt(message), msgget.getThisCode()) && msg.startsWith("说");
         }
     }
 }

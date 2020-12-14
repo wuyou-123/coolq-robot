@@ -28,7 +28,7 @@ public class AutisticFilter {
                 return true;
             }
             final String msg = CQ.UTILS.remove(message, true, true);
-            return at.test() && Objects.equals(CQ.getAt(message), msgget.getThisCode()) && "自闭".equals(msg);
+            return at.test() && Objects.equals(CQ.startsWithAt(message), msgget.getThisCode()) && "自闭".equals(msg);
         }
     }
 
@@ -42,7 +42,7 @@ public class AutisticFilter {
                 return true;
             }
             final String msg = CQ.UTILS.remove(message, true, true);
-            return at.test() && Objects.equals(CQ.getAt(message), msgget.getThisCode()) && msg.startsWith("领取套餐");
+            return at.test() && Objects.equals(CQ.startsWithAt(message), msgget.getThisCode()) && msg.startsWith("领取套餐");
         }
 
     }

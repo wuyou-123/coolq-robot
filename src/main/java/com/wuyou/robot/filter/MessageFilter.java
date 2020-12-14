@@ -27,7 +27,7 @@ public class MessageFilter {
 			String message = msgget.getMsg();
 			String regex = ".*添加消息.*回复.*";
 			return message.matches(regex) && at.test()
-					&& Objects.equals(CQ.getAt(message), msgget.getThisCode());
+					&& Objects.equals(CQ.startsWithAt(message), msgget.getThisCode());
 		}
 
 	}
@@ -40,7 +40,7 @@ public class MessageFilter {
 			String message = msgget.getMsg();
 			String regex = ".*删除消息.*";
 			return message.matches(regex) && at.test()
-					&& Objects.equals(CQ.getAt(message), msgget.getThisCode());
+					&& Objects.equals(CQ.startsWithAt(message), msgget.getThisCode());
 		}
 
 	}
