@@ -55,6 +55,15 @@ public class GroupOtherListeners {
     }
 
     @Listen(MsgGetTypes.groupMsg)
+    @Filter(diyFilter = "boot", value = "点歌.*")
+    public void music(GroupMsg msg, MsgSender sender) {
+        System.out.println("点歌");
+        String message = msg.getMsg();
+        String music = message.trim().substring(3);
+        SenderUtil.sendGroupMsg(sender, msg.getGroup(),CQ.getMusic(music).toString());
+    }
+
+    @Listen(MsgGetTypes.groupMsg)
     @Filter(diyFilter = "boot", value = "呼叫龙王")
     public synchronized void findDragon(GroupMsg msg, MsgSender sender) {
         Map<String, Object> map = GlobalVariable.GROUP_DRAGON.get(msg.getGroup());
@@ -140,7 +149,7 @@ public class GroupOtherListeners {
                 }
                 int time = times * 60;
                 timeStr = getTime(time);
-                sender.SETTER.setGroupBan(fromGroup, fromQQ, times * 60);
+                sender.SETTER.setGroupBan(fromGroup, fromQQ, times * 60L);
                 SenderUtil.sendGroupMsg(sender, fromGroup,
                         CQ.at(fromQQ) + "恭喜领取了"
                                 + timeStr.replace("天0小时", "天").replace("小时0分钟", "小时").replace("分钟0秒", "分钟") + "的套餐"

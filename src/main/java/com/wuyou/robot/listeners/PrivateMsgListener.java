@@ -43,6 +43,32 @@ public class PrivateMsgListener {
 ///    private String commandStr;
 
     @Listen(MsgGetTypes.privateMsg)
+    public void testPrivateMsg(PrivateMsg msg, MsgSender sender) {
+        String qq = msg.getQQ();
+        String message = msg.getMsg();
+        if (!"1097810498".equals(qq)) {
+            return;
+        }
+        if (message.startsWith("点歌 ")) {
+            String music = message.substring(3);
+            System.out.println(music);
+
+        }
+
+    }
+    @Listen(MsgGetTypes.privateMsg)
+    @Filter(value = "点歌 .*")
+    public void music(PrivateMsg msg, MsgSender sender) {
+        String qq = msg.getQQ();
+        String message = msg.getMsg();
+        System.out.println("点歌");
+        String music = message.trim().substring(3);
+//        SenderUtil.sendGroupMsg(sender, msg.getGroup(),CQ.getMusic(music).toString());
+        sender.SENDER.sendPrivateMsg(qq,CQ.getMusic(music).toString());
+    }
+
+
+    @Listen(MsgGetTypes.privateMsg)
     public void privateMsg(PrivateMsg msg, MsgSender sender) {
         String qq = msg.getQQ();
         String message = msg.getMsg();
