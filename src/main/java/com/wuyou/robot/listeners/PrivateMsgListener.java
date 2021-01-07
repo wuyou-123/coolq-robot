@@ -16,12 +16,14 @@ import com.wuyou.entity.GroupEntity;
 import com.wuyou.enums.FaceEnum;
 import com.wuyou.exception.ObjectExistedException;
 import com.wuyou.exception.ObjectNotFoundException;
+import com.wuyou.robot.BootClass;
 import com.wuyou.service.AllBlackService;
 import com.wuyou.service.ClearService;
 import com.wuyou.utils.CQ;
 import com.wuyou.utils.GlobalVariable;
 import com.wuyou.utils.GroupUtils;
 import com.wuyou.utils.HttpUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -38,8 +40,10 @@ public class PrivateMsgListener {
     private ClearService clearService;
     @Depend
     private AllBlackService allBlackUserService;
+    @Autowired
+    private BootClass boot;
 
-///    @Value("${command}")
+    ///    @Value("${command}")
 ///    private String commandStr;
 
     @Listen(MsgGetTypes.privateMsg)
@@ -54,8 +58,25 @@ public class PrivateMsgListener {
             System.out.println(music);
 
         }
+        if (message.startsWith("重启斗地主")) {
+            boot.initLandlords();
+        }
+//        if (message.startsWith("发牌 ")) {
 
+//            sender.SENDER.sendPrivateMsg(qq, CQ.getPoker(pokerFile.toString()).toString());
+//        }
+        if (message.equals("a")) {
+//            String a = "[CQ:image,file=/Users/wuyou/other/coolq-robot/src/resourcesData/poker/poker_comp/a1_a2.png,destruct=false]";
+//            String a = "[CQ:image,file=/Users/wuyou/Desktop/小恐龙表情/a048e674d5bcfe02eaa96a6b0f41fb46.jpg,destruct=false]";
+            String a = CQ.getImage("/Users/wuyou/Desktop/小恐龙表情/a048e674d5bcfe02eaa96a6b0f41fb46.jpg").toString();
+            String b = CQ.getImage("/Users/wuyou/other/coolq-robot/src/resourcesData/poker/poker_comp/a2_b2_ak_bk_ck_dk_dq_aj_cj_dj_a9_c8_a7_c7_c5_b4_c4.png").toString();
+            System.out.println(a);
+            sender.SENDER.sendPrivateMsg(qq, a);
+            sender.SENDER.sendPrivateMsg(qq, b);
+
+        }
     }
+
     @Listen(MsgGetTypes.privateMsg)
     @Filter(value = "点歌 .*")
     public void music(PrivateMsg msg, MsgSender sender) {
@@ -64,7 +85,7 @@ public class PrivateMsgListener {
         System.out.println("点歌");
         String music = message.trim().substring(3);
 //        SenderUtil.sendGroupMsg(sender, msg.getGroup(),CQ.getMusic(music).toString());
-        sender.SENDER.sendPrivateMsg(qq,CQ.getMusic(music).toString());
+        sender.SENDER.sendPrivateMsg(qq, CQ.getMusic(music).toString());
     }
 
 

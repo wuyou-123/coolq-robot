@@ -101,7 +101,7 @@ public class WebCookiesUtils {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("获取到的cookie: " + cookies);
+        System.out.println("网页登录获取到的cookie: " + cookies);
         return cookies;
     }
 

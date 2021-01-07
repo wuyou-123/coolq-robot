@@ -64,8 +64,8 @@ public class HttpUtils {
 //    }
 
     public static RequestEntity post(String url, Map<String, String> params, Map<String, String> cookies) {
-        System.out.println(cookies);
-        System.out.println(params);
+//        System.out.println(cookies);
+//        System.out.println(params);
         try {
             HttpPost httpPost = new HttpPost(url);
             if (params != null) {
@@ -86,8 +86,9 @@ public class HttpUtils {
     private static void setCookies(HttpRequestBase httpRequestBase, Map<String, String> cookies) {
         if (cookies != null) {
             StringBuilder cookie = new StringBuilder();
-            cookies.forEach((key, value) -> {cookie.append(key).append("=").append(value).append(";");
-                System.out.println(key+": "+value);});
+            cookies.forEach((key, value) -> {
+                cookie.append(key).append("=").append(value).append(";");
+            });
             httpRequestBase.setHeader("Cookie", cookie.toString());
         }
     }
@@ -97,11 +98,11 @@ public class HttpUtils {
             return GlobalVariable.THREAD_POOL.submit(() -> {
                 RequestEntity requestEntity = new RequestEntity();
                 httpRequestBase.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.122 Safari/537.36 SE 2.X MetaSr 1.0");
-                System.out.println(Arrays.toString(httpRequestBase.getHeaders("Cookie")));
+//                System.out.println(Arrays.toString(httpRequestBase.getHeaders("Cookie")));
                 try (CloseableHttpResponse closeableHttpResponse = CLOSEABLE_HTTP_CLIENT.execute(httpRequestBase)) {
                     requestEntity.setResponse(EntityUtils.toString(closeableHttpResponse.getEntity(), "UTF-8"));
                     requestEntity.setCookies(STORE.getCookies());
-                    httpRequestBase.setHeader("Cookie","");
+                    httpRequestBase.setHeader("Cookie", "");
                     STORE.clear();
                 } catch (IOException e) {
                     e.printStackTrace();

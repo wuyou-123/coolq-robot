@@ -6,9 +6,11 @@ import com.simplerobot.modules.utils.CodeTemplate;
 import com.simplerobot.modules.utils.KQCode;
 import com.simplerobot.modules.utils.KQCodeUtils;
 import com.simplerobot.modules.utils.MutableKQCode;
+import org.nico.ratel.landlords.entity.Poker;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,12 +24,15 @@ public class CQ {
     public static final KQCodeUtils UTILS = KQCodeUtils.getInstance();
     final static CodeTemplate<KQCode> STRING_TEMPLATE = UTILS.getKqCodeTemplate();
     private static String cqPath;
+    private static String pokerPath;
 
-    @Value("${cqPath}")
     public static void setCqPath(String cq) {
         cqPath = cq;
     }
 
+    public static void setPokerPath(String poker) {
+        pokerPath = poker;
+    }
 
     public static String at(String qq, String name) {
         final MutableKQCode at = STRING_TEMPLATE.at(qq).mutable();
@@ -153,8 +158,99 @@ public class CQ {
         return CQ.UTILS.toKq("app", map);
     }
 
+    public static String getPoker(List<Poker> pokers) {
+        try {
+            List<String> pokerList = new ArrayList<>();
+            for (Poker poker : pokers) {
+                String a = poker.getLevel().getName().replace("A", "1");
+                String b;
+                switch (poker.getType().toString()) {
+                    case "SPADE":
+                        b = "a";
+                        break;
+                    case "HEART":
+                        b = "b";
+                        break;
+                    case "CLUB":
+                        b = "c";
+                        break;
+                    case "DIAMOND":
+                        b = "d";
+                        break;
+                    default:
+                        b = "e";
+                }
+                pokerList.add((b + a).toLowerCase(Locale.ROOT).replace("10", "0"));
+            }
+            char[] sort = new char[]{'x', 's', '2', '1', 'k', 'q', 'j', '0', '9', '8', '7', '6', '5', '4', '3'};
+            char[] sort2 = new char[]{'e', 'a', 'b', 'c', 'd'};
+            pokerList.sort((a, b) -> {
+
+                int aIndex = -1;
+                int bIndex = -1;
+                for (int i = 0; i < sort.length; i++) {
+                    if (a.split("")[1].charAt(0) == (sort[i])) {
+                        aIndex = i;
+                    }
+                    if (b.split("")[1].charAt(0) == (sort[i])) {
+                        bIndex = i;
+                    }
+                }
+                if (aIndex == bIndex) {
+                    for (int i = 0; i < sort2.length; i++) {
+                        if (a.split("")[0].charAt(0) == (sort2[i])) {
+                            aIndex = i;
+                        }
+                        if (b.split("")[0].charAt(0) == (sort2[i])) {
+                            bIndex = i;
+                        }
+                    }
+                }
+                return aIndex - bIndex;
+            });
+            String pokerStr = pokerList.toString().replace(" ", "").replace(",", "_");
+            pokerStr = pokerStr.substring(1, pokerStr.length() - 1);
+            File pokerDir = new File(pokerPath + "poker_comp/");
+            if (!pokerDir.exists()) {
+                if (pokerDir.mkdirs()) {
+                    System.out.println("创建文件夹成功");
+                }
+            }
+            File pokerFile = new File(pokerPath + "poker_comp/" + pokerStr + ".png");
+            if (pokerFile.exists()) {
+                return getImage(pokerFile.toString()).toString();
+            }
+            List<String> command = new ArrayList<>();
+            command.add("python");
+            command.add(pokerPath + "generatePoker.py");
+            command.add(pokerPath + "poker/");
+            command.add(pokerFile.toString());
+            command.addAll(pokerList);
+//            command.forEach(item->{
+//                System.out.print(item+" ");
+//            });
+//            System.out.println();
+            Process proc = Runtime.getRuntime().exec(command.toArray(new String[]{}));
+            proc.waitFor();
+            return getImage(pokerFile.toString()).toString();
+        } catch (Exception e) {
+            return "";
+        }
+
+    }
+
     public static String getCQPath() {
         return cqPath;
+    }
+
+    @Value("${cqPath}")
+    public void setCQ(String cq) {
+        setCqPath(cq);
+    }
+
+    @Value("${pokerPath}")
+    public void setPoker(String poker) {
+        setPokerPath(poker);
     }
 
 }

@@ -17,11 +17,18 @@ import com.simplerobot.modules.utils.KQCode;
 import com.wuyou.enums.FaceEnum;
 import com.wuyou.exception.ObjectExistedException;
 import com.wuyou.exception.ObjectNotFoundException;
+import com.wuyou.robot.BootClass;
 import com.wuyou.service.MessageService;
-import com.wuyou.utils.CQ;
-import com.wuyou.utils.HttpUtils;
-import com.wuyou.utils.PowerUtils;
-import com.wuyou.utils.SenderUtil;
+import com.wuyou.utils.*;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioSocketChannel;
+import org.nico.ratel.landlords.client.handler.DefaultChannelInitializer;
+import org.nico.ratel.landlords.entity.Room;
+import org.nico.ratel.landlords.enums.ServerEventCode;
+import org.nico.ratel.landlords.server.ServerContains;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -31,6 +38,8 @@ import java.util.*;
 import java.util.Base64.Decoder;
 import java.util.stream.Collectors;
 
+import static org.nico.ratel.landlords.channel.ChannelUtils.pushToServer;
+
 /**
  * @author Administrator<br>
  * 2020年3月13日
@@ -39,6 +48,8 @@ import java.util.stream.Collectors;
 public class GroupMessageListener {
     @Depend
     MessageService service;
+    @Depend
+    private BootClass boot;
 
     private static String getReqSign(Map<String, String> params) throws UnsupportedEncodingException {
         List<String> list = new ArrayList<>(params.keySet());
@@ -350,5 +361,86 @@ public class GroupMessageListener {
         } else {
             SenderUtil.sendGroupMsg(sender, group, "删除失败,你不是我的管理员!");
         }
+    }
+
+    @Listen(MsgGetTypes.groupMsg)
+    @Filter("重启斗地主")
+    public void reloadLandlords(GroupMsg msg, MsgSender sender) {
+        boot.initLandlords();
+    }
+
+    @Listen(MsgGetTypes.groupMsg)
+    @Filter("上桌")
+    public void playLandlords(GroupMsg msg, MsgSender sender) {
+        String group = msg.getGroup();
+        String qq = msg.getQQ();
+        System.out.println(qq);
+        EventLoopGroup nioEventLoopGroup = new NioEventLoopGroup();
+        try {
+            if (GlobalVariable.LANDLORDS_PLAYER.get(group) == null) {
+                GlobalVariable.LANDLORDS_PLAYER.put(group, new HashMap<>());
+                Bootstrap bootstrap = new Bootstrap()
+                        .group(nioEventLoopGroup)
+                        .channel(NioSocketChannel.class)
+                        .handler(new DefaultChannelInitializer());
+                Channel channel = bootstrap.connect("127.0.0.1", ServerContains.port).sync().channel();
+                GlobalVariable.LANDLORDS_PLAYER.get(group).put(qq, channel);
+                Thread.sleep(500);
+                pushToServer(channel, ServerEventCode.CODE_CLIENT_NICKNAME_SET, qq).sync();
+//                //get(ClientEventCode.CODE_SHOW_OPTIONS).call(channel, "1");
+                pushToServer(channel, ServerEventCode.CODE_ROOM_CREATE, group).sync();
+                System.out.println("创建房间");
+//                int clientId = getId(channel);
+//                ClientSide clientSide = ServerContains.CLIENT_SIDE_MAP.get(clientId);
+//                Room room = new Room(ServerContains.getServerId());
+//                room.setStatus(RoomStatus.BLANK);
+//                room.setType(RoomType.PVP);
+//                room.setRoomOwner(clientSide.getNickname());
+//                room.getClientSideMap().put(clientSide.getId(), clientSide);
+//                room.getClientSideList().add(clientSide);
+//                room.setCurrentSellClient(clientSide.getId());
+//                room.setCreateTime(System.currentTimeMillis());
+//                room.setLastFlushTime(System.currentTimeMillis());
+//                clientSide.setRoomId(room.getId());
+//                ServerContains.addRoom(room);
+//                GlobalVariable.LANDLORDS_ROOM.put(group, room);
+            } else {
+                if (GlobalVariable.LANDLORDS_PLAYER.get(group).get(qq) == null) {
+                    Bootstrap bootstrap = new Bootstrap()
+                            .group(nioEventLoopGroup)
+                            .channel(NioSocketChannel.class)
+                            .handler(new DefaultChannelInitializer());
+                    Channel channel = bootstrap.connect("127.0.0.1", ServerContains.port).sync().channel();
+                    System.out.println(ServerContains.CLIENT_SIDE_MAP);
+                    GlobalVariable.LANDLORDS_PLAYER.get(group).put(qq, channel);
+                    Thread.sleep(1000);
+                    pushToServer(channel, ServerEventCode.CODE_CLIENT_NICKNAME_SET, qq).sync();
+//                    pushToServer(channel, ServerEventCode.CODE_GET_ROOMS, null);
+                    Room room = GlobalVariable.LANDLORDS_ROOM.get(group);
+                    if (ServerContains.getRoom(room.getId()) == null) {
+                        pushToServer(channel, ServerEventCode.CODE_ROOM_CREATE, group).sync();
+                    } else {
+                        pushToServer(channel, ServerEventCode.CODE_ROOM_JOIN, room.getId() + "").sync();
+                    }
+                } else {
+//                    SenderUtil.sendGroupMsg(sender, group, "你已经在桌上了");
+                }
+
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            nioEventLoopGroup.shutdownGracefully();
+        }
+    }
+
+    private int getId(Channel channel) {
+        String longId = channel.id().asLongText();
+        Integer clientId = ServerContains.CHANNEL_ID_MAP.get(longId);
+        if (null == clientId) {
+            clientId = ServerContains.getClientId();
+            ServerContains.CHANNEL_ID_MAP.put(longId, clientId);
+        }
+        return clientId;
     }
 }
