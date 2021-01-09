@@ -8,17 +8,15 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import org.nico.ratel.landlords.client.handler.DefaultChannelInitializer;
 import org.nico.ratel.landlords.server.ServerContains;
 
-import java.io.IOException;
-
 public class SimpleClient {
 
-    public static int id = -1;
+    public static String id = "-1";
 
     public static String serverAddress = "127.0.0.1";
 
     public static int port = 1028;
 
-    public static void main(String[] args) throws InterruptedException, IOException {
+    public static void main(String[] args) {
         EventLoopGroup nioEventLoopGroup = new NioEventLoopGroup();
 
         try {
@@ -50,7 +48,7 @@ public class SimpleClient {
 //                        .handler(new DefaultChannelInitializer());
 //                Channel channel = bootstrap.connect("127.0.0.1", ServerContains.port).sync().channel();
 //                GlobalVariable.LANDLORDS_PLAYER.get(group).put(qq, channel);
-//                pushToServer(channel, ServerEventCode.CODE_CLIENT_NICKNAME_SET, msg.getRemarkOrNickname());
+//                pushToServer(channel, ServerEventCode.CODE_CLIENT_NICKNAME_SET, msg.getAccountInfo().getAccountRemarkOrNickname());
 ////                pushToServer(channel, ServerEventCode.CODE_ROOM_CREATE, null);
 ////                get(ClientEventCode.CODE_SHOW_ROOMS).call(channel, "");
 //

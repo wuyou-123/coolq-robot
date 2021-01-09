@@ -1,6 +1,5 @@
 package org.nico.ratel.landlords.server.event;
 
-import com.wuyou.utils.GlobalVariable;
 import org.nico.noson.Noson;
 import org.nico.noson.util.string.StringUtils;
 import org.nico.ratel.landlords.client.event.ClientEventListener;
@@ -20,20 +19,20 @@ public class ServerEventListener_CODE_GAME_POKER_PLAY_REDIRECT implements Server
 	@Override
 	public void call(ClientSide clientSide, String data) {
 		Room room = ServerContains.getRoom(clientSide.getRoomId());
-		Map<String, Object> datas = new HashMap<String, Object>();
+		Map<String, Object> datas = new HashMap<>();
 		if(StringUtils.isNotBlank(data)) {
 			datas = Noson.parseMap(data);
 		}
 		
-		List<Map<String, Object>> clientInfos = new ArrayList<Map<String,Object>>(3);
+		List<Map<String, Object>> clientInfos = new ArrayList<>(3);
 		for(ClientSide client: room.getClientSideList()){
-			if(clientSide.getId() != client.getId()){
+			if(!clientSide.getId().equals(client.getId())){
 				clientInfos.add(MapHelper.newInstance()
 						.put("clientId", client.getId())
 						.put("clientNickname", client.getNickname())
 						.put("type", client.getType())
 						.put("surplus", client.getPokers().size())
-						.put("position", clientSide.getPre().getId() == client.getId() ? "UP" : "DOWN")
+						.put("position", clientSide.getPre().getId().equals(client.getId()) ? "上家" : "下家")
 						.map());
 			}
 		}
@@ -44,7 +43,7 @@ public class ServerEventListener_CODE_GAME_POKER_PLAY_REDIRECT implements Server
 				.put("lastSellClientId", datas.get("lastSellClientId"))
 				.put("clientInfos", clientInfos)
 				.put("sellClientId", room.getCurrentSellClient())
-				.put("sellClinetNickname", ServerContains.CLIENT_SIDE_MAP.get(GlobalVariable.CLIENT_ID_MAP.get(room.getCurrentSellClient())).getNickname())
+				.put("sellClientNickname", ServerContains.CLIENT_SIDE_MAP.get(room.getCurrentSellClient()).getNickname())
 				.json();
 		
 //		ChannelUtils.pushToClient(clientSide.getChannel(), ClientEventCode.CODE_GAME_POKER_PLAY_REDIRECT, result);

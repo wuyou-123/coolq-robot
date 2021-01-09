@@ -6,7 +6,7 @@ import org.nico.ratel.landlords.entity.ClientTransferData;
 import org.nico.ratel.landlords.entity.ServerTransferData;
 import org.nico.ratel.landlords.enums.ClientEventCode;
 import org.nico.ratel.landlords.enums.ServerEventCode;
-import org.nico.ratel.landlords.print.SimplePrinter;
+import com.wuyou.utils.landlordsPrint.SimplePrinter;
 import org.nico.ratel.landlords.utils.GetQQUtils;
 
 public class ChannelUtils {
@@ -28,7 +28,9 @@ public class ChannelUtils {
 				clientTransferData.setInfo(info);
 			}
 			System.out.println("向客户端发送: "+code);
-			SimplePrinter.sendNotice(GetQQUtils.getQQ(channel), code.getMsg());
+			if (code != null) {
+				SimplePrinter.sendNotice(GetQQUtils.getQQ(channel), code.getMsg());
+			}
 //			channel.writeAndFlush(clientTransferData);
 //			pushToServer(channel, ServerEventCode.CODE_SEND_TO_QQ, code.getMsg());
 		}

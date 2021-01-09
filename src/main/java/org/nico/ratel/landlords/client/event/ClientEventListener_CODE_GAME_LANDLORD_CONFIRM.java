@@ -1,12 +1,13 @@
 package org.nico.ratel.landlords.client.event;
 
+import com.wuyou.utils.landlordsPrint.SimplePrinter;
 import io.netty.channel.Channel;
 import org.nico.noson.Noson;
 import org.nico.noson.entity.NoType;
 import org.nico.ratel.landlords.entity.Poker;
 import org.nico.ratel.landlords.enums.ServerEventCode;
 import org.nico.ratel.landlords.helper.MapHelper;
-import org.nico.ratel.landlords.print.SimplePrinter;
+import org.nico.ratel.landlords.server.event.ServerEventListener;
 import org.nico.ratel.landlords.utils.GetQQUtils;
 
 import java.util.List;
@@ -25,8 +26,13 @@ public class ClientEventListener_CODE_GAME_LANDLORD_CONFIRM extends ClientEventL
 		
 		List<Poker> additionalPokers = Noson.convert(map.get("additionalPokers"), new NoType<List<Poker>>() {});
 		SimplePrinter.printPokers(qq, additionalPokers);
-		
-		pushToServer(channel, ServerEventCode.CODE_GAME_POKER_PLAY_REDIRECT);
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		ServerEventListener.get(ServerEventCode.CODE_GAME_POKER_PLAY_REDIRECT).call(GetQQUtils.getClient(channel),null);
+//		pushToServer(channel, ServerEventCode.CODE_GAME_POKER_PLAY_REDIRECT);
 	}
 
 }

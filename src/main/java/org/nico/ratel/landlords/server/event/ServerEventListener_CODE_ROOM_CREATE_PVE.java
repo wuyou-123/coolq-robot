@@ -12,10 +12,10 @@ public class ServerEventListener_CODE_ROOM_CREATE_PVE implements ServerEventList
 	@Override
 	public void call(ClientSide clientSide, String data) {
 		
-		int difficultyCoefficient = Integer.valueOf(data);
+		int difficultyCoefficient = Integer.parseInt(data);
 		if(RobotDecisionMakers.contains(difficultyCoefficient)) {
 
-			Room room = new Room(ServerContains.getServerId());
+			Room room = new Room(data);
 			room.setType(RoomType.PVE);
 			room.setStatus(RoomStatus.BLANK);
 			room.setRoomOwner(clientSide.getNickname());
@@ -31,7 +31,7 @@ public class ServerEventListener_CODE_ROOM_CREATE_PVE implements ServerEventList
 			ClientSide preClient = clientSide;
 			//Add robots
 			for(int index = 1; index < 3; index ++) {
-				ClientSide robot = new ClientSide(- ServerContains.getClientId(), ClientStatus.PLAYING, null);
+				ClientSide robot = new ClientSide("-"+clientSide.getId(), ClientStatus.PLAYING, null);
 				robot.setNickname("robot_" + index);
 				robot.setRole(ClientRole.ROBOT);
 				preClient.setNext(robot);

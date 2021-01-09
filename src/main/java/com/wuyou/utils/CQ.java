@@ -2,10 +2,10 @@ package com.wuyou.utils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.simplerobot.modules.utils.CodeTemplate;
-import com.simplerobot.modules.utils.KQCode;
-import com.simplerobot.modules.utils.KQCodeUtils;
-import com.simplerobot.modules.utils.MutableKQCode;
+import love.forte.catcode.CatCodeUtil;
+import love.forte.catcode.CodeTemplate;
+import love.forte.catcode.MutableNeko;
+import love.forte.catcode.Neko;
 import org.nico.ratel.landlords.entity.Poker;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -21,8 +21,8 @@ import java.util.stream.Collectors;
 @Component
 public class CQ {
     public static final Map<String, String[]> CONTEXT = new HashMap<>();
-    public static final KQCodeUtils UTILS = KQCodeUtils.getInstance();
-    final static CodeTemplate<KQCode> STRING_TEMPLATE = UTILS.getKqCodeTemplate();
+    public static final CatCodeUtil UTILS = CatCodeUtil.getInstance();
+    final static CodeTemplate<Neko> STRING_TEMPLATE = UTILS.getNekoTemplate();
     private static String cqPath;
     private static String pokerPath;
 
@@ -35,7 +35,7 @@ public class CQ {
     }
 
     public static String at(String qq, String name) {
-        final MutableKQCode at = STRING_TEMPLATE.at(qq).mutable();
+        final MutableNeko at = STRING_TEMPLATE.at(qq).mutable();
         at.put("name", name);
         return at + " ";
     }
@@ -46,7 +46,7 @@ public class CQ {
 
     public static String startsWithAt(String msg) {
         List<String> list = UTILS.split(msg);
-        KQCode code = UTILS.getKq(list.get(0), "at");
+        Neko code = UTILS.getNeko(list.get(0), "at");
         if (code != null) {
             return code.get("qq");
         }
@@ -57,15 +57,15 @@ public class CQ {
      * 获取所有艾特的QQ号
      */
     public static Set<String> getAts(String msg) {
-        final List<KQCode> list = UTILS.getKqs(msg, "at");
+        final List<Neko> list = UTILS.getNekoList(msg, "at");
         return list.stream().map(item -> item.get("qq")).collect(Collectors.toSet());
     }
 
     /**
      * 获取所有艾特的QQ号的KQ码
      */
-    public static Set<KQCode> getAtKqs(String msg) {
-        final List<KQCode> list = UTILS.getKqs(msg, "at");
+    public static Set<Neko> getAtKqs(String msg) {
+        final List<Neko> list = UTILS.getNekoList(msg, "at");
         return new HashSet<>(list);
     }
 
@@ -73,30 +73,30 @@ public class CQ {
      * 获取第一个艾特的QQ号
      */
     public static String getAt(String msg) {
-        final List<KQCode> list = UTILS.getKqs(msg, "at");
+        final List<Neko> list = UTILS.getNekoList(msg, "at");
         if (list.size() == 0) {
             return null;
         }
         return list.get(0).get("qq");
     }
 
-    public static List<KQCode> getKq(String msg, String type) {
-        return UTILS.getKqs(msg, type);
+    public static List<Neko> getKq(String msg, String type) {
+        return UTILS.getNekoList(msg, type);
     }
 
-    public static KQCode getFace(String id) {
+    public static Neko getFace(String id) {
         return STRING_TEMPLATE.face(id);
     }
 
-    public static KQCode getRecord(String path) {
+    public static Neko getRecord(String path) {
         return STRING_TEMPLATE.record(path);
     }
 
-    public static KQCode getImage(String path) {
+    public static Neko getImage(String path) {
         return STRING_TEMPLATE.image(path);
     }
 
-    public static KQCode getMusic(String music) {
+    public static Neko getMusic(String music) {
 
         String resp = HttpUtils.get("http://music.163.com/api/search/get/web?type=1&s=" + music).getResponse();
         JSONObject json = JSONObject.parseObject(resp);
@@ -155,7 +155,7 @@ public class CQ {
                 "  \"extra\": \"\"" +
                 "}";
         map.put("content", code);
-        return CQ.UTILS.toKq("app", map);
+        return CQ.UTILS.toNeko("app", map);
     }
 
     public static String getPoker(List<Poker> pokers) {

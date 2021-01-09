@@ -1,6 +1,6 @@
 package com.wuyou.entity;
 
-import com.forte.qqrobot.beans.messages.types.PowerType;
+import love.forte.simbot.api.message.assists.Permissions;
 import lombok.Data;
 
 /**
@@ -21,7 +21,7 @@ public class GroupEntity {
     /**
      * 本人在群里的权限
      */
-    PowerType role;
+    Permissions role;
     /**
      * 群主信息
      */

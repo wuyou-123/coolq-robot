@@ -1,10 +1,10 @@
 package org.nico.ratel.landlords.client.event;
 
+import com.wuyou.utils.landlordsPrint.SimplePrinter;
 import io.netty.channel.Channel;
-import org.nico.ratel.landlords.client.SimpleClient;
 import org.nico.ratel.landlords.enums.ServerEventCode;
 import org.nico.ratel.landlords.helper.MapHelper;
-import org.nico.ratel.landlords.print.SimplePrinter;
+import org.nico.ratel.landlords.server.event.ServerEventListener;
 import org.nico.ratel.landlords.utils.GetQQUtils;
 
 import java.util.Map;
@@ -16,11 +16,12 @@ public class ClientEventListener_CODE_GAME_POKER_PLAY_PASS extends ClientEventLi
 		String qq = GetQQUtils.getQQ(channel);
 		Map<String, Object> map = MapHelper.parser(data);
 		
-		SimplePrinter.sendNotice(qq, map.get("clientNickname") + " passed. It is now " + map.get("nextClientNickname") + "'s turn.");
+		SimplePrinter.sendNotice(qq, map.get("clientNickname") + " 11跳过了. 现在轮到" + map.get("nextClientNickname") + "出牌.");
 		
-		int turnClientId = (int) map.get("nextClientId");
-		if(SimpleClient.id == turnClientId) {
-			pushToServer(channel, ServerEventCode.CODE_GAME_POKER_PLAY_REDIRECT);
+		String turnClientId = (String) map.get("nextClientId");
+		if(qq.equals(turnClientId)) {
+			ServerEventListener.get(ServerEventCode.CODE_GAME_POKER_PLAY_REDIRECT).call(GetQQUtils.getClient(channel), null);
+//			pushToServer(channel, ServerEventCode.CODE_GAME_POKER_PLAY_REDIRECT);
 		}
 	}
 

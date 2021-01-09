@@ -2,12 +2,11 @@ package com.wuyou.utils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.forte.qqrobot.beans.messages.types.PowerType;
-import com.forte.qqrobot.beans.messages.types.SexType;
-import com.forte.qqrobot.sender.MsgSender;
-import com.forte.qqrobot.utils.JSONUtils;
 import com.wuyou.entity.GroupEntity;
 import com.wuyou.entity.GroupMemberEntity;
+import com.wuyou.enums.SexType;
+import love.forte.simbot.api.message.assists.Permissions;
+import love.forte.simbot.api.sender.MsgSender;
 
 import java.util.*;
 
@@ -30,11 +29,11 @@ public class GroupUtils {
             JSONObject jsonObject = JSONObject.parseObject(request);
             List<GroupEntity> list = new ArrayList<>();
             JSONArray create = jsonObject.getJSONArray("create");
-            setGroupList(sender, create, list, PowerType.OWNER);
+            setGroupList(sender, create, list, Permissions.OWNER);
             JSONArray manage = jsonObject.getJSONArray("manage");
-            setGroupList(sender, manage, list, PowerType.ADMIN);
+            setGroupList(sender, manage, list, Permissions.ADMINISTRATOR);
             JSONArray join = jsonObject.getJSONArray("join");
-            setGroupList(sender, join, list, PowerType.MEMBER);
+            setGroupList(sender, join, list, Permissions.MEMBER);
             return list;
         } catch (Exception e) {
             sender.SENDER.sendPrivateMsg(GlobalVariable.ADMINISTRATOR.get(0), "出现异常");
@@ -71,9 +70,9 @@ public class GroupUtils {
                 JSONObject object = (JSONObject) mem;
                 GroupMemberEntity entity = JSONObject.toJavaObject(object, GroupMemberEntity.class);
                 int role = object.getInteger("role");
-                entity.setRole(PowerType.of(role == 0 ? 1 : role == 1 ? 0 : -1));
+                entity.setRole(role == 0 ? Permissions.OWNER : role == 1 ? Permissions.ADMINISTRATOR : Permissions.MEMBER);
                 int g = object.getInteger("g");
-                entity.setSex(SexType.of(g == 0 ? -1 : g == -1 ? 0 : g));
+                entity.setSex(g == 0 ? SexType.MALE : g == 1 ? SexType.FEMALE : SexType.OTHER);
                 entity.setPoint(object.getJSONObject("lv").getInteger("point"));
                 entity.setLevel(object.getJSONObject("lv").getInteger("level"));
                 list.add(entity);
@@ -132,10 +131,10 @@ public class GroupUtils {
     private static JSONObject getJson(String body) {
         String jsonStr = body.substring(body.indexOf("__INITIAL_STATE__=") + 18);
         jsonStr = jsonStr.substring(0, jsonStr.indexOf("</script>"));
-        return JSONUtils.toJsonObject(jsonStr);
+        return JSONObject.parseObject(jsonStr);
     }
 
-    private static void setGroupList(MsgSender sender, JSONArray array, List<GroupEntity> list, PowerType powerType) {
+    private static void setGroupList(MsgSender sender, JSONArray array, List<GroupEntity> list, Permissions powerType) {
         array.forEach(group -> {
             JSONObject object = (JSONObject) group;
             GroupEntity groupEntity = new GroupEntity();

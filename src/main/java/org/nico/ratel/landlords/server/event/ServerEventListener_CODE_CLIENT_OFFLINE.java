@@ -23,7 +23,7 @@ public class ServerEventListener_CODE_CLIENT_OFFLINE implements ServerEventListe
                     .json();
             for (ClientSide client : room.getClientSideList()) {
                 if (client.getRole() == ClientRole.PLAYER) {
-                    if (client.getId() != clientSide.getId()) {
+                    if (!client.getId().equals(clientSide.getId())) {
 //						ChannelUtils.pushToClient(client.getChannel(), ClientEventCode.CODE_CLIENT_EXIT, result);
                         ClientEventListener.get(ClientEventCode.CODE_CLIENT_EXIT).call(client.getChannel(), result);
 

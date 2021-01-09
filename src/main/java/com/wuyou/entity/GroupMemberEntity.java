@@ -1,9 +1,9 @@
 package com.wuyou.entity;
 
-import com.forte.qqrobot.beans.messages.types.PowerType;
-import com.forte.qqrobot.beans.messages.types.SexType;
+import com.wuyou.enums.SexType;
 import lombok.Getter;
 import lombok.Setter;
+import love.forte.simbot.api.message.assists.Permissions;
 
 import java.util.Date;
 import java.util.Objects;
@@ -23,7 +23,7 @@ public class GroupMemberEntity {
     /**
      * 权限
      */
-    private PowerType role;
+    private Permissions role;
     /**
      * 性别
      */

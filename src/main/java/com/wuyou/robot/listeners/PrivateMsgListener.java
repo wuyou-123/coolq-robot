@@ -1,19 +1,6 @@
 package com.wuyou.robot.listeners;
 
-import com.alibaba.fastjson.JSONObject;
-import com.forte.qqrobot.anno.Filter;
-import com.forte.qqrobot.anno.Listen;
-import com.forte.qqrobot.anno.depend.Beans;
-import com.forte.qqrobot.anno.depend.Depend;
-import com.forte.qqrobot.beans.messages.msgget.PrivateMsg;
-import com.forte.qqrobot.beans.messages.result.GroupInfo;
-import com.forte.qqrobot.beans.messages.result.GroupMemberInfo;
-import com.forte.qqrobot.beans.messages.types.MsgGetTypes;
-import com.forte.qqrobot.sender.MsgSender;
-import com.forte.qqrobot.utils.JSONUtils;
-import com.simplerobot.modules.utils.KQCode;
 import com.wuyou.entity.GroupEntity;
-import com.wuyou.enums.FaceEnum;
 import com.wuyou.exception.ObjectExistedException;
 import com.wuyou.exception.ObjectNotFoundException;
 import com.wuyou.robot.BootClass;
@@ -22,11 +9,21 @@ import com.wuyou.service.ClearService;
 import com.wuyou.utils.CQ;
 import com.wuyou.utils.GlobalVariable;
 import com.wuyou.utils.GroupUtils;
-import com.wuyou.utils.HttpUtils;
+import love.forte.common.ioc.annotation.Beans;
+import love.forte.common.ioc.annotation.Depend;
+import love.forte.simbot.annotation.Filter;
+import love.forte.simbot.annotation.Filters;
+import love.forte.simbot.annotation.OnPrivate;
+import love.forte.simbot.api.message.events.PrivateMsg;
+import love.forte.simbot.api.message.results.GroupFullInfo;
+import love.forte.simbot.api.message.results.GroupMemberInfo;
+import love.forte.simbot.api.sender.MsgSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -45,10 +42,15 @@ public class PrivateMsgListener {
 
     ///    @Value("${command}")
 ///    private String commandStr;
+    @OnPrivate
+    @Filters(customFilter = "landlords")
+    public void landlords(PrivateMsg msg, MsgSender sender) {
+    }
 
-    @Listen(MsgGetTypes.privateMsg)
+    @OnPrivate
     public void testPrivateMsg(PrivateMsg msg, MsgSender sender) {
-        String qq = msg.getQQ();
+//        System.out.println(1111);
+        String qq = msg.getAccountInfo().getAccountCode();
         String message = msg.getMsg();
         if (!"1097810498".equals(qq)) {
             return;
@@ -65,7 +67,7 @@ public class PrivateMsgListener {
 
 //            sender.SENDER.sendPrivateMsg(qq, CQ.getPoker(pokerFile.toString()).toString());
 //        }
-        if (message.equals("a")) {
+        if ("a".equals(message)) {
 //            String a = "[CQ:image,file=/Users/wuyou/other/coolq-robot/src/resourcesData/poker/poker_comp/a1_a2.png,destruct=false]";
 //            String a = "[CQ:image,file=/Users/wuyou/Desktop/小恐龙表情/a048e674d5bcfe02eaa96a6b0f41fb46.jpg,destruct=false]";
             String a = CQ.getImage("/Users/wuyou/Desktop/小恐龙表情/a048e674d5bcfe02eaa96a6b0f41fb46.jpg").toString();
@@ -77,126 +79,118 @@ public class PrivateMsgListener {
         }
     }
 
-    @Listen(MsgGetTypes.privateMsg)
+    @OnPrivate
     @Filter(value = "点歌 .*")
     public void music(PrivateMsg msg, MsgSender sender) {
-        String qq = msg.getQQ();
+        String qq = msg.getAccountInfo().getAccountCode();
         String message = msg.getMsg();
         System.out.println("点歌");
         String music = message.trim().substring(3);
-//        SenderUtil.sendGroupMsg(sender, msg.getGroup(),CQ.getMusic(music).toString());
+//        SenderUtil.sendGroupMsg(sender, msg.getGroupInfo().getGroupCode(),CQ.getMusic(music).toString());
         sender.SENDER.sendPrivateMsg(qq, CQ.getMusic(music).toString());
     }
 
 
-    @Listen(MsgGetTypes.privateMsg)
+    @OnPrivate
     public void privateMsg(PrivateMsg msg, MsgSender sender) {
-        String qq = msg.getQQ();
-        String message = msg.getMsg();
-        System.out.println(message);
-        if (GlobalVariable.ADMINISTRATOR.contains(qq)) {
-            try {
-                if (message.indexOf("给") == 0 && message.contains("发送消息")) {
-                    // 发送消息
-                    String toQQ = message.substring(1, message.indexOf("发送消息"));
-                    String toMessage = message.substring(message.indexOf("发送消息") + 4);
-                    sender.SENDER.sendPrivateMsg(toQQ, toMessage);
-                    sender.SENDER.sendPrivateMsg(qq, "已将[" + toMessage + "]发送给[" + toQQ + "]("
-                            + sender.getPersonInfoByCode(toQQ).getRemarkOrNickname() + ")");
-                }
-            } catch (Exception e) {
-                sender.SENDER.sendPrivateMsg(qq, "出现异常\n" + e.getMessage());
-            }
-            return;
-        }
-        if (msg.getType().isFromSystem()) {
-            return;
-        }
-///     收到他人发送的消息, 转发至自己
-        String adminQQ = "1097810498";
-        sender.SENDER.sendPrivateMsg(adminQQ,
-                "收到来自[" + qq + "](" + sender.getPersonInfoByCode(qq).getRemarkOrNickname() + ")的一条消息");
-        sender.SENDER.sendPrivateMsg(adminQQ, msg.getMsg());
-        List<KQCode> faces = CQ.getKq(message, "face");
-        for (KQCode KQCode : faces) {
-            String str = FaceEnum.getString(KQCode.get("id"));
-            message = message.replace(KQCode, str);
-        }
-        String url = "http://api.tianapi.com/txapi/tuling/index";
-        Map<String, String> params = new HashMap<>(4);
-        params.put("key", "9845b4e0442683f1f8ab813c35180fc5");
-        params.put("question", message);
-        params.put("user", qq);
-        String web = HttpUtils.get(url, params, null).getResponse();
-        System.out.println("请求: " + message);
-        System.out.println("返回值: " + web);
-        JSONObject json = JSONUtils.toJsonObject(web);
-        if (json.getInteger("code") == 200) {
-            String reply = json.getJSONArray("newslist").getJSONObject(0).getString("reply");
-            if (!reply.isEmpty()) {
-                sender.SENDER.sendPrivateMsg(qq, reply);
-                sender.SENDER.sendPrivateMsg("1097810498", "向[" + qq + "](" + sender.getPersonInfoByCode(qq).getRemarkOrNickname() + ")发送消息: " + reply);
-                return;
-            }
-        }
-        System.out.println("请求错误");
-        sender.SENDER.sendPrivateMsg("1097810498", "聊天接口调用失败! QQ号: " + qq + ", 请求消息: " + message);
+//        String qq = msg.getAccountInfo().getAccountCode();
+//        String message = msg.getMsg();
+//        System.out.println(message);
+//        if (GlobalVariable.ADMINISTRATOR.contains(qq)) {
+//            try {
+//                if (message.indexOf("给") == 0 && message.contains("发送消息")) {
+//                    // 发送消息
+//                    String toQQ = message.substring(1, message.indexOf("发送消息"));
+//                    String toMessage = message.substring(message.indexOf("发送消息") + 4);
+//                    sender.SENDER.sendPrivateMsg(toQQ, toMessage);
+//                    sender.SENDER.sendPrivateMsg(qq, "已将[" + toMessage + "]发送给[" + toQQ + "]("
+//                            + sender.GETTER.getFriendInfo(toQQ).getAccountInfo().getAccountRemarkOrNickname() + ")");
+//                }
+//            } catch (Exception e) {
+//                sender.SENDER.sendPrivateMsg(qq, "出现异常\n" + e.getMessage());
+//            }
+//            return;
+//        }
+//        if (msg.getPrivateMsgType() == PrivateMsg.Type.SYS) {
+//            return;
+//        }
+/////     收到他人发送的消息, 转发至自己
+//        String adminQQ = "1097810498";
+//        sender.SENDER.sendPrivateMsg(adminQQ,
+//                "收到来自[" + qq + "](" + sender.GETTER.getFriendInfo(qq).getAccountInfo().getAccountRemarkOrNickname() + ")的一条消息");
+//        sender.SENDER.sendPrivateMsg(adminQQ, msg.getMsg());
+//        List<Neko> faces = CQ.getKq(message, "face");
+//        for (Neko neko : faces) {
+//            String str = FaceEnum.getString(neko.get("id"));
+//            message = message.replace(neko, str);
+//        }
+//        JSONObject json = RequestUtil.aiChat(message, qq);
+//        if (json.getInteger("code") == 200) {
+//            String reply = json.getJSONArray("newslist").getJSONObject(0).getString("reply");
+//            if (!reply.isEmpty()) {
+//                sender.SENDER.sendPrivateMsg(qq, reply);
+//                sender.SENDER.sendPrivateMsg("1097810498", "向[" + qq + "](" + sender.GETTER.getFriendInfo(qq).getAccountInfo().getAccountRemarkOrNickname() + ")发送消息: " + reply);
+//                return;
+//            }
+//        }
+//        System.out.println("请求错误");
+//        sender.SENDER.sendPrivateMsg("1097810498", "聊天接口调用失败! QQ号: " + qq + ", 请求消息: " + message);
 
     }
 
-    @Listen(MsgGetTypes.privateMsg)
+    @OnPrivate
     public void cancelGroupBan(PrivateMsg msg, MsgSender sender) {
         String message = msg.getMsg();
-        if (GlobalVariable.ADMINISTRATOR.contains(msg.getQQ()) && message.startsWith("解禁群")) {
+        if (GlobalVariable.ADMINISTRATOR.contains(msg.getAccountInfo().getAccountCode()) && message.startsWith("解禁群")) {
             String group = message.substring(3);
-            if (sender.SETTER.setGroupBan(group, msg.getQQ(), 0)) {
-                sender.SENDER.sendPrivateMsg(msg.getQQ(), "解禁成功");
+            if (sender.SETTER.setGroupBan(group, msg.getAccountInfo().getAccountCode(), 0).get()) {
+                sender.SENDER.sendPrivateMsg(msg.getAccountInfo().getAccountCode(), "解禁成功");
             } else {
-                sender.SENDER.sendPrivateMsg(msg.getQQ(), "解禁失败");
+                sender.SENDER.sendPrivateMsg(msg.getAccountInfo().getAccountCode(), "解禁失败");
             }
         }
     }
 
-    @Listen(MsgGetTypes.privateMsg)
+    @OnPrivate
     public void leaveGroupBan(PrivateMsg msg, MsgSender sender) {
         try {
             String message = msg.getMsg();
-            if (GlobalVariable.ADMINISTRATOR.contains(msg.getQQ()) && message.startsWith("退群")) {
+            if (GlobalVariable.ADMINISTRATOR.contains(msg.getAccountInfo().getAccountCode()) && message.startsWith("退群")) {
                 String group = message.substring(2);
-                if (sender.GETTER.getGroupMemberInfo(group, msg.getThisCode()).getPowerType().isOwner()) {
-                    sender.SENDER.sendPrivateMsg(msg.getQQ(), "退出失败,不能退出我的群");
+                if (sender.GETTER.getMemberInfo(group, msg.getBotInfo().getBotCode()).getPermission().isOwner()) {
+                    sender.SENDER.sendPrivateMsg(msg.getAccountInfo().getAccountCode(), "退出失败,不能退出我的群");
                     return;
                 }
-                sender.SETTER.setGroupLeave(group);
+                sender.SETTER.setGroupQuit(group, false);
                 clearService.clearAllData(group);
-                sender.SENDER.sendPrivateMsg(msg.getQQ(), "退出成功");
+                sender.SENDER.sendPrivateMsg(msg.getAccountInfo().getAccountCode(), "退出成功");
             }
         } catch (Exception e) {
             if (e.getMessage().contains("-16")) {
-                sender.SENDER.sendPrivateMsg(msg.getQQ(), "ID：3804 错误：帐号不在群内或网络错误，无法退出/解散该群 (-16)");
+                sender.SENDER.sendPrivateMsg(msg.getAccountInfo().getAccountCode(), "ID：3804 错误：帐号不在群内或网络错误，无法退出/解散该群 (-16)");
             } else {
-                sender.SENDER.sendPrivateMsg(msg.getQQ(), e.getMessage());
+                sender.SENDER.sendPrivateMsg(msg.getAccountInfo().getAccountCode(), e.getMessage());
             }
         }
     }
 
-    @Listen(MsgGetTypes.privateMsg)
+    @OnPrivate
     public void cancelGroupAllBan(PrivateMsg msg, MsgSender sender) {
         String message = msg.getMsg();
-        if (GlobalVariable.ADMINISTRATOR.contains(msg.getQQ()) && message.startsWith("全体解禁")) {
+        if (GlobalVariable.ADMINISTRATOR.contains(msg.getAccountInfo().getAccountCode()) && message.startsWith("全体解禁")) {
             String group = message.substring(4);
-            if (sender.SETTER.setGroupWholeBan(group, false)) {
-                sender.SENDER.sendPrivateMsg(msg.getQQ(), "解禁成功");
+            if (sender.SETTER.setGroupWholeBan(group, false).get()) {
+                sender.SENDER.sendPrivateMsg(msg.getAccountInfo().getAccountCode(), "解禁成功");
             } else {
-                sender.SENDER.sendPrivateMsg(msg.getQQ(), "解禁失败");
+                sender.SENDER.sendPrivateMsg(msg.getAccountInfo().getAccountCode(), "解禁失败");
             }
         }
     }
 
-    @Listen(MsgGetTypes.privateMsg)
+    @OnPrivate
     @Filter("群列表")
     public void groupList(PrivateMsg msg, MsgSender sender) {
-        if (GlobalVariable.ADMINISTRATOR.contains(msg.getQQ())) {
+        if (GlobalVariable.ADMINISTRATOR.contains(msg.getAccountInfo().getAccountCode())) {
             GlobalVariable.THREAD_POOL.execute(() -> {
                 // 发送群列表
                 List<GroupEntity> groupList = GroupUtils.getGroupList(sender);
@@ -213,42 +207,37 @@ public class PrivateMsgListener {
                 });
                 String[] messageArray = groupInfo.toString().split("\n\n\n");
                 for (String message : messageArray) {
-                    sender.SENDER.sendPrivateMsg(msg.getQQ(), message.trim());
+                    sender.SENDER.sendPrivateMsg(msg.getAccountInfo().getAccountCode(), message.trim());
                 }
             });
 
         }
     }
 
-    @Listen(MsgGetTypes.privateMsg)
+    @OnPrivate
     public void groupDetail(PrivateMsg msg, MsgSender sender) {
         try {
             String message = msg.getMsg();
-            if (GlobalVariable.ADMINISTRATOR.contains(msg.getQQ()) && message.startsWith("群信息")) {
+            if (GlobalVariable.ADMINISTRATOR.contains(msg.getAccountInfo().getAccountCode()) && message.startsWith("群信息")) {
                 String group = message.substring(3);
-                GroupInfo groupInfo = sender.GETTER.getGroupInfo(group, true);
-                if (groupInfo == null) {
-                    System.out.println("没有找到群信息");
-                    sender.SENDER.sendPrivateMsg(msg.getQQ(), "没有找到群信息");
-                    return;
-                }
+                GroupFullInfo groupInfo = sender.GETTER.getGroupInfo(group);
                 StringBuilder resultMessage = new StringBuilder();
-                resultMessage.append("群号: ").append(groupInfo.getCode());
-                resultMessage.append("\n群名称: ").append(groupInfo.getName());
+                resultMessage.append("群号: ").append(groupInfo.getGroupCode());
+                resultMessage.append("\n群名称: ").append(groupInfo.getGroupName());
                 sender.GETTER.getGroupMemberList(group);
-                resultMessage.append("\n群介绍: ").append(groupInfo.getCompleteIntro());
-                resultMessage.append("\n群主QQ: ").append(groupInfo.getOwnerQQ());
-                sender.SENDER.sendPrivateMsg(msg.getQQ(), resultMessage.toString());
+                resultMessage.append("\n群介绍: ").append(groupInfo.getFullIntroduction());
+                resultMessage.append("\n群主QQ: ").append(groupInfo.getOwner().getAccountInfo().getAccountCode());
+                sender.SENDER.sendPrivateMsg(msg.getAccountInfo().getAccountCode(), resultMessage.toString());
             }
         } catch (Exception e) {
-            sender.SENDER.sendPrivateMsg(msg.getQQ(), "出现异常\n" + e.getMessage());
+            sender.SENDER.sendPrivateMsg(msg.getAccountInfo().getAccountCode(), "出现异常\n" + e.getMessage());
         }
     }
 
-///    @Listen(MsgGetTypes.privateMsg)
+///    @OnPrivate
 ///    public void restartServer(PrivateMsg msg, MsgSender sender) {
 ///        String message = msg.getMsg();
-///        if (GlobalVariable.ADMINISTRATOR.contains(msg.getQQ()) && "重启".equals(message)) {
+///        if (GlobalVariable.ADMINISTRATOR.contains(msg.getAccountInfo().getAccountCode()) && "重启".equals(message)) {
 ///            List<String> sb = new ArrayList<>();
 ///            try {
 ///                System.out.println(commandStr);
@@ -271,10 +260,10 @@ public class PrivateMsgListener {
 ///        }
 ///    }
 
-    @Listen(MsgGetTypes.privateMsg)
+    @OnPrivate
     public void setAllBlackUser(PrivateMsg msg, MsgSender sender) {
         String message = msg.getMsg();
-        String qq = msg.getQQ();
+        String qq = msg.getAccountInfo().getAccountCode();
         if (GlobalVariable.ADMINISTRATOR.contains(qq) && message.startsWith("拉黑")) {
             StringBuilder str = new StringBuilder("添加黑名单:");
             try {
@@ -295,10 +284,10 @@ public class PrivateMsgListener {
         }
     }
 
-    @Listen(MsgGetTypes.privateMsg)
+    @OnPrivate
     public void cancelAllBlackUser(PrivateMsg msg, MsgSender sender) {
         String message = msg.getMsg();
-        String qq = msg.getQQ();
+        String qq = msg.getAccountInfo().getAccountCode();
         if (GlobalVariable.ADMINISTRATOR.contains(qq) && message.startsWith("取消拉黑")) {
             StringBuilder str = new StringBuilder("取消拉黑:");
             try {
@@ -319,10 +308,10 @@ public class PrivateMsgListener {
         }
     }
 
-    @Listen(MsgGetTypes.privateMsg)
+    @OnPrivate
     public void setAllBlackGroup(PrivateMsg msg, MsgSender sender) {
         String message = msg.getMsg();
-        String qq = msg.getQQ();
+        String qq = msg.getAccountInfo().getAccountCode();
         if (GlobalVariable.ADMINISTRATOR.contains(qq) && message.startsWith("群拉黑")) {
             StringBuilder str = new StringBuilder("添加群黑名单:");
             try {
@@ -334,7 +323,7 @@ public class PrivateMsgListener {
                         list.add(user2);
                     }
                 }
-                str.append(setBlackGroups(msg.getThisCode(), list, sender));
+                str.append(setBlackGroups(msg.getBotInfo().getBotCode(), list, sender));
             } catch (NumberFormatException e) {
                 e.printStackTrace();
                 sender.SENDER.sendPrivateMsg(qq, "指令不合法");
@@ -344,10 +333,10 @@ public class PrivateMsgListener {
         }
     }
 
-    @Listen(MsgGetTypes.privateMsg)
+    @OnPrivate
     public void cancelAllBlackGroup(PrivateMsg msg, MsgSender sender) {
         String message = msg.getMsg();
-        String qq = msg.getQQ();
+        String qq = msg.getAccountInfo().getAccountCode();
         if (GlobalVariable.ADMINISTRATOR.contains(qq) && message.startsWith("取消群拉黑")) {
             StringBuilder str = new StringBuilder("取消群拉黑:");
             try {
@@ -369,10 +358,10 @@ public class PrivateMsgListener {
         }
     }
 
-    @Listen(MsgGetTypes.privateMsg)
+    @OnPrivate
     @Filter(".*黑名单")
     public void allBlackUserList(PrivateMsg msg, MsgSender sender) {
-        String qq = msg.getQQ();
+        String qq = msg.getAccountInfo().getAccountCode();
         String message = msg.getMsg();
         int type = 0;
         if ("黑名单".equals(message)) {
@@ -404,7 +393,7 @@ public class PrivateMsgListener {
                 str.append("\n\t\t添加黑名单失败: QQ:[").append(user).append("],你拉黑自己干嘛?");
                 continue;
             }
-            if (sender.GETTER.getLoginQQInfo().getQQ().equals(user + "")) {
+            if (sender.GETTER.getBotInfo().getBotCode().equals(user + "")) {
                 str.append("\n\t\t添加黑名单失败: QQ:[").append(user).append("],我这辈子不可能拉黑自己!");
                 continue;
             }
@@ -430,7 +419,7 @@ public class PrivateMsgListener {
                 str.append("\n\t\t移除黑名单失败: QQ:[").append(user).append("],你不在黑名单!");
                 continue;
             }
-            if (sender.GETTER.getLoginQQInfo().getQQ().equals(user + "")) {
+            if (sender.GETTER.getBotInfo().getBotCode().equals(user + "")) {
                 str.append("\n\t\t移除黑名单失败: QQ:[").append(user).append("],我怎么可能出现在黑名单!");
                 continue;
             }
@@ -450,8 +439,8 @@ public class PrivateMsgListener {
         for (String user : list) {
             GroupMemberInfo info;
             try {
-                info = sender.GETTER.getGroupMemberInfo(user, thisQQ);
-                if (info.getPowerType().isOwner()) {
+                info = sender.GETTER.getMemberInfo(user, thisQQ);
+                if (info.getPermission().isOwner()) {
                     str.append("\n\t\t添加黑名单失败: 群:[").append(user).append("]失败,不能拉黑自己的群");
                     continue;
                 }

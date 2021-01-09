@@ -9,15 +9,15 @@ import java.util.Map;
 
 public interface ServerEventListener {
 
-	public void call(ClientSide client, String data);
+	void call(ClientSide client, String data);
 
-	public final static Map<ServerEventCode, ServerEventListener> LISTENER_MAP = new HashMap<>();
+	Map<ServerEventCode, ServerEventListener> LISTENER_MAP = new HashMap<>();
 	
-	final static String LISTENER_PREFIX = "org.nico.ratel.landlords.server.event.ServerEventListener_";
+	String LISTENER_PREFIX = "org.nico.ratel.landlords.server.event.ServerEventListener_";
 	
 	@SuppressWarnings("unchecked")
-	public static ServerEventListener get(ServerEventCode code){
-		System.out.println("ServerEventListener-----"+code);
+	static ServerEventListener get(ServerEventCode code){
+//		System.out.println("ServerEventListener-----"+code);
 		ServerEventListener listener = null;
 		try {
 			if(ServerEventListener.LISTENER_MAP.containsKey(code)){

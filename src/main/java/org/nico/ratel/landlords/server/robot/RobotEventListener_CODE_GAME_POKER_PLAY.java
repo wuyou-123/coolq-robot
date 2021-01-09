@@ -8,7 +8,7 @@ import org.nico.ratel.landlords.enums.SellType;
 import org.nico.ratel.landlords.enums.ServerEventCode;
 import org.nico.ratel.landlords.helper.PokerHelper;
 import org.nico.ratel.landlords.helper.TimeHelper;
-import org.nico.ratel.landlords.print.SimplePrinter;
+import com.wuyou.utils.landlordsPrint.SimplePrinter;
 import org.nico.ratel.landlords.robot.RobotDecisionMakers;
 import org.nico.ratel.landlords.server.ServerContains;
 import org.nico.ratel.landlords.server.event.ServerEventListener;
@@ -21,8 +21,8 @@ public class RobotEventListener_CODE_GAME_POKER_PLAY implements RobotEventListen
 			Room room = ServerContains.getRoom(robot.getRoomId());
 
 			PokerSell lastPokerSell = null;
-			PokerSell pokerSell = null;
-			if(room.getLastSellClient() != robot.getId()) {
+			PokerSell pokerSell;
+			if(!room.getLastSellClient().equals(robot.getId())) {
 				lastPokerSell = room.getLastPokerShell();
 				pokerSell = RobotDecisionMakers.howToPlayPokers(room.getDifficultyCoefficient(), lastPokerSell, robot);
 			}else {

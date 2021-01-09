@@ -1,19 +1,19 @@
 package com.wuyou.robot.listeners;
 
-import com.forte.qqrobot.anno.Filter;
-import com.forte.qqrobot.anno.Listen;
-import com.forte.qqrobot.anno.depend.Beans;
-import com.forte.qqrobot.anno.depend.Depend;
-import com.forte.qqrobot.beans.messages.msgget.GroupMsg;
-import com.forte.qqrobot.beans.messages.types.MsgGetTypes;
-import com.forte.qqrobot.beans.types.MostDIYType;
-import com.forte.qqrobot.sender.MsgSender;
 import com.wuyou.exception.ObjectExistedException;
 import com.wuyou.exception.ObjectNotFoundException;
 import com.wuyou.service.BanMessageService;
 import com.wuyou.utils.CQ;
 import com.wuyou.utils.PowerUtils;
 import com.wuyou.utils.SenderUtil;
+import love.forte.common.ioc.annotation.Beans;
+import love.forte.common.ioc.annotation.Depend;
+import love.forte.simbot.annotation.Filter;
+import love.forte.simbot.annotation.Filters;
+import love.forte.simbot.annotation.OnGroup;
+import love.forte.simbot.api.message.events.GroupMsg;
+import love.forte.simbot.api.sender.MsgSender;
+import love.forte.simbot.filter.MostMatchType;
 
 import java.util.List;
 import java.util.Random;
@@ -28,11 +28,14 @@ public class GroupBanMessageListener {
     @Depend
     BanMessageService service;
 
-    @Listen(MsgGetTypes.groupMsg)
-    @Filter(value = {"禁言关键词", "关键词列表"}, diyFilter = "boot")
+    @OnGroup
+    @Filters(value = {
+            @Filter(value = "禁言关键词"),
+            @Filter(value = "关键词列表")
+    }, customFilter = "boot")
     public void sendBanMessages(GroupMsg msg, MsgSender sender) {
         System.out.println("发送禁言关键词列表");
-        String fromGroup = msg.getGroup();
+        String fromGroup = msg.getGroupInfo().getGroupCode();
         List<String> list = service.getAllByGroupId(fromGroup);
         if (list.size() == 0) {
             SenderUtil.sendGroupMsg(sender, fromGroup, "暂无回复记录");
@@ -45,12 +48,12 @@ public class GroupBanMessageListener {
         SenderUtil.sendGroupMsg(sender, fromGroup, mes.toString().trim());
     }
 
-    @Listen(MsgGetTypes.groupMsg)
-    @Filter(diyFilter = {"boot", "sendBanMessage"}, mostDIYType = MostDIYType.EVERY_MATCH)
+    @OnGroup
+    @Filters(customFilter = {"boot", "sendBanMessage"}, mostMatchType = MostMatchType.ALL)
     public void sendMessage(GroupMsg msg, MsgSender sender) {
 
-        String fromGroup = msg.getGroup();
-        String fromQQ = msg.getQQ();
+        String fromGroup = msg.getGroupInfo().getGroupCode();
+        String fromQQ = msg.getAccountInfo().getAccountCode();
         String message = msg.getMsg();
         List<String> list = service.getAllByGroupId(fromGroup);
 
@@ -86,13 +89,13 @@ public class GroupBanMessageListener {
 
     }
 
-    @Listen(MsgGetTypes.groupMsg)
-    @Filter(diyFilter = {"boot", "addBanMessage"}, mostDIYType = MostDIYType.EVERY_MATCH)
+    @OnGroup
+    @Filters(customFilter = {"boot", "addBanMessage"}, mostMatchType = MostMatchType.ALL)
     public void addMessage(GroupMsg msg, MsgSender sender) {
         String mess = msg.getMsg();
-        String group = msg.getGroup();
-        String qq = msg.getQQ();
-        if (PowerUtils.getPowerType(group, qq, sender) > 1) {
+        String group = msg.getGroupInfo().getGroupCode();
+        String qq = msg.getAccountInfo().getAccountCode();
+        if (PowerUtils.getPermissions(group, qq, sender) > 1) {
             System.out.println("执行添加关键词代码");
             String message = mess.substring(mess.indexOf("添加关键词") + 5).trim();
             if ("".equals(message)) {
@@ -114,13 +117,13 @@ public class GroupBanMessageListener {
         }
     }
 
-    @Listen(MsgGetTypes.groupMsg)
-    @Filter(diyFilter = {"boot", "removeBanMessage"}, mostDIYType = MostDIYType.EVERY_MATCH)
+    @OnGroup
+    @Filters(customFilter = {"boot", "removeBanMessage"}, mostMatchType = MostMatchType.ALL)
     public void removeMessage(GroupMsg msg, MsgSender sender) {
         String mess = msg.getMsg();
-        String group = msg.getGroup();
-        String qq = msg.getQQ();
-        if (PowerUtils.getPowerType(group, qq, sender) > 1) {
+        String group = msg.getGroupInfo().getGroupCode();
+        String qq = msg.getAccountInfo().getAccountCode();
+        if (PowerUtils.getPermissions(group, qq, sender) > 1) {
             System.out.println("执行删除关键词代码");
             String message = mess.substring(mess.indexOf("删除关键词") + 5).trim();
             if ("".equals(message)) {
@@ -148,15 +151,15 @@ public class GroupBanMessageListener {
     private void luck(GroupMsg msg, MsgSender sender) {
         System.out.println("执行抽奖代码");
         Random ran = new Random();
-        String fromGroup = msg.getGroup();
-        String fromQQ = msg.getQQ();
+        String fromGroup = msg.getGroupInfo().getGroupCode();
+        String fromQQ = msg.getAccountInfo().getAccountCode();
 
         String[] context = CQ.CONTEXT.get(fromGroup);
         int probability = 100;
         int max = 10;
 
         if (context != null) {
-            if (context[2].contains("轮空") || context[3].contains("轮空")){
+            if (context[2].contains("轮空") || context[3].contains("轮空")) {
                 probability = 150;
                 max = 5;
             }

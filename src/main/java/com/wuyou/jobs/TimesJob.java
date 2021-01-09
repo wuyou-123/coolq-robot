@@ -1,15 +1,15 @@
 package com.wuyou.jobs;
 
-import com.forte.qqrobot.anno.depend.Beans;
-import com.forte.qqrobot.anno.depend.Depend;
-import com.forte.qqrobot.anno.timetask.CronTask;
-import com.forte.qqrobot.beans.messages.result.GroupList;
-import com.forte.qqrobot.beans.messages.result.inner.Group;
-import com.forte.qqrobot.sender.MsgSender;
-import com.forte.qqrobot.timetask.TimeJob;
-import com.forte.qqrobot.utils.CQCodeUtil;
 import com.wuyou.service.ClearService;
 import com.wuyou.service.StatService;
+import love.forte.common.ioc.annotation.Beans;
+import love.forte.common.ioc.annotation.Depend;
+import love.forte.simbot.api.message.results.GroupList;
+import love.forte.simbot.api.message.results.SimpleGroupInfo;
+import love.forte.simbot.bot.BotManager;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,22 +22,25 @@ import java.util.Set;
  *
  */
 @Beans
-@CronTask("0 0 0 * * ? ")
-public class TimesJob implements TimeJob {
+@Configuration
+@EnableScheduling
+public class TimesJob {
 
 	@Depend
 	StatService statService;
 	@Depend
 	ClearService clearService;
+	@Depend
+	private BotManager botManager;
 
-	@Override
-	public void execute(MsgSender msg, CQCodeUtil CQCodeUtil) {
+	@Scheduled(cron = "0 0 0 * * ? ")
+	public void execute() {
 		System.out.println("删除无用群信息");
-		GroupList groupList = msg.GETTER.getGroupList();
+		GroupList groupList = botManager.getDefaultBot().getSender().GETTER.getGroupList();
 		Set<String> set = statService.getAllStat().keySet();
 		List<String> list = new ArrayList<>();
-		for (Group group : groupList) {
-			list.add(group.getCode());
+		for (SimpleGroupInfo group : groupList) {
+			list.add(group.getGroupCode());
 		}
 		for (String string : set) {
 			if (!list.contains(string)) {

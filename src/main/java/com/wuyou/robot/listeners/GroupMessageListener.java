@@ -1,32 +1,36 @@
 package com.wuyou.robot.listeners;
 
+import cn.hutool.crypto.SecureUtil;
 import com.alibaba.fastjson.JSONObject;
-import com.forte.qqrobot.anno.Filter;
-import com.forte.qqrobot.anno.Listen;
-import com.forte.qqrobot.anno.depend.Beans;
-import com.forte.qqrobot.anno.depend.Depend;
-import com.forte.qqrobot.beans.messages.msgget.GroupMsg;
-import com.forte.qqrobot.beans.messages.result.GroupMemberList;
-import com.forte.qqrobot.beans.messages.result.inner.GroupMember;
-import com.forte.qqrobot.beans.messages.types.MsgGetTypes;
-import com.forte.qqrobot.beans.types.MostDIYType;
-import com.forte.qqrobot.sender.MsgSender;
-import com.forte.qqrobot.utils.JSONUtils;
-import com.forte.utils.basis.MD5Utils;
-import com.simplerobot.modules.utils.KQCode;
 import com.wuyou.enums.FaceEnum;
 import com.wuyou.exception.ObjectExistedException;
 import com.wuyou.exception.ObjectNotFoundException;
 import com.wuyou.robot.BootClass;
 import com.wuyou.service.MessageService;
 import com.wuyou.utils.*;
+import com.wuyou.utils.landlordsPrint.SimplePrinter;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import love.forte.catcode.Neko;
+import love.forte.common.ioc.annotation.Beans;
+import love.forte.common.ioc.annotation.Depend;
+import love.forte.simbot.annotation.Filter;
+import love.forte.simbot.annotation.Filters;
+import love.forte.simbot.annotation.OnGroup;
+import love.forte.simbot.api.message.events.GroupMsg;
+import love.forte.simbot.api.message.results.GroupMemberList;
+import love.forte.simbot.api.sender.MsgSender;
+import love.forte.simbot.filter.MostMatchType;
+import org.nico.ratel.landlords.client.event.ClientEventListener;
 import org.nico.ratel.landlords.client.handler.DefaultChannelInitializer;
+import org.nico.ratel.landlords.entity.ClientSide;
 import org.nico.ratel.landlords.entity.Room;
+import org.nico.ratel.landlords.enums.ClientEventCode;
+import org.nico.ratel.landlords.enums.ClientRole;
+import org.nico.ratel.landlords.enums.ClientStatus;
 import org.nico.ratel.landlords.enums.ServerEventCode;
 import org.nico.ratel.landlords.server.ServerContains;
 
@@ -35,7 +39,6 @@ import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
-import java.util.Base64.Decoder;
 import java.util.stream.Collectors;
 
 import static org.nico.ratel.landlords.channel.ChannelUtils.pushToServer;
@@ -73,21 +76,25 @@ public class GroupMessageListener {
             str.append(string).append("=").append(URLEncoder.encode(params.get(string), "UTF-8")).append("&");
         }
         str.append("app_key=").append("AEYJcmaShG0BokTZ");
-        return MD5Utils.toMD5(str.toString()).toUpperCase();
+        return SecureUtil.md5(str.toString()).toUpperCase();
     }
 
-    @Listen(MsgGetTypes.groupMsg)
-    @Filter(value = {"消息列表", "查询问答", "查询消息"}, diyFilter = "boot")
+    @OnGroup
+    @Filters(value = {
+            @Filter("消息列表"),
+            @Filter("查询问答"),
+            @Filter("查询消息")
+    }, customFilter = "boot")
     public void sendMessages(GroupMsg msg, MsgSender sender) {
         System.out.println("发送消息列表");
-        String fromGroup = msg.getGroup();
+        String fromGroup = msg.getGroupInfo().getGroupCode();
         Map<String, String> map = service.getAllByGroup(fromGroup);
         if (map.size() == 0) {
             SenderUtil.sendGroupMsg(sender, fromGroup, "暂无回复记录");
             return;
         }
         GroupMemberList groupMemberList = sender.GETTER.getGroupMemberList(fromGroup);
-        Set<String> qqSet = groupMemberList.stream().map(GroupMember::getQQ).collect(Collectors.toSet());
+        Set<String> qqSet = groupMemberList.stream().map(item -> item.getAccountInfo().getAccountCode()).collect(Collectors.toSet());
         map.forEach((key, str) -> {
             String newStr = getStr(sender, fromGroup, qqSet, str);
             map.put(key, newStr);
@@ -106,20 +113,20 @@ public class GroupMessageListener {
     }
 
     private String getStr(MsgSender sender, String fromGroup, Set<String> qqSet, String str) {
-        Set<KQCode> stringSet = CQ.getAtKqs(str);
+        Set<Neko> stringSet = CQ.getAtKqs(str);
         final String[] newStr = {str};
-        stringSet.forEach(kqCode -> {
-            if (qqSet.contains(kqCode.get("qq"))) {
-                newStr[0] = newStr[0].replace(kqCode, "@" + sender.GETTER.getGroupMemberInfo(fromGroup, kqCode.get("qq")).getRemarkOrNickname());
+        stringSet.forEach(neko -> {
+            if (qqSet.contains(neko.get("qq"))) {
+                newStr[0] = newStr[0].replace(neko, "@" + sender.GETTER.getMemberInfo(fromGroup, Objects.requireNonNull(neko.get("qq"))).getAccountInfo().getAccountRemarkOrNickname());
             }
         });
         return newStr[0];
     }
 
-    @Listen(MsgGetTypes.groupMsg)
-    @Filter(diyFilter = "boot")
+    @OnGroup
+    @Filters(customFilter = "boot")
     public void sendMessage(GroupMsg msg, MsgSender sender) {
-        String fromGroup = msg.getGroup();
+        String fromGroup = msg.getGroupInfo().getGroupCode();
         String message = msg.getMsg();
         Map<String, String> map = service.getAllByGroup(fromGroup);
         if (map.size() == 0) {
@@ -133,33 +140,25 @@ public class GroupMessageListener {
         }
     }
 
-    @Listen(MsgGetTypes.groupMsg)
-    @Filter(diyFilter = {"boot", "ai"}, mostDIYType = MostDIYType.EVERY_MATCH)
+    @OnGroup
+    @Filters(customFilter = {"boot", "ai"}, mostMatchType = MostMatchType.ALL)
     public void sendAiMessage(GroupMsg msg, MsgSender sender) {
-        String fromGroup = msg.getGroup();
+        String fromGroup = msg.getGroupInfo().getGroupCode();
         String message = CQ.UTILS.removeByType("at", msg.getMsg(), true, true);
         Map<String, String> map = service.getAllByGroup(fromGroup);
         if (map.containsKey(msg.getMsg().trim())) {
             return;
         }
-        List<KQCode> faces = CQ.getKq(message, "face");
-        for (KQCode KQCode : faces) {
-            String str = FaceEnum.getString(KQCode.get("id"));
-            message = message.replace(KQCode, str);
+        List<Neko> faces = CQ.getKq(message, "face");
+        for (Neko neko : faces) {
+            String str = FaceEnum.getString(neko.get("id"));
+            message = message.replace(neko, str);
         }
         if ("".equals(message)) {
             message = "在吗在吗";
         }
         if (!"783140627".equals(fromGroup)) {
-            String url = "http://api.tianapi.com/txapi/tuling/index";
-            Map<String, String> params = new HashMap<>(4);
-            params.put("key", "9845b4e0442683f1f8ab813c35180fc5");
-            params.put("question", message);
-            params.put("user", fromGroup);
-            String web = HttpUtils.get(url, params, null).getResponse();
-            System.out.println("请求: " + message);
-            System.out.println("返回值: " + web);
-            JSONObject json = JSONUtils.toJsonObject(web);
+            JSONObject json = RequestUtil.aiChat(message, fromGroup);
             if (json.getInteger("code") == 200) {
                 String reply = json.getJSONArray("newslist").getJSONObject(0).getString("reply");
                 if (!reply.isEmpty()) {
@@ -170,8 +169,8 @@ public class GroupMessageListener {
             System.out.println("请求错误");
             sender.SENDER.sendPrivateMsg("1097810498", "聊天接口调用失败! 群号: " + fromGroup + ", 请求消息: " + message);
         } else {
-///    @Listen(MsgGetTypes.groupMsg)
-///    @Filter(diyFilter = {"boot", "ai"}, mostDIYType = MostDIYType.EVERY_MATCH)
+///    @OnGroup
+///    @Filters(customFilter = {"boot", "ai"}, mostMatchType = MostMatchType.ALL)
 ///    public void sendAiMessage2(GroupMsg msg, MsgSender sender) {
             System.out.println(message);
             try {
@@ -188,7 +187,7 @@ public class GroupMessageListener {
                 System.out.println("第1次请求");
                 System.out.println("返回值: " + web);
                 JSONObject json;
-                json = JSONUtils.toJsonObject(web);
+                json = JSONObject.parseObject(web);
                 for (int i = 2; i < 11; i++) {
                     // 请求成功直接跳出
                     if (json.getInteger("ret") == 0) {
@@ -196,7 +195,7 @@ public class GroupMessageListener {
                     }
                     // 请求失败重试
                     web = HttpUtils.get(url, params, null).getResponse();
-                    json = JSONUtils.toJsonObject(web);
+                    json = JSONObject.parseObject(web);
                     System.out.println("第" + i + "次请求");
                     System.out.println("返回值: " + web);
                 }
@@ -215,10 +214,10 @@ public class GroupMessageListener {
         }
     }
 
-    @Listen(MsgGetTypes.groupMsg)
-    @Filter(diyFilter = {"boot", "aiVoice"}, mostDIYType = MostDIYType.EVERY_MATCH)
+    @OnGroup
+    @Filters(customFilter = {"boot", "aiVoice"}, mostMatchType = MostMatchType.ALL)
     public void sendAiVoice(GroupMsg msg, MsgSender sender) {
-        String fromGroup = msg.getGroup();
+        String fromGroup = msg.getGroupInfo().getGroupCode();
         String message = CQ.UTILS.remove(msg.getMsg(), true, true).substring(1);
 
         Map<String, String> map = service.getAllByGroup(fromGroup);
@@ -228,10 +227,10 @@ public class GroupMessageListener {
         if ("说".equals(message)) {
             message = "你想让我说什么";
         }
-        List<KQCode> faces = CQ.getKq(message, "face");
-        for (KQCode KQCode : faces) {
-            String str = FaceEnum.getString(KQCode.get("id"));
-            message = message.replace(KQCode, "".equals(str) ? KQCode : str);
+        List<Neko> faces = CQ.getKq(message, "face");
+        for (Neko neko : faces) {
+            String str = FaceEnum.getString(neko.get("id"));
+            message = message.replace(neko, "".equals(str) ? neko : str);
         }
         try {
             String signature;
@@ -258,14 +257,14 @@ public class GroupMessageListener {
                 } catch (Exception e) {
                     continue;
                 }
-                json = JSONUtils.toJsonObject(web);
+                json = JSONObject.parseObject(web);
                 if (num > 5) {
                     break;
                 }
             } while (Objects.requireNonNull(json).getInteger("ret") != 0);
             JSONObject data = json.getJSONObject("data");
             if (json.getInteger("ret") == 0) {
-                Decoder decoder = Base64.getDecoder();
+                Base64.Decoder decoder = Base64.getDecoder();
                 byte[] d = decoder.decode(data.getString("speech"));
                 for (int i = 0; i < d.length; i++) {
                     if (d[i] < 0) {
@@ -285,7 +284,7 @@ public class GroupMessageListener {
                 fos.close();
                 SenderUtil.sendGroupMsg(sender, fromGroup, CQ.getRecord(path + "/" + filePath).toString());
             } else {
-                SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(msg.getQQ()) + "小忧没有看懂你说的是什么~");
+                SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(msg.getAccountInfo().getAccountCode()) + "小忧没有看懂你说的是什么~");
                 System.out.println("请求错误");
             }
         } catch (Exception e) {
@@ -304,18 +303,18 @@ public class GroupMessageListener {
         return params;
     }
 
-    @Listen(MsgGetTypes.groupMsg)
-    @Filter(diyFilter = {"boot", "addMessage"}, mostDIYType = MostDIYType.EVERY_MATCH)
+    @OnGroup
+    @Filters(customFilter = {"boot", "addMessage"}, mostMatchType = MostMatchType.ALL)
     public void addMessage(GroupMsg msg, MsgSender sender) {
         String mess = msg.getMsg();
-        String group = msg.getGroup();
-        String qq = msg.getQQ();
+        String group = msg.getGroupInfo().getGroupCode();
+        String qq = msg.getAccountInfo().getAccountCode();
         System.out.println(mess);
         if (mess.toLowerCase().contains("atall")) {
             SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "添加失败: 不允许有艾特全体");
             return;
         }
-        if (PowerUtils.getPowerType(group, qq, sender) > 1) {
+        if (PowerUtils.getPermissions(group, qq, sender) > 1) {
             System.out.println("执行添加消息代码");
             String message = mess.substring(mess.indexOf("添加消息") + 4, mess.indexOf("回复")).trim();
             String answer = mess.substring(mess.indexOf("回复") + 2).trim();
@@ -339,13 +338,13 @@ public class GroupMessageListener {
         }
     }
 
-    @Listen(MsgGetTypes.groupMsg)
-    @Filter(diyFilter = {"boot", "removeMessage"}, mostDIYType = MostDIYType.EVERY_MATCH)
+    @OnGroup
+    @Filters(customFilter = {"boot", "removeMessage"}, mostMatchType = MostMatchType.ALL)
     public void removeMessage(GroupMsg msg, MsgSender sender) {
         String mess = msg.getMsg();
-        String group = msg.getGroup();
-        String qq = msg.getQQ();
-        if (PowerUtils.getPowerType(group, qq, sender) > 1) {
+        String group = msg.getGroupInfo().getGroupCode();
+        String qq = msg.getAccountInfo().getAccountCode();
+        if (PowerUtils.getPermissions(group, qq, sender) > 1) {
             System.out.println("执行删除消息代码");
             String message = mess.substring(mess.indexOf("删除消息") + 4).trim();
             if ("".equals(message)) {
@@ -363,69 +362,50 @@ public class GroupMessageListener {
         }
     }
 
-    @Listen(MsgGetTypes.groupMsg)
+    @OnGroup
     @Filter("重启斗地主")
     public void reloadLandlords(GroupMsg msg, MsgSender sender) {
         boot.initLandlords();
     }
 
-    @Listen(MsgGetTypes.groupMsg)
+    @OnGroup
     @Filter("上桌")
     public void playLandlords(GroupMsg msg, MsgSender sender) {
-        String group = msg.getGroup();
-        String qq = msg.getQQ();
+        String group = msg.getGroupInfo().getGroupCode();
+        String qq = msg.getAccountInfo().getAccountCode();
         System.out.println(qq);
         EventLoopGroup nioEventLoopGroup = new NioEventLoopGroup();
         try {
-            if (GlobalVariable.LANDLORDS_PLAYER.get(group) == null) {
-                GlobalVariable.LANDLORDS_PLAYER.put(group, new HashMap<>());
+            if (GlobalVariable.LANDLORDS_PLAYER.get(qq) == null) {
                 Bootstrap bootstrap = new Bootstrap()
                         .group(nioEventLoopGroup)
                         .channel(NioSocketChannel.class)
                         .handler(new DefaultChannelInitializer());
                 Channel channel = bootstrap.connect("127.0.0.1", ServerContains.port).sync().channel();
-                GlobalVariable.LANDLORDS_PLAYER.get(group).put(qq, channel);
-                Thread.sleep(500);
-                pushToServer(channel, ServerEventCode.CODE_CLIENT_NICKNAME_SET, qq).sync();
-//                //get(ClientEventCode.CODE_SHOW_OPTIONS).call(channel, "1");
-                pushToServer(channel, ServerEventCode.CODE_ROOM_CREATE, group).sync();
-                System.out.println("创建房间");
-//                int clientId = getId(channel);
-//                ClientSide clientSide = ServerContains.CLIENT_SIDE_MAP.get(clientId);
-//                Room room = new Room(ServerContains.getServerId());
-//                room.setStatus(RoomStatus.BLANK);
-//                room.setType(RoomType.PVP);
-//                room.setRoomOwner(clientSide.getNickname());
-//                room.getClientSideMap().put(clientSide.getId(), clientSide);
-//                room.getClientSideList().add(clientSide);
-//                room.setCurrentSellClient(clientSide.getId());
-//                room.setCreateTime(System.currentTimeMillis());
-//                room.setLastFlushTime(System.currentTimeMillis());
-//                clientSide.setRoomId(room.getId());
-//                ServerContains.addRoom(room);
-//                GlobalVariable.LANDLORDS_ROOM.put(group, room);
-            } else {
-                if (GlobalVariable.LANDLORDS_PLAYER.get(group).get(qq) == null) {
-                    Bootstrap bootstrap = new Bootstrap()
-                            .group(nioEventLoopGroup)
-                            .channel(NioSocketChannel.class)
-                            .handler(new DefaultChannelInitializer());
-                    Channel channel = bootstrap.connect("127.0.0.1", ServerContains.port).sync().channel();
-                    System.out.println(ServerContains.CLIENT_SIDE_MAP);
-                    GlobalVariable.LANDLORDS_PLAYER.get(group).put(qq, channel);
-                    Thread.sleep(1000);
-                    pushToServer(channel, ServerEventCode.CODE_CLIENT_NICKNAME_SET, qq).sync();
-//                    pushToServer(channel, ServerEventCode.CODE_GET_ROOMS, null);
-                    Room room = GlobalVariable.LANDLORDS_ROOM.get(group);
-                    if (ServerContains.getRoom(room.getId()) == null) {
-                        pushToServer(channel, ServerEventCode.CODE_ROOM_CREATE, group).sync();
-                    } else {
-                        pushToServer(channel, ServerEventCode.CODE_ROOM_JOIN, room.getId() + "").sync();
-                    }
-                } else {
-//                    SenderUtil.sendGroupMsg(sender, group, "你已经在桌上了");
-                }
+                GlobalVariable.LANDLORDS_PLAYER.put(qq, channel);
+                ClientSide clientSide = new ClientSide(getId(channel, qq), ClientStatus.TO_CHOOSE, channel);
+                clientSide.setNickname(String.valueOf(clientSide.getId()));
+                clientSide.setRole(ClientRole.PLAYER);
+                System.out.println("clientSideId: "+clientSide.getId());
+                ServerContains.CLIENT_SIDE_MAP.put(clientSide.getId(), clientSide);
+                System.out.println(ServerContains.CLIENT_SIDE_MAP);
+                SimplePrinter.serverLog("Has client connect to the server：" + clientSide.getId());
+                System.out.println("客户端id: " + clientSide.getId());
+//        ChannelUtils.pushToClient(ch, ClientEventCode.CODE_CLIENT_CONNECT, String.valueOf(clientSide.getId()));
+                ClientEventListener.get(ClientEventCode.CODE_CLIENT_CONNECT).call(channel, qq);
 
+                Thread.sleep(100);
+                pushToServer(channel, ServerEventCode.CODE_CLIENT_NICKNAME_SET, qq);
+//                pushToServer(channel, ServerEventCode.CODE_ROOM_CREATE, group).sync();
+                Room room = GlobalVariable.LANDLORDS_ROOM.get(group);
+                if (room==null||ServerContains.getRoom(group) == null) {
+                    pushToServer(channel, ServerEventCode.CODE_ROOM_CREATE, group);
+                } else {
+                    pushToServer(channel, ServerEventCode.CODE_ROOM_JOIN, room.getId() + "");
+                }
+                System.out.println("创建房间");
+            } else {
+                SenderUtil.sendGroupMsg(sender, group, "你已经在桌上了");
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -434,13 +414,11 @@ public class GroupMessageListener {
         }
     }
 
-    private int getId(Channel channel) {
-        String longId = channel.id().asLongText();
-        Integer clientId = ServerContains.CHANNEL_ID_MAP.get(longId);
-        if (null == clientId) {
-            clientId = ServerContains.getClientId();
-            ServerContains.CHANNEL_ID_MAP.put(longId, clientId);
-        }
-        return clientId;
+    private String getId(Channel channel, String id) {
+        String longId = channel.localAddress().toString();
+        ServerContains.CHANNEL_ID_MAP.putIfAbsent(longId, id);
+        System.out.println(longId+"------"+id);
+        System.out.println(channel);
+        return ServerContains.CHANNEL_ID_MAP.get(longId);
     }
 }

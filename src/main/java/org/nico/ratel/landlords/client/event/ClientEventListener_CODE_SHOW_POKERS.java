@@ -5,7 +5,7 @@ import org.nico.noson.Noson;
 import org.nico.noson.entity.NoType;
 import org.nico.ratel.landlords.entity.Poker;
 import org.nico.ratel.landlords.helper.MapHelper;
-import org.nico.ratel.landlords.print.SimplePrinter;
+import com.wuyou.utils.landlordsPrint.SimplePrinter;
 import org.nico.ratel.landlords.utils.GetQQUtils;
 
 import java.util.List;
@@ -26,8 +26,8 @@ public class ClientEventListener_CODE_SHOW_POKERS extends ClientEventListener{
 		lastPokers = Noson.convert(map.get("pokers"), new NoType<List<Poker>>() {});
 		SimplePrinter.printPokers(qq, lastPokers);
 		
-		if(map.containsKey("sellClinetNickname")) {
-			SimplePrinter.sendNotice(qq, "下一位玩家是 " + map.get("sellClinetNickname") + ", 请等待他确认.");
+		if(map.containsKey("sellClientNickname")) {
+			SimplePrinter.sendNotice(qq, "下一位玩家是 " + map.get("sellClientNickname") + ", 请等待他确认.");
 		}
 	}
 

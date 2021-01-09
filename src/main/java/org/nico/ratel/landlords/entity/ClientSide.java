@@ -9,9 +9,9 @@ import java.util.List;
 
 public class ClientSide{
 
-	private int id;
+	private String id;
 	
-	private int roomId;
+	private String roomId;
 	
 	private String nickname;
 	
@@ -31,14 +31,14 @@ public class ClientSide{
 	
 	public ClientSide() {}
 
-	public ClientSide(int id, ClientStatus status, Channel channel) {
+	public ClientSide(String id, ClientStatus status, Channel channel) {
 		this.id = id;
 		this.status = status;
 		this.channel = channel;
 	}
 	
 	public void init() {
-		roomId = 0;
+		roomId = "0";
 		pokers = null;
 		status = ClientStatus.TO_CHOOSE;
 		type = null;
@@ -70,11 +70,11 @@ public class ClientSide{
 		this.channel = channel;
 	}
 
-	public final int getRoomId() {
+	public final String getRoomId() {
 		return roomId;
 	}
 
-	public final void setRoomId(int roomId) {
+	public final void setRoomId(String roomId) {
 		this.roomId = roomId;
 	}
 
@@ -102,11 +102,11 @@ public class ClientSide{
 		this.type = type;
 	}
 
-	public final int getId() {
+	public final String getId() {
 		return id;
 	}
 
-	public final void setId(int id) {
+	public final void setId(String id) {
 		this.id = id;
 	}
 
@@ -127,25 +127,18 @@ public class ClientSide{
 	}
 
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + id;
-		return result;
-	}
-
-	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		ClientSide other = (ClientSide) obj;
-		if (id != other.id)
-			return false;
-		return true;
+		return id.equals(other.id);
 	}
 
 }

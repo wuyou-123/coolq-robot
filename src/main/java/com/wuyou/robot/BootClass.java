@@ -1,6 +1,5 @@
 package com.wuyou.robot;
 
-import com.forte.qqrobot.anno.depend.Beans;
 import com.wuyou.service.StatService;
 import com.wuyou.utils.CQ;
 import com.wuyou.utils.GlobalVariable;
@@ -12,7 +11,8 @@ import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import org.nico.ratel.landlords.print.SimplePrinter;
+import love.forte.common.ioc.annotation.Beans;
+import com.wuyou.utils.landlordsPrint.SimplePrinter;
 import org.nico.ratel.landlords.robot.RobotDecisionMakers;
 import org.nico.ratel.landlords.server.ServerContains;
 import org.nico.ratel.landlords.server.handler.DefaultChannelInitializer;
@@ -92,13 +92,12 @@ public class BootClass {
         try {
             ChannelFuture f = GlobalVariable.BOOTSTRAP.bind().sync();
 
-            SimplePrinter.serverLog("斗地主服务器已经成功启动在端口: " + ServerContains.port);
+            SimplePrinter.serverLog("斗地主服务器已经在端口: " + ServerContains.port + " 启动成功");
             //Init robot.
             RobotDecisionMakers.init();
-
-            ServerContains.THREAD_EXCUTER.execute(() -> {
-                Executors.newScheduledThreadPool(5).scheduleAtFixedRate(RoomClearTask::new, 0, 20, TimeUnit.SECONDS);
-            });
+            ServerContains.THREAD_EXCUTER.execute(() ->
+                Executors.newScheduledThreadPool(5).scheduleAtFixedRate(RoomClearTask::new, 0, 20, TimeUnit.SECONDS)
+            );
             f.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -122,7 +121,7 @@ public class BootClass {
 ///                    }
 ///                    System.out.println("获取到json数据: " + json);
 ///                    if (json.getInteger("code") == 0) {
-///                        JSONObject data = JSONUtils.toJsonObject(json.getJSONArray("data").getString(0));
+///                        JSONObject data = JSONObject.parseObject(json.getJSONArray("data").getString(0));
 ///                        String url = data.getString("url");
 ///                        String fileName = "R18-" + data.getString("pid");
 ///                        System.out.println("准备下载图片");
@@ -203,7 +202,7 @@ public class BootClass {
 ///                    }
 ///                    System.out.println("获取到json数据: " + json);
 ///                    if (json.getInteger("code") == 0) {
-///                        JSONObject data = JSONUtils.toJsonObject(json.getJSONArray("data").getString(0));
+///                        JSONObject data = JSONObject.parseObject(json.getJSONArray("data").getString(0));
 ///                        String url = data.getString("url");
 ///                        String fileName = data.getString("pid");
 ///                        System.out.println("准备下载图片");
@@ -276,11 +275,11 @@ public class BootClass {
 ///            String key2 = "198111555ec3242d2c6b42";
 ///            String web = Jsoup.connect("http://api.lolicon.app/setu/").ignoreContentType(true).data("apikey", key1)
 ///                    .data("size1200", "true").data("r18", r18).get().text();
-///            json = JSONUtils.toJsonObject(web);
+///            json = JSONObject.parseObject(web);
 ///            if (json.getInteger("code") == 429) {
 ///                web = Jsoup.connect("http://api.lolicon.app/setu/").ignoreContentType(true).data("apikey", key2)
 ///                        .data("size1200", "true").data("r18", r18).get().text();
-///                json = JSONUtils.toJsonObject(web);
+///                json = JSONObject.parseObject(web);
 ///            }
 ///        } catch (ConnectException e) {
 ///            System.out.println("获取json数据出现错误" + e.getMessage());

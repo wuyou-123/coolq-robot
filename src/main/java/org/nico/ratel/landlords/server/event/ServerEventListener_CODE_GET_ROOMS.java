@@ -1,7 +1,6 @@
 package org.nico.ratel.landlords.server.event;
 
 import org.nico.noson.Noson;
-import org.nico.ratel.landlords.channel.ChannelUtils;
 import org.nico.ratel.landlords.client.event.ClientEventListener;
 import org.nico.ratel.landlords.entity.ClientSide;
 import org.nico.ratel.landlords.entity.Room;
@@ -19,7 +18,7 @@ public class ServerEventListener_CODE_GET_ROOMS implements ServerEventListener{
 	@Override
 	public void call(ClientSide clientSide, String data) {
 		List<Map<String, Object>> roomList = new ArrayList<>(ServerContains.getRoomMap().size());
-		for(Entry<Integer, Room> entry: ServerContains.getRoomMap().entrySet()) {
+		for(Entry<String, Room> entry: ServerContains.getRoomMap().entrySet()) {
 			Room room = entry.getValue();
 			roomList.add(MapHelper.newInstance()
 					.put("roomId", room.getId())

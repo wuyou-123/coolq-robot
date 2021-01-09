@@ -1,6 +1,5 @@
 package org.nico.ratel.landlords.server.event;
 
-import org.nico.ratel.landlords.channel.ChannelUtils;
 import org.nico.ratel.landlords.client.event.ClientEventListener;
 import org.nico.ratel.landlords.entity.ClientSide;
 import org.nico.ratel.landlords.entity.Room;
@@ -17,8 +16,8 @@ public class ServerEventListener_CODE_GAME_POKER_PLAY_PASS implements ServerEven
 		Room room = ServerContains.getRoom(clientSide.getRoomId());
 
 		if(room != null) {
-			if(room.getCurrentSellClient() == clientSide.getId()) {
-				if(clientSide.getId() != room.getLastSellClient()) {
+			if(room.getCurrentSellClient().equals(clientSide.getId())) {
+				if(!clientSide.getId().equals(room.getLastSellClient())) {
 					ClientSide turnClient = clientSide.getNext();
 
 					room.setCurrentSellClient(turnClient.getId());
@@ -31,11 +30,11 @@ public class ServerEventListener_CODE_GAME_POKER_PLAY_PASS implements ServerEven
 								.put("nextClientNickname", turnClient.getNickname())
 								.json();
 						if(client.getRole() == ClientRole.PLAYER) {
-//							ChannelUtils.pushToClient(client.getChannel(), ClientEventCode.CODE_GAME_POKER_PLAY_PASS, result);
+///							ChannelUtils.pushToClient(client.getChannel(), ClientEventCode.CODE_GAME_POKER_PLAY_PASS, result);
 							ClientEventListener.get(ClientEventCode.CODE_GAME_POKER_PLAY_PASS).call(client.getChannel(), result);
 
 						}else {
-							if(client.getId() == turnClient.getId()) {
+							if(client.getId().equals(turnClient.getId())) {
 								RobotEventListener.get(ClientEventCode.CODE_GAME_POKER_PLAY).call(turnClient, data);
 							}
 						}
@@ -43,18 +42,20 @@ public class ServerEventListener_CODE_GAME_POKER_PLAY_PASS implements ServerEven
 
 					notifyWatcherPlayPass(room, clientSide);
 				}else {
-//					ChannelUtils.pushToClient(clientSide.getChannel(), ClientEventCode.CODE_GAME_POKER_PLAY_CANT_PASS, null);
+///					ChannelUtils.pushToClient(clientSide.getChannel(), ClientEventCode.CODE_GAME_POKER_PLAY_CANT_PASS, null);
 					ClientEventListener.get(ClientEventCode.CODE_GAME_POKER_PLAY_CANT_PASS).call(clientSide.getChannel(), null);
 
 				}
 			}else {
-//				ChannelUtils.pushToClient(clientSide.getChannel(), ClientEventCode.CODE_GAME_POKER_PLAY_ORDER_ERROR, null);
+///				ChannelUtils.pushToClient(clientSide.getChannel(), ClientEventCode.CODE_GAME_POKER_PLAY_ORDER_ERROR, null);
 				ClientEventListener.get(ClientEventCode.CODE_GAME_POKER_PLAY_ORDER_ERROR).call(clientSide.getChannel(), null);
 
 			}
-		}else {
-//			ChannelUtils.pushToClient(clientSide.getChannel(), ClientEventCode.CODE_ROOM_PLAY_FAIL_BY_INEXIST, null);
 		}
+///		else {
+///			ClientEventListener.get(ClientEventCode.CODE_ROOM_PLAY_FAIL_BY_INEXIST1).call(clientSide.getChannel(), null);
+///			ChannelUtils.pushToClient(clientSide.getChannel(), ClientEventCode.CODE_ROOM_PLAY_FAIL_BY_INEXIST, null);
+///		}
 	}
 
 	/**

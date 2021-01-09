@@ -15,7 +15,7 @@ public class ServerEventListener_CODE_ROOM_CREATE implements ServerEventListener
 	@Override
 	public void call(ClientSide clientSide, String data) {
 		
-		Room room = new Room(ServerContains.getServerId());
+		Room room = new Room(data);
 		room.setStatus(RoomStatus.BLANK);
 		room.setType(RoomType.PVP);
 		room.setRoomOwner(clientSide.getNickname());

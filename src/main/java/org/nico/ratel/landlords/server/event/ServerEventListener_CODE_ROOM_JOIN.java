@@ -17,8 +17,9 @@ public class ServerEventListener_CODE_ROOM_JOIN implements ServerEventListener{
 	@Override
 	public void call(ClientSide clientSide, String data) {
 
-		Room room = ServerContains.getRoom(Integer.valueOf(data));
+		Room room = ServerContains.getRoom(data);
 		System.out.println(clientSide.getNickname()+"尝试加入房间");
+		System.out.println(clientSide.getId()+"尝试加入房间");
 		if(room == null) {
 			String result = MapHelper.newInstance()
 								.put("roomId", data)
@@ -39,7 +40,7 @@ public class ServerEventListener_CODE_ROOM_JOIN implements ServerEventListener{
 			}else {
 				clientSide.setRoomId(room.getId());
 
-				ConcurrentSkipListMap<Integer, ClientSide> roomClientMap = (ConcurrentSkipListMap<Integer, ClientSide>) room.getClientSideMap();
+				ConcurrentSkipListMap<String, ClientSide> roomClientMap = (ConcurrentSkipListMap<String, ClientSide>) room.getClientSideMap();
 				LinkedList<ClientSide> roomClientList = room.getClientSideList();
 
 				if(roomClientList.size() > 0){
@@ -68,7 +69,7 @@ public class ServerEventListener_CODE_ROOM_JOIN implements ServerEventListener{
 							.json();
 					for(ClientSide client: roomClientMap.values()) {
 //						ChannelUtils.pushToClient(client.getChannel(), ClientEventCode.CODE_ROOM_JOIN_SUCCESS, result);
-						ClientEventListener.get(ClientEventCode.CODE_ROOM_JOIN_SUCCESS).call(clientSide.getChannel(), result);
+						ClientEventListener.get(ClientEventCode.CODE_ROOM_JOIN_SUCCESS).call(client.getChannel(), result);
 
 					}
 

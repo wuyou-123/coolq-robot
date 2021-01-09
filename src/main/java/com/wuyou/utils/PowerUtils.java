@@ -1,9 +1,9 @@
 package com.wuyou.utils;
 
-import com.forte.qqrobot.beans.messages.msgget.GroupMsg;
-import com.forte.qqrobot.beans.messages.types.PowerType;
-import com.forte.qqrobot.sender.MsgSender;
 import com.wuyou.service.ManagerService;
+import love.forte.simbot.api.message.assists.Permissions;
+import love.forte.simbot.api.message.events.GroupMsg;
+import love.forte.simbot.api.sender.MsgSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,11 +29,11 @@ public class PowerUtils {
      *
      * @return 0:群员 1:管理员 2:机器人管理员 3:群主 4:主人
      */
-    public static int getPowerType(String group, String user, MsgSender sender) {
+    public static int getPermissions(String group, String user, MsgSender sender) {
         if (GlobalVariable.ADMINISTRATOR.contains(user)) {
             return 4;
         }
-        PowerType power = GroupUtils.getGroupMembers(sender, group, user).get(0).getRole();
+        Permissions power = GroupUtils.getGroupMembers(sender, group, user).get(0).getRole();
         if (power.isOwner()) {
             return 3;
         }
@@ -52,9 +52,9 @@ public class PowerUtils {
      * @return true:机器人权限较大 false:群成员权限较大或二者权限一致
      */
     public static boolean powerCompare(GroupMsg msg, String user, MsgSender sender) {
-        String group = msg.getGroup();
-        PowerType userPower = GroupUtils.getGroupMembers(sender, group, user).get(0).getRole();
-        PowerType thisPower = GroupUtils.getGroupMembers(sender, group, msg.getThisCode()).get(0).getRole();
+        String group = msg.getGroupInfo().getGroupCode();
+        Permissions userPower = GroupUtils.getGroupMembers(sender, group, user).get(0).getRole();
+        Permissions thisPower = GroupUtils.getGroupMembers(sender, group, msg.getBotInfo().getBotCode()).get(0).getRole();
         if (userPower.isMember()) {
             if (thisPower.isAdmin() || thisPower.isOwner()) {
                 return true;

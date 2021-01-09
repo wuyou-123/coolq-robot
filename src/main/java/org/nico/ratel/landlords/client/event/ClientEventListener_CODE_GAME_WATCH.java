@@ -7,7 +7,7 @@ import org.nico.ratel.landlords.client.entity.User;
 import org.nico.ratel.landlords.entity.Poker;
 import org.nico.ratel.landlords.enums.ClientEventCode;
 import org.nico.ratel.landlords.helper.MapHelper;
-import org.nico.ratel.landlords.print.SimplePrinter;
+import com.wuyou.utils.landlordsPrint.SimplePrinter;
 import org.nico.ratel.landlords.utils.GetQQUtils;
 
 import java.time.LocalDateTime;

@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 
 public class Room{
 
-	private int id;
+	private String id;
 	
 	private String roomOwner;
 	
@@ -19,19 +19,19 @@ public class Room{
 	
 	private RoomType type;
 	
-	private Map<Integer, ClientSide> clientSideMap;
+	private Map<String, ClientSide> clientSideMap;
 	
 	private LinkedList<ClientSide> clientSideList;
 	
-	private int landlordId = -1;
+	private String landlordId = "-1";
 	
 	private List<Poker> landlordPokers;
 	
 	private PokerSell lastPokerShell;
 	
-	private int lastSellClient = -1;
+	private String lastSellClient = "-1";
 	
-	private int currentSellClient = -1;
+	private String currentSellClient = "-1";
 	
 	private int difficultyCoefficient;
 	
@@ -39,7 +39,7 @@ public class Room{
 	
 	private long createTime;
 
-	private int firstSellClient;
+	private String firstSellClient;
 
 	/** 观战者列表 */
 	private List<ClientSide> watcherList = new ArrayList<>(5);
@@ -47,7 +47,7 @@ public class Room{
 	public Room() {
 	}
 
-	public Room(int id) {
+	public Room(String id) {
 		this.id = id;
 		this.clientSideMap = new ConcurrentSkipListMap<>();
 		this.clientSideList = new LinkedList<>();
@@ -86,11 +86,11 @@ public class Room{
 		this.lastPokerShell = lastPokerShell;
 	}
 
-	public final int getCurrentSellClient() {
+	public final String getCurrentSellClient() {
 		return currentSellClient;
 	}
 
-	public final void setCurrentSellClient(int currentSellClient) {
+	public final void setCurrentSellClient(String currentSellClient) {
 		this.currentSellClient = currentSellClient;
 	}
 
@@ -102,19 +102,19 @@ public class Room{
 		this.lastFlushTime = lastFlushTime;
 	}
 
-	public int getLastSellClient() {
+	public String getLastSellClient() {
 		return lastSellClient;
 	}
 
-	public void setLastSellClient(int lastSellClient) {
+	public void setLastSellClient(String lastSellClient) {
 		this.lastSellClient = lastSellClient;
 	}
 
-	public int getLandlordId() {
+	public String getLandlordId() {
 		return landlordId;
 	}
 
-	public void setLandlordId(int landlordId) {
+	public void setLandlordId(String landlordId) {
 		this.landlordId = landlordId;
 	}
 
@@ -142,11 +142,11 @@ public class Room{
 		this.roomOwner = roomOwner;
 	}
 
-	public final int getId() {
+	public final String getId() {
 		return id;
 	}
 
-	public final void setId(int id) {
+	public final void setId(String id) {
 		this.id = id;
 	}
 
@@ -158,19 +158,19 @@ public class Room{
 		this.status = status;
 	}
 
-	public final Map<Integer, ClientSide> getClientSideMap() {
+	public final Map<String, ClientSide> getClientSideMap() {
 		return clientSideMap;
 	}
 
-	public final void setClientSideMap(Map<Integer, ClientSide> clientSideMap) {
+	public final void setClientSideMap(Map<String, ClientSide> clientSideMap) {
 		this.clientSideMap = clientSideMap;
 	}
 
-	public int getFirstSellClient() {
+	public String getFirstSellClient() {
 		return firstSellClient;
 	}
 
-	public void setFirstSellClient(int firstSellClient) {
+	public void setFirstSellClient(String firstSellClient) {
 		this.firstSellClient = firstSellClient;
 	}
 

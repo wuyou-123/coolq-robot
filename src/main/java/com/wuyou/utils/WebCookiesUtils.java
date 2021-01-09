@@ -1,9 +1,9 @@
 package com.wuyou.utils;
 
-import com.forte.qqrobot.anno.depend.Beans;
-import com.forte.qqrobot.exception.ConfigurationException;
 import com.wuyou.entity.RequestEntity;
 import com.wuyou.exception.JavaScriptNotFoundException;
+import love.forte.common.configuration.exception.ConfigurationException;
+import love.forte.common.ioc.annotation.Beans;
 import org.apache.http.cookie.Cookie;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -31,7 +31,7 @@ public class WebCookiesUtils {
     private static String uin;
     private static String pwd;
 
-    @Value("${core.bots}")
+    @Value("${simbot.core.bots}")
     public void setBotInfo(final String botInfo) {
         setBotInfoStatic(botInfo);
     }

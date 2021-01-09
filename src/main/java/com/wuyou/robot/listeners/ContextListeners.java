@@ -1,13 +1,16 @@
 package com.wuyou.robot.listeners;
 
-import com.forte.qqrobot.anno.Filter;
-import com.forte.qqrobot.anno.Listen;
-import com.forte.qqrobot.anno.depend.Beans;
-import com.forte.qqrobot.beans.messages.msgget.GroupMsg;
-import com.forte.qqrobot.beans.messages.types.MsgGetTypes;
-import com.forte.qqrobot.sender.MsgSender;
+//import love.forte.simbot.annotation.Listen;
+
+
 import com.wuyou.utils.CQ;
 import com.wuyou.utils.SenderUtil;
+import love.forte.common.ioc.annotation.Beans;
+import love.forte.simbot.annotation.Filters;
+import love.forte.simbot.annotation.Listen;
+import love.forte.simbot.annotation.Listens;
+import love.forte.simbot.api.message.events.GroupMsg;
+import love.forte.simbot.api.sender.MsgSender;
 
 import java.util.Random;
 
@@ -18,10 +21,10 @@ import java.util.Random;
 @Beans
 public class ContextListeners {
 
-    @Listen(value = MsgGetTypes.groupMsg, sort = 10)
-    @Filter(diyFilter = "boot")
+    @Listens(value = {@Listen(GroupMsg.class)}, priority = 10)
+    @Filters(customFilter = "boot")
     public void getContext(GroupMsg msg, MsgSender sender) {
-        String fromGroup = msg.getGroup();
+        String fromGroup = msg.getGroupInfo().getGroupCode();
         String message = msg.getMsg();
         if (CQ.CONTEXT.get(fromGroup) == null) {
             CQ.CONTEXT.put(fromGroup, new String[]{"", "", "", "", message});

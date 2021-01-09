@@ -4,6 +4,7 @@ import com.wuyou.utils.GlobalVariable;
 import org.nico.ratel.landlords.entity.ClientSide;
 import org.nico.ratel.landlords.entity.Poker;
 import org.nico.ratel.landlords.entity.PokerSell;
+import org.nico.ratel.landlords.server.ServerContains;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,24 +17,25 @@ import java.util.Map;
  */
 public class RobotDecisionMakers {
 	
-	private static final Map<Integer, AbstractRobotDecisionMakers> decisionMakersMap = new HashMap<Integer, AbstractRobotDecisionMakers>();
+	private static final Map<Integer, AbstractRobotDecisionMakers> DECISION_MAKERS_MAP = new HashMap<>();
 	
 	public static void init() {
-		decisionMakersMap.put(1, new EasyRobotDecisionMakers());
-		decisionMakersMap.put(2, new MediumRobotDecisionMakers());
+		DECISION_MAKERS_MAP.put(1, new EasyRobotDecisionMakers());
+		DECISION_MAKERS_MAP.put(2, new MediumRobotDecisionMakers());
 		GlobalVariable.LANDLORDS_PLAYER.clear();
+		ServerContains.clearAll();
 	}
 	
 	public static boolean contains(int difficultyCoefficient) {
-		return decisionMakersMap.containsKey(difficultyCoefficient);
+		return DECISION_MAKERS_MAP.containsKey(difficultyCoefficient);
 	}
 	
 	public static PokerSell howToPlayPokers(int difficultyCoefficient, PokerSell lastPokerSell, ClientSide robot){
-		return decisionMakersMap.get(difficultyCoefficient).howToPlayPokers(lastPokerSell, robot);
+		return DECISION_MAKERS_MAP.get(difficultyCoefficient).howToPlayPokers(lastPokerSell, robot);
 	}
 	
 	public static boolean howToChooseLandlord(int difficultyCoefficient, List<Poker> leftPokers, List<Poker> rightPokers, List<Poker> myPokers) {
-		return decisionMakersMap.get(difficultyCoefficient).howToChooseLandlord(leftPokers, rightPokers, myPokers);
+		return DECISION_MAKERS_MAP.get(difficultyCoefficient).howToChooseLandlord(leftPokers, rightPokers, myPokers);
 	}
 	
 }

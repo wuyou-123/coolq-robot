@@ -1,14 +1,5 @@
 package com.wuyou.robot.listeners;
 
-import com.forte.qqrobot.anno.Filter;
-import com.forte.qqrobot.anno.Listen;
-import com.forte.qqrobot.anno.depend.Beans;
-import com.forte.qqrobot.anno.depend.Depend;
-import com.forte.qqrobot.beans.messages.msgget.GroupMsg;
-import com.forte.qqrobot.beans.messages.result.GroupMemberInfo;
-import com.forte.qqrobot.beans.messages.types.MsgGetTypes;
-import com.forte.qqrobot.beans.types.MostDIYType;
-import com.forte.qqrobot.sender.MsgSender;
 import com.wuyou.exception.ObjectExistedException;
 import com.wuyou.exception.ObjectNotFoundException;
 import com.wuyou.service.ManagerService;
@@ -16,6 +7,15 @@ import com.wuyou.utils.CQ;
 import com.wuyou.utils.GlobalVariable;
 import com.wuyou.utils.PowerUtils;
 import com.wuyou.utils.SenderUtil;
+import love.forte.common.ioc.annotation.Beans;
+import love.forte.common.ioc.annotation.Depend;
+import love.forte.simbot.annotation.Filter;
+import love.forte.simbot.annotation.Filters;
+import love.forte.simbot.annotation.OnGroup;
+import love.forte.simbot.api.message.events.GroupMsg;
+import love.forte.simbot.api.message.results.GroupMemberInfo;
+import love.forte.simbot.api.sender.MsgSender;
+import love.forte.simbot.filter.MostMatchType;
 
 import java.util.HashSet;
 import java.util.List;
@@ -30,24 +30,24 @@ public class GroupManagerListener {
     @Depend
     ManagerService service;
 
-    @Listen(MsgGetTypes.groupMsg)
-    @Filter(value = "管理员列表", diyFilter = "boot")
+    @OnGroup
+    @Filters(value = @Filter(value = "管理员列表"), customFilter = "boot")
     public void sendManager(GroupMsg msg, MsgSender sender) {
         System.out.println("发送管理员列表");
-        String fromGroup = msg.getGroup();
-        List<String> list = service.getManagerByGroupId(msg.getGroup());
+        String fromGroup = msg.getGroupInfo().getGroupCode();
+        List<String> list = service.getManagerByGroupId(msg.getGroupInfo().getGroupCode());
         StringBuilder str = new StringBuilder("管理员列表:\n");
         int a = 0;
         Set<String> members = new HashSet<>();
         for (String qq : list) {
             try {
-                sender.GETTER.getGroupMemberInfo(fromGroup, qq);
+                sender.GETTER.getMemberInfo(fromGroup, qq);
             } catch (Exception e) {
                 members.add(qq);
                 continue;
             }
             a++;
-            String nickname = sender.GETTER.getGroupMemberInfo(fromGroup, qq).getRemarkOrNickname();
+            String nickname = sender.GETTER.getMemberInfo(fromGroup, qq).getAccountInfo().getAccountRemarkOrNickname();
             str.append("\t管理员").append(a).append(": ").append(qq).append("(").append(nickname).append(")\n");
         }
         if (members.size() > 0) {
@@ -60,22 +60,22 @@ public class GroupManagerListener {
         }
     }
 
-    @Listen(MsgGetTypes.groupMsg)
-    @Filter(diyFilter = {"boot", "addManager"}, mostDIYType = MostDIYType.EVERY_MATCH)
+    @OnGroup
+    @Filters(customFilter = {"boot", "addManager"}, mostMatchType = MostMatchType.ANY)
     public void addManager(GroupMsg msg, MsgSender sender) {
-        String group = msg.getGroup();
-        if (PowerUtils.getPowerType(group, msg.getQQ(), sender) > 1) {
+        String group = msg.getGroupInfo().getGroupCode();
+        if (PowerUtils.getPermissions(group, msg.getAccountInfo().getAccountCode(), sender) > 1) {
             addManagers(msg, sender);
         } else {
             SenderUtil.sendGroupMsg(sender, group, "添加失败,你不是我的管理员!");
         }
     }
 
-    @Listen(MsgGetTypes.groupMsg)
-    @Filter(diyFilter = {"boot", "removeManager"}, mostDIYType = MostDIYType.EVERY_MATCH)
+    @OnGroup
+    @Filters(customFilter = {"boot", "removeManager"}, mostMatchType = MostMatchType.ALL)
     public void removeManager(GroupMsg msg, MsgSender sender) {
-        String group = msg.getGroup();
-        if (PowerUtils.getPowerType(group, msg.getQQ(), sender) > 1) {
+        String group = msg.getGroupInfo().getGroupCode();
+        if (PowerUtils.getPermissions(group, msg.getAccountInfo().getAccountCode(), sender) > 1) {
             Set<String> set = new HashSet<>(CQ.getAts(msg.getMsg()));
             removeManager(set, group, sender);
         } else {
@@ -83,12 +83,12 @@ public class GroupManagerListener {
         }
     }
 
-    @Listen(MsgGetTypes.groupMsg)
-    @Filter(diyFilter = {"boot", "addGroupManager"}, mostDIYType = MostDIYType.EVERY_MATCH)
+    @OnGroup
+    @Filters(customFilter = {"boot", "addGroupManager"}, mostMatchType = MostMatchType.ALL)
     public void addGroupManager(GroupMsg msg, MsgSender sender) {
-        String group = msg.getGroup();
-        if (PowerUtils.getPowerType(group, msg.getQQ(), sender) > 1) {
-            if (PowerUtils.getPowerType(group, msg.getThisCode(), sender) == 3) {
+        String group = msg.getGroupInfo().getGroupCode();
+        if (PowerUtils.getPermissions(group, msg.getAccountInfo().getAccountCode(), sender) > 1) {
+            if (PowerUtils.getPermissions(group, msg.getBotInfo().getBotCode(), sender) == 3) {
                 Set<String> set = new HashSet<>(CQ.getAts(msg.getMsg()));
                 addGroupManager(set, group, sender);
             } else {
@@ -99,12 +99,12 @@ public class GroupManagerListener {
         }
     }
 
-    @Listen(MsgGetTypes.groupMsg)
-    @Filter(diyFilter = {"boot", "removeGroupManager"}, mostDIYType = MostDIYType.EVERY_MATCH)
+    @OnGroup
+    @Filters(customFilter = {"boot", "removeGroupManager"}, mostMatchType = MostMatchType.ALL)
     public void removeGroupManager(GroupMsg msg, MsgSender sender) {
-        String group = msg.getGroup();
-        if (PowerUtils.getPowerType(group, msg.getQQ(), sender) > 1) {
-            if (PowerUtils.getPowerType(group, msg.getThisCode(), sender) == 3) {
+        String group = msg.getGroupInfo().getGroupCode();
+        if (PowerUtils.getPermissions(group, msg.getAccountInfo().getAccountCode(), sender) > 1) {
+            if (PowerUtils.getPermissions(group, msg.getBotInfo().getBotCode(), sender) == 3) {
                 Set<String> set = new HashSet<>(CQ.getAts(msg.getMsg()));
                 removeGroupManager(set, group, sender);
             } else {
@@ -118,13 +118,13 @@ public class GroupManagerListener {
     private void addGroupManager(Set<String> list, String fromGroup, MsgSender sender) {
         StringBuilder str = new StringBuilder("设置群管理员:");
         for (String user : list) {
-            GroupMemberInfo userMember = sender.GETTER.getGroupMemberInfo(fromGroup, user);
-            String nickname = userMember.getRemarkOrNickname();
-            int power = PowerUtils.getPowerType(fromGroup, user, sender);
+            GroupMemberInfo userMember = sender.GETTER.getMemberInfo(fromGroup, user);
+            String nickname = userMember.getAccountInfo().getAccountRemarkOrNickname();
+            int power = PowerUtils.getPermissions(fromGroup, user, sender);
             System.out.println(power);
             switch (power) {
                 case 4:
-                    if (sender.GETTER.getGroupMemberInfo(fromGroup, user).getPowerType().isMember()) {
+                    if (sender.GETTER.getMemberInfo(fromGroup, user).getPermission().isMember()) {
                         sender.SETTER.setGroupAdmin(fromGroup, user, true);
                         str.append("\n\t\t设置群管理员成功: QQ:[").append(user).append("](").append(nickname).append("),恭喜主人升级为管理员");
                     } else {
@@ -154,9 +154,9 @@ public class GroupManagerListener {
     private void removeGroupManager(Set<String> list, String fromGroup, MsgSender sender) {
         StringBuilder str = new StringBuilder("取消群管理员:");
         for (String user : list) {
-            GroupMemberInfo userMember = sender.GETTER.getGroupMemberInfo(fromGroup, user);
-            String nickname = userMember.getRemarkOrNickname();
-            int power = PowerUtils.getPowerType(fromGroup, user, sender);
+            GroupMemberInfo userMember = sender.GETTER.getMemberInfo(fromGroup, user);
+            String nickname = userMember.getAccountInfo().getAccountRemarkOrNickname();
+            int power = PowerUtils.getPermissions(fromGroup, user, sender);
             if (power == 1) {
                 sender.SETTER.setGroupAdmin(fromGroup, user, false);
                 str.append("\n\t\t设置管理员成功, [").append(user).append("](").append(nickname).append(")已经被设置为管理员");
@@ -165,7 +165,7 @@ public class GroupManagerListener {
 
             switch (power) {
                 case 4:
-                    if (sender.GETTER.getGroupMemberInfo(fromGroup, user).getPowerType().isAdmin()) {
+                    if (sender.GETTER.getMemberInfo(fromGroup, user).getPermission().isAdmin()) {
                         sender.SETTER.setGroupAdmin(fromGroup, user, false);
                         str.append("\n\t\t取消群管理员成功: QQ:[").append(user).append("](").append(nickname).append("),已把我的主人降级为群员");
                     } else {
@@ -189,16 +189,16 @@ public class GroupManagerListener {
 
     private void addManagers(GroupMsg msg, MsgSender sender) {
         Set<String> list = CQ.getAts(msg.getMsg());
-        String fromGroup = msg.getGroup();
+        String fromGroup = msg.getGroupInfo().getGroupCode();
         StringBuilder str = new StringBuilder("添加管理员:");
         for (String user : list) {
-            GroupMemberInfo userMember = sender.GETTER.getGroupMemberInfo(fromGroup, user);
-            String nickname = userMember.getRemarkOrNickname();
+            GroupMemberInfo userMember = sender.GETTER.getMemberInfo(fromGroup, user);
+            String nickname = userMember.getAccountInfo().getAccountRemarkOrNickname();
             if (GlobalVariable.ADMINISTRATOR.contains(user)) {
                 str.append("\n\t\t添加管理员失败: QQ:[").append(user).append("](").append(nickname).append("),不需要添加我的主人!");
                 continue;
             }
-            if (user.equals(msg.getThisCode())) {
+            if (user.equals(msg.getBotInfo().getBotCode())) {
                 str.append("\n\t\t添加管理员失败: QQ:[").append(user).append("](").append(nickname).append("),怎么可以把自己设置为我的管理员。。。");
                 continue;
             }

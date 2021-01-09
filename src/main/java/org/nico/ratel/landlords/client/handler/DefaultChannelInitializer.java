@@ -14,8 +14,7 @@ import java.util.concurrent.TimeUnit;
 public class DefaultChannelInitializer extends ChannelInitializer<SocketChannel>{
 
 	@Override
-	protected void initChannel(SocketChannel ch) throws Exception {
-		
+	protected void initChannel(SocketChannel ch) {
 		ch.pipeline()
 		.addLast(new IdleStateHandler(0, 4, 0, TimeUnit.SECONDS))
         .addLast(new ProtobufVarint32FrameDecoder())
@@ -24,7 +23,7 @@ public class DefaultChannelInitializer extends ChannelInitializer<SocketChannel>
         .addLast(new ProtobufEncoder())
         .addLast(new SecondProtobufCodec())
         .addLast(new TransferHandler());
-		
+
 	}
 
 }

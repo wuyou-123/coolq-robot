@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class MapHelper {
 
-	private Map<String, Object> data;
+	private final Map<String, Object> data;
 	
 	private MapHelper() {
 		this.data = new LinkedHashMap<>();

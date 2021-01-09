@@ -1,13 +1,12 @@
 package com.wuyou.robot.filter;
 
-import com.forte.qqrobot.anno.DIYFilter;
-import com.forte.qqrobot.anno.data.Filter;
-import com.forte.qqrobot.anno.depend.Beans;
-import com.forte.qqrobot.beans.messages.msgget.MsgGet;
-import com.forte.qqrobot.listener.Filterable;
-import com.forte.qqrobot.listener.ListenContext;
-import com.forte.qqrobot.listener.invoker.AtDetection;
 import com.wuyou.utils.CQ;
+import love.forte.simbot.api.message.events.GroupMsg;
+import love.forte.simbot.api.message.events.MsgGet;
+import love.forte.simbot.filter.FilterData;
+import love.forte.simbot.filter.ListenerFilter;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
@@ -15,35 +14,42 @@ import java.util.Objects;
  * @author Administrator<br>
  * 2020年5月2日
  */
-@Beans
+@Component
 public class AutisticFilter {
 
-    @DIYFilter("autistic1")
-    public static class Autistic1 implements Filterable {
+    @Component("autistic1")
+    public static class Autistic1 implements ListenerFilter {
 
         @Override
-        public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
-            String message = msgget.getMsg();
-            if ("自闭".equals(message)) {
-                return true;
+        public boolean test(@NotNull FilterData data) {
+            MsgGet msgget = data.getMsgGet();
+            if (msgget instanceof GroupMsg) {
+                String message = ((GroupMsg) msgget).getMsg();
+                if ("自闭".equals(message)) {
+                    return true;
+                }
+                final String msg = CQ.UTILS.remove(message, true, true);
+                return data.getAtDetection().atBot() && Objects.equals(CQ.startsWithAt(message), msgget.getBotInfo().getBotCode()) && "自闭".equals(msg);
             }
-            final String msg = CQ.UTILS.remove(message, true, true);
-            return at.test() && Objects.equals(CQ.startsWithAt(message), msgget.getThisCode()) && "自闭".equals(msg);
+            return false;
         }
     }
 
-    @DIYFilter("autistic2")
-    public static class Autistic2 implements Filterable {
+    @Component("autistic2")
+    public static class Autistic2 implements ListenerFilter {
 
         @Override
-        public boolean filter(Filter filter, MsgGet msgget, AtDetection at, ListenContext context) {
-            String message = msgget.getMsg();
-            if (message.startsWith("领取套餐")) {
-                return true;
+        public boolean test(@NotNull FilterData data) {
+            MsgGet msgget = data.getMsgGet();
+            if (msgget instanceof GroupMsg) {
+                String message = ((GroupMsg) msgget).getMsg();
+                if (message.startsWith("领取套餐")) {
+                    return true;
+                }
+                final String msg = CQ.UTILS.remove(message, true, true);
+                return data.getAtDetection().atBot() && Objects.equals(CQ.startsWithAt(message), msgget.getBotInfo().getBotCode()) && msg.startsWith("领取套餐");
             }
-            final String msg = CQ.UTILS.remove(message, true, true);
-            return at.test() && Objects.equals(CQ.startsWithAt(message), msgget.getThisCode()) && msg.startsWith("领取套餐");
+            return false;
         }
-
     }
 }

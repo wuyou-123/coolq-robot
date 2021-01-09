@@ -5,7 +5,7 @@ import org.nico.ratel.landlords.client.event.ClientEventListener;
 import org.nico.ratel.landlords.entity.ClientSide;
 import org.nico.ratel.landlords.entity.Room;
 import org.nico.ratel.landlords.enums.*;
-import org.nico.ratel.landlords.print.SimplePrinter;
+import com.wuyou.utils.landlordsPrint.SimplePrinter;
 import org.nico.ratel.landlords.server.ServerContains;
 import org.nico.ratel.landlords.server.event.ServerEventListener;
 import org.nico.ratel.landlords.server.robot.RobotEventListener;
@@ -39,7 +39,7 @@ public class RoomClearTask extends TimerTask {
     }
 
     public void doing() {
-        Map<Integer, Room> rooms = ServerContains.getRoomMap();
+        Map<String, Room> rooms = ServerContains.getRoomMap();
         if (rooms != null && !rooms.isEmpty()) {
             long now = System.currentTimeMillis();
             for (Room room : rooms.values()) {
@@ -66,7 +66,7 @@ public class RoomClearTask extends TimerTask {
                             if (diff > interval) {
                                 boolean allRobots = true;
                                 for (ClientSide client : room.getClientSideList()) {
-                                    if (client.getId() != room.getCurrentSellClient() && client.getRole() == ClientRole.PLAYER) {
+                                    if (!client.getId().equals(room.getCurrentSellClient()) && client.getRole() == ClientRole.PLAYER) {
                                         allRobots = false;
                                         break;
                                     }
@@ -89,7 +89,7 @@ public class RoomClearTask extends TimerTask {
                                     room.getClientSideMap().remove(currentPlayer.getId());
                                     room.getClientSideList().remove(currentPlayer);
 
-                                    ClientSide robot = new ClientSide(-ServerContains.getClientId(), ClientStatus.PLAYING, null);
+                                    ClientSide robot = new ClientSide("-"+currentPlayer.getId(), ClientStatus.PLAYING, null);
                                     robot.setNickname(currentPlayer.getNickname());
                                     robot.setRole(ClientRole.ROBOT);
                                     robot.setRoomId(room.getId());
@@ -105,7 +105,7 @@ public class RoomClearTask extends TimerTask {
                                     room.setCurrentSellClient(robot.getId());
 
                                     //If last sell client is current client, replace it to robot id
-                                    if (room.getLastSellClient() == currentPlayer.getId()) {
+                                    if (room.getLastSellClient().equals(currentPlayer.getId())) {
                                         room.setLastSellClient(robot.getId());
                                     }
 
@@ -120,7 +120,7 @@ public class RoomClearTask extends TimerTask {
 
                                     SimplePrinter.serverLog("room " + room.getId() + " player " + currentPlayer.getNickname() + " " + startingStatusInterval + "ms not operating, automatic custody!");
 
-                                    if (room.getLandlordId() == -1) {
+                                    if ("-1".equals(room.getLandlordId())) {
                                         RobotEventListener.get(ClientEventCode.CODE_GAME_LANDLORD_ELECT).call(robot, null);
                                     } else {
                                         RobotEventListener.get(ClientEventCode.CODE_GAME_POKER_PLAY).call(robot, null);

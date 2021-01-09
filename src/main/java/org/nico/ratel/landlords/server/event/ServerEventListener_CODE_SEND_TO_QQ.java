@@ -1,7 +1,7 @@
 package org.nico.ratel.landlords.server.event;
 
 import org.nico.ratel.landlords.entity.ClientSide;
-import org.nico.ratel.landlords.print.SimplePrinter;
+import com.wuyou.utils.landlordsPrint.SimplePrinter;
 import org.nico.ratel.landlords.utils.GetQQUtils;
 
 public class ServerEventListener_CODE_SEND_TO_QQ implements ServerEventListener{

@@ -29,13 +29,13 @@ public class GlobalVariable {
     public static ServerBootstrap BOOTSTRAP = null;
     public static EventLoopGroup PARENT_GROUP = null;
     public static EventLoopGroup CHILD_GROUP = null;
-    public static final Map<String, Map<String, Channel>> LANDLORDS_PLAYER;
+    public static final Map<String, Channel> LANDLORDS_PLAYER;
     public static final Map<String, Room> LANDLORDS_ROOM;
-    public static final AttributeKey<String> ATTRIBUTE_KEY;
-    public static final Map<Integer, String> CLIENT_ID_MAP;
+    public static final AttributeKey<Integer> ATTRIBUTE_KEY_NUMBER;
+    public static final Map<String, String> CLIENT_ID_MAP;
 
     static {
-        ATTRIBUTE_KEY = AttributeKey.newInstance("name");
+        ATTRIBUTE_KEY_NUMBER = AttributeKey.newInstance("name");
         CLIENT_ID_MAP = new HashMap<>();
         BOOT_MAP = new HashMap<>();
         ADMINISTRATOR = new ArrayList<>();

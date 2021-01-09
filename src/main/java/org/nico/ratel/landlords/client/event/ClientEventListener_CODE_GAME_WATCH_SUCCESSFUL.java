@@ -3,7 +3,7 @@ package org.nico.ratel.landlords.client.event;
 import io.netty.channel.Channel;
 import org.nico.ratel.landlords.client.entity.User;
 import org.nico.ratel.landlords.helper.MapHelper;
-import org.nico.ratel.landlords.print.SimplePrinter;
+import com.wuyou.utils.landlordsPrint.SimplePrinter;
 import org.nico.ratel.landlords.utils.GetQQUtils;
 
 import java.util.Map;

@@ -2,7 +2,7 @@ package org.nico.ratel.landlords.client.event;
 
 import io.netty.channel.Channel;
 import org.nico.ratel.landlords.enums.ServerEventCode;
-import org.nico.ratel.landlords.print.SimplePrinter;
+import com.wuyou.utils.landlordsPrint.SimplePrinter;
 import org.nico.ratel.landlords.utils.GetQQUtils;
 
 public class ClientEventListener_CODE_CLIENT_NICKNAME_SET extends ClientEventListener{
@@ -12,7 +12,7 @@ public class ClientEventListener_CODE_CLIENT_NICKNAME_SET extends ClientEventLis
 	@Override
 	public void call(Channel channel, String data) {
 		String qq = GetQQUtils.getQQ(channel);
-//		String nickname = SimpleWriter.write("nickname");
+//		String nickname = SimpleWriter.write(qq, "nickname");
 
 		pushToServer(channel, ServerEventCode.CODE_CLIENT_NICKNAME_SET, qq);
 		pushToServer(channel, ServerEventCode.CODE_SEND_TO_QQ, "欢迎来到斗地主");

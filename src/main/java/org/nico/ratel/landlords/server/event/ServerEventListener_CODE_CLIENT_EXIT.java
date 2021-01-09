@@ -1,6 +1,5 @@
 package org.nico.ratel.landlords.server.event;
 
-import org.nico.ratel.landlords.channel.ChannelUtils;
 import org.nico.ratel.landlords.client.event.ClientEventListener;
 import org.nico.ratel.landlords.entity.ClientSide;
 import org.nico.ratel.landlords.entity.Room;
@@ -15,7 +14,7 @@ public class ServerEventListener_CODE_CLIENT_EXIT implements ServerEventListener
 	public void call(ClientSide clientSide, String data) {
 
 		Room room = ServerContains.getRoom(clientSide.getRoomId());
-
+		System.out.println("退出clientId: "+clientSide.getId());
 		if(room != null) {
 			String result = MapHelper.newInstance()
 								.put("roomId", room.getId())
@@ -25,7 +24,7 @@ public class ServerEventListener_CODE_CLIENT_EXIT implements ServerEventListener
 			for(ClientSide client: room.getClientSideList()) {
 				if(client.getRole() == ClientRole.PLAYER){
 //					ChannelUtils.pushToClient(client.getChannel(), ClientEventCode.CODE_CLIENT_EXIT, result);
-					ClientEventListener.get(ClientEventCode.CODE_CLIENT_EXIT).call(clientSide.getChannel(), result);
+					ClientEventListener.get(ClientEventCode.CODE_CLIENT_EXIT).call(client.getChannel(), result);
 					client.init();
 				}
 			}

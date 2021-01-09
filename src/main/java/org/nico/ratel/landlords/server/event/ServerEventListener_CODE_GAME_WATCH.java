@@ -1,7 +1,6 @@
 package org.nico.ratel.landlords.server.event;
 
 import org.nico.noson.Noson;
-import org.nico.ratel.landlords.channel.ChannelUtils;
 import org.nico.ratel.landlords.client.event.ClientEventListener;
 import org.nico.ratel.landlords.entity.ClientSide;
 import org.nico.ratel.landlords.entity.Room;
@@ -16,7 +15,7 @@ public class ServerEventListener_CODE_GAME_WATCH implements ServerEventListener 
 
     @Override
     public void call(ClientSide clientSide, String data) {
-        Room room = ServerContains.getRoom(Integer.valueOf(data));
+        Room room = ServerContains.getRoom(data);
 
         if (room == null) {
             String result = MapHelper.newInstance()

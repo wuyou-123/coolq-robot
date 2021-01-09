@@ -1,8 +1,7 @@
 package org.nico.ratel.landlords.client.event;
 
 import io.netty.channel.Channel;
-import org.nico.ratel.landlords.enums.ClientEventCode;
-import org.nico.ratel.landlords.print.SimplePrinter;
+import com.wuyou.utils.landlordsPrint.SimplePrinter;
 import org.nico.ratel.landlords.utils.GetQQUtils;
 
 public class ClientEventListener_CODE_PVE_DIFFICULTY_NOT_SUPPORT extends ClientEventListener{

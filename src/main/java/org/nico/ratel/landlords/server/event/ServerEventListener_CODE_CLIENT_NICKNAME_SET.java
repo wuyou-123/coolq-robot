@@ -23,7 +23,7 @@ public class ServerEventListener_CODE_CLIENT_NICKNAME_SET implements ServerEvent
 			System.out.println(ServerContains.CLIENT_SIDE_MAP.get(client.getId()+""));
 			ServerContains.CLIENT_SIDE_MAP.get(client.getId()+"").setNickname(nickname);
 			ServerContains.CLIENT_SIDE_MAP.put(nickname, ServerContains.CLIENT_SIDE_MAP.get(client.getId()+""));
-			ServerContains.CLIENT_SIDE_MAP.remove(client.getId()+"");
+//			ServerContains.CLIENT_SIDE_MAP.remove(client.getId()+"");
 			GlobalVariable.CLIENT_ID_MAP.put(client.getId(), nickname);
 //			ChannelUtils.pushToClient(client.getChannel(), ClientEventCode.CODE_SHOW_OPTIONS, nickname);
 		}

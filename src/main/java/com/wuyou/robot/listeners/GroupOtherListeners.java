@@ -2,15 +2,15 @@ package com.wuyou.robot.listeners;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.forte.qqrobot.anno.Filter;
-import com.forte.qqrobot.anno.Listen;
-import com.forte.qqrobot.anno.depend.Beans;
-import com.forte.qqrobot.beans.messages.msgget.GroupMsg;
-import com.forte.qqrobot.beans.messages.types.MsgGetTypes;
-import com.forte.qqrobot.beans.types.MostDIYType;
-import com.forte.qqrobot.sender.MsgSender;
-import com.forte.qqrobot.utils.JSONUtils;
 import com.wuyou.utils.*;
+import love.forte.common.ioc.annotation.Beans;
+import love.forte.simbot.annotation.Filter;
+import love.forte.simbot.annotation.Filters;
+import love.forte.simbot.annotation.OnGroup;
+import love.forte.simbot.api.message.events.GroupMsg;
+import love.forte.simbot.api.sender.MsgSender;
+import love.forte.simbot.filter.MatchType;
+import love.forte.simbot.filter.MostMatchType;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -29,11 +29,11 @@ public class GroupOtherListeners {
 ///    int setuNum = 0;
 
 
-///    @Listen(MsgGetTypes.groupMsg)
-///    @Filter(diyFilter = "boot", value = {"点赞", "名片赞"})
+///    @OnGroup
+///    @Filters(customFilter = "boot", value = {"点赞", "名片赞"})
 ///    public void sendLike(GroupMsg msg, MsgSender sender) {
-///        String fromGroup = msg.getGroup();
-///        String fromQQ = msg.getQQ();
+///        String fromGroup = msg.getGroupInfo().getGroupCode();
+///        String fromQQ = msg.getAccountInfo().getAccountCode();
 ///        try {
 ///            boolean isSucc = sender.SENDER.sendLike(fromQQ, 10);
 ///            SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + (isSucc ? "已点赞" : "点赞失败"));
@@ -43,47 +43,65 @@ public class GroupOtherListeners {
 ///        }
 ///    }
 
-    @Listen(MsgGetTypes.groupMsg)
-    @Filter(diyFilter = "boot", value = ".*百度.*", at = true)
+    static String getTime(int time) {
+        String timeStr;
+        if (time > 1440 * 60) {
+            timeStr = time / 1440 / 60 + "天" + (time / 60) % 1440 / 60 + "小时" + (time / 60) % 1440 % 60 + "分钟";
+        } else if (time > 60 * 60) {
+            timeStr = time / 60 / 60 + "小时" + time / 60 % 60 + "分钟";
+        } else {
+            timeStr = time / 60 + "分钟" + time % 60 + "秒";
+        }
+        return timeStr;
+    }
+
+    @OnGroup
+    @Filters(value = {
+            @Filter(value = "百度", matchType = MatchType.CONTAINS)
+    }, customFilter = "boot", atBot = true)
     public void baiduSearch(GroupMsg msg, MsgSender sender) throws UnsupportedEncodingException {
         String message = msg.getMsg();
         String search = message.substring(message.indexOf("百度") + 2).trim();
         if (search.length() > 0) {
-            SenderUtil.sendGroupMsg(sender, msg.getGroup(),
+            SenderUtil.sendGroupMsg(sender, msg.getGroupInfo().getGroupCode(),
                     "百度搜索 [" + search + "]：https://baidu.com/s?word=" + URLEncoder.encode(search, "UTF-8"));
         }
     }
 
-    @Listen(MsgGetTypes.groupMsg)
-    @Filter(diyFilter = "boot", value = "点歌.*")
+    @OnGroup
+    @Filters(value = {
+            @Filter(value = "点歌", matchType = MatchType.STARTS_WITH)
+    }, customFilter = "boot")
     public void music(GroupMsg msg, MsgSender sender) {
         System.out.println("点歌");
         String message = msg.getMsg();
         String music = message.trim().substring(3);
-        SenderUtil.sendGroupMsg(sender, msg.getGroup(),CQ.getMusic(music).toString());
+        SenderUtil.sendGroupMsg(sender, msg.getGroupInfo().getGroupCode(), CQ.getMusic(music).toString());
     }
 
-    @Listen(MsgGetTypes.groupMsg)
-    @Filter(diyFilter = "boot", value = "呼叫龙王")
+    @OnGroup
+    @Filters(customFilter = "boot", value = {
+            @Filter(value = "呼叫龙王")
+    })
     public synchronized void findDragon(GroupMsg msg, MsgSender sender) {
-        Map<String, Object> map = GlobalVariable.GROUP_DRAGON.get(msg.getGroup());
+        Map<String, Object> map = GlobalVariable.GROUP_DRAGON.get(msg.getGroupInfo().getGroupCode());
         if (map != null) {
             if (((Calendar) map.get("time")).getTimeInMillis() - System.currentTimeMillis() > 0) {
-                SenderUtil.sendGroupMsg(sender, msg.getGroup(), map.get("qq") != null ? CQ.at(map.get("qq") + "") : "当前暂无龙王");
+                SenderUtil.sendGroupMsg(sender, msg.getGroupInfo().getGroupCode(), map.get("qq") != null ? CQ.at(map.get("qq") + "") : "当前暂无龙王");
                 return;
             }
         }
-        GroupUtils.getDragon(sender, msg.getGroup(), 0);
+        GroupUtils.getDragon(sender, msg.getGroupInfo().getGroupCode(), 0);
     }
 
-    @Listen(MsgGetTypes.groupMsg)
-    @Filter(diyFilter = {"boot", "menu"}, mostDIYType = MostDIYType.EVERY_MATCH)
+    @OnGroup
+    @Filters(customFilter = {"boot", "menu"}, mostMatchType = MostMatchType.ALL)
     public void sendMenu(GroupMsg msg, MsgSender sender) {
-        SenderUtil.sendGroupMsg(sender, msg.getGroup(), "http://wuyourj.club/menu.html");
+        SenderUtil.sendGroupMsg(sender, msg.getGroupInfo().getGroupCode(), "http://wuyourj.club/menu.html");
     }
 
-    @Listen(MsgGetTypes.groupMsg)
-    @Filter(diyFilter = {"boot", "setu"}, mostDIYType = MostDIYType.EVERY_MATCH)
+    @OnGroup
+    @Filters(customFilter = {"boot", "setu"}, mostMatchType = MostMatchType.ALL)
     public void sendSetu(GroupMsg msg, MsgSender sender) {
         boolean r18 = msg.getMsg().toLowerCase().contains("r18");
         JSONObject json = getJson(r18 ? "1" : "0");
@@ -93,22 +111,22 @@ public class GroupOtherListeners {
         String title = data.getString("title");
         String stringBuilder = "标题: " + title + "\n链接: " + url +
                 "\n\napk链接: http://ii096.cn/IvS6lo";
-        SenderUtil.sendGroupMsg(sender, msg.getGroup(), stringBuilder);
-//        SenderUtil.sendGroupMsg(sender, msg.getGroup(), "涩图功能关闭啦,可以去http://wuyourj.club/apk/lolicon.apk下载app使用哦~");
+        SenderUtil.sendGroupMsg(sender, msg.getGroupInfo().getGroupCode(), stringBuilder);
+//        SenderUtil.sendGroupMsg(sender, msg.getGroupInfo().getGroupCode(), "涩图功能关闭啦,可以去http://wuyourj.club/apk/lolicon.apk下载app使用哦~");
 
     }
 
-    @Listen(MsgGetTypes.groupMsg)
-    @Filter(diyFilter = {"boot", "setuImage"}, mostDIYType = MostDIYType.EVERY_MATCH)
+    @OnGroup
+    @Filters(customFilter = {"boot", "setuImage"}, mostMatchType = MostMatchType.ALL)
     public void sendSetuImage(GroupMsg msg, MsgSender sender) {
         sendSetu(msg, sender);
     }
 
-    @Listen(MsgGetTypes.groupMsg)
-    @Filter(diyFilter = {"boot", "autistic1"}, mostDIYType = MostDIYType.EVERY_MATCH)
+    @OnGroup
+    @Filters(customFilter = {"boot", "autistic1"}, mostMatchType = MostMatchType.ALL)
     public void autistic1(GroupMsg msg, MsgSender sender) {
-        String fromGroup = msg.getGroup();
-        String fromQQ = msg.getQQ();
+        String fromGroup = msg.getGroupInfo().getGroupCode();
+        String fromQQ = msg.getAccountInfo().getAccountCode();
         if (PowerUtils.powerCompare(msg, fromQQ, sender)) {
             sender.SETTER.setGroupBan(fromGroup, fromQQ, 1800);
             SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + "自闭成功" + CQ.getFace("178"));
@@ -118,11 +136,11 @@ public class GroupOtherListeners {
         }
     }
 
-    @Listen(MsgGetTypes.groupMsg)
-    @Filter(diyFilter = {"boot", "autistic2"}, mostDIYType = MostDIYType.EVERY_MATCH)
+    @OnGroup
+    @Filters(customFilter = {"boot", "autistic2"}, mostMatchType = MostMatchType.ALL)
     public void autistic2(GroupMsg msg, MsgSender sender) {
-        String fromGroup = msg.getGroup();
-        String fromQQ = msg.getQQ();
+        String fromGroup = msg.getGroupInfo().getGroupCode();
+        String fromQQ = msg.getAccountInfo().getAccountCode();
         String message = msg.getMsg();
         String sub = message.substring(message.indexOf("领取套餐") + 4);
         String end = sub.trim();
@@ -163,18 +181,6 @@ public class GroupOtherListeners {
         }
     }
 
-    static String getTime(int time) {
-        String timeStr;
-        if (time > 1440 * 60) {
-            timeStr = time / 1440 / 60 + "天" + (time / 60) % 1440 / 60 + "小时" + (time / 60) % 1440 % 60 + "分钟";
-        } else if (time > 60 * 60) {
-            timeStr = time / 60 / 60 + "小时" + time / 60 % 60 + "分钟";
-        } else {
-            timeStr = time / 60 + "分钟" + time % 60 + "秒";
-        }
-        return timeStr;
-    }
-
     private JSONObject getJson(String r18) {
         JSONObject json = null;
         try {
@@ -185,11 +191,11 @@ public class GroupOtherListeners {
             params.put("size1200", "true");
             params.put("r18", r18);
             String web = HttpUtils.get("http://api.lolicon.app/setu/", params, null).getResponse();
-            json = JSONUtils.toJsonObject(web);
+            json = JSONObject.parseObject(web);
             if (json.getInteger("code") == 429) {
                 params.put("apikey", key2);
                 web = HttpUtils.get("http://api.lolicon.app/setu/", params, null).getResponse();
-                json = JSONUtils.toJsonObject(web);
+                json = JSONObject.parseObject(web);
             }
         } catch (Exception e) {
             e.printStackTrace();
