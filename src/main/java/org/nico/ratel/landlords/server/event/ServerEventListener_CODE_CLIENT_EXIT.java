@@ -1,5 +1,6 @@
 package org.nico.ratel.landlords.server.event;
 
+import com.wuyou.utils.GlobalVariable;
 import org.nico.ratel.landlords.client.event.ClientEventListener;
 import org.nico.ratel.landlords.entity.ClientSide;
 import org.nico.ratel.landlords.entity.Room;
@@ -28,6 +29,7 @@ public class ServerEventListener_CODE_CLIENT_EXIT implements ServerEventListener
 					client.init();
 				}
 			}
+			GlobalVariable.LANDLORDS_ROOM.remove(room.getId());
 
 			notifyWatcherClientExit(room, clientSide);
 

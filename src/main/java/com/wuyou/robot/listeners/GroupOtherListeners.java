@@ -36,10 +36,10 @@ public class GroupOtherListeners {
 ///        String fromQQ = msg.getAccountInfo().getAccountCode();
 ///        try {
 ///            boolean isSucc = sender.SENDER.sendLike(fromQQ, 10);
-///            SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + (isSucc ? "已点赞" : "点赞失败"));
+///            SenderUtil.sendGroupMsg(fromGroup, CQ.at(fromQQ) + (isSucc ? "已点赞" : "点赞失败"));
 ///        } catch (Exception e) {
 ///            e.printStackTrace();
-///            SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + "点赞失败");
+///            SenderUtil.sendGroupMsg(fromGroup, CQ.at(fromQQ) + "点赞失败");
 ///        }
 ///    }
 
@@ -63,7 +63,7 @@ public class GroupOtherListeners {
         String message = msg.getMsg();
         String search = message.substring(message.indexOf("百度") + 2).trim();
         if (search.length() > 0) {
-            SenderUtil.sendGroupMsg(sender, msg.getGroupInfo().getGroupCode(),
+            SenderUtil.sendGroupMsg(msg.getGroupInfo().getGroupCode(),
                     "百度搜索 [" + search + "]：https://baidu.com/s?word=" + URLEncoder.encode(search, "UTF-8"));
         }
     }
@@ -76,7 +76,7 @@ public class GroupOtherListeners {
         System.out.println("点歌");
         String message = msg.getMsg();
         String music = message.trim().substring(3);
-        SenderUtil.sendGroupMsg(sender, msg.getGroupInfo().getGroupCode(), CQ.getMusic(music).toString());
+        SenderUtil.sendGroupMsg(msg.getGroupInfo().getGroupCode(), CQ.getMusic(music).toString());
     }
 
     @OnGroup
@@ -87,7 +87,7 @@ public class GroupOtherListeners {
         Map<String, Object> map = GlobalVariable.GROUP_DRAGON.get(msg.getGroupInfo().getGroupCode());
         if (map != null) {
             if (((Calendar) map.get("time")).getTimeInMillis() - System.currentTimeMillis() > 0) {
-                SenderUtil.sendGroupMsg(sender, msg.getGroupInfo().getGroupCode(), map.get("qq") != null ? CQ.at(map.get("qq") + "") : "当前暂无龙王");
+                SenderUtil.sendGroupMsg(msg.getGroupInfo().getGroupCode(), map.get("qq") != null ? CQ.at(map.get("qq") + "") : "当前暂无龙王");
                 return;
             }
         }
@@ -95,13 +95,13 @@ public class GroupOtherListeners {
     }
 
     @OnGroup
-    @Filters(customFilter = {"boot", "menu"}, mostMatchType = MostMatchType.ALL)
+    @Filters(customFilter = {"boot", "menu"}, customMostMatchType = MostMatchType.ALL)
     public void sendMenu(GroupMsg msg, MsgSender sender) {
-        SenderUtil.sendGroupMsg(sender, msg.getGroupInfo().getGroupCode(), "http://wuyourj.club/menu.html");
+        SenderUtil.sendGroupMsg(msg.getGroupInfo().getGroupCode(), "http://wuyourj.club/menu.html");
     }
 
     @OnGroup
-    @Filters(customFilter = {"boot", "setu"}, mostMatchType = MostMatchType.ALL)
+    @Filters(customFilter = {"boot", "setu"}, customMostMatchType = MostMatchType.ALL)
     public void sendSetu(GroupMsg msg, MsgSender sender) {
         boolean r18 = msg.getMsg().toLowerCase().contains("r18");
         JSONObject json = getJson(r18 ? "1" : "0");
@@ -111,33 +111,33 @@ public class GroupOtherListeners {
         String title = data.getString("title");
         String stringBuilder = "标题: " + title + "\n链接: " + url +
                 "\n\napk链接: http://ii096.cn/IvS6lo";
-        SenderUtil.sendGroupMsg(sender, msg.getGroupInfo().getGroupCode(), stringBuilder);
-//        SenderUtil.sendGroupMsg(sender, msg.getGroupInfo().getGroupCode(), "涩图功能关闭啦,可以去http://wuyourj.club/apk/lolicon.apk下载app使用哦~");
+        SenderUtil.sendGroupMsg(msg.getGroupInfo().getGroupCode(), stringBuilder);
+//        SenderUtil.sendGroupMsg(msg.getGroupInfo().getGroupCode(), "涩图功能关闭啦,可以去http://wuyourj.club/apk/lolicon.apk下载app使用哦~");
 
     }
 
     @OnGroup
-    @Filters(customFilter = {"boot", "setuImage"}, mostMatchType = MostMatchType.ALL)
+    @Filters(customFilter = {"boot", "setuImage"}, customMostMatchType = MostMatchType.ALL)
     public void sendSetuImage(GroupMsg msg, MsgSender sender) {
         sendSetu(msg, sender);
     }
 
     @OnGroup
-    @Filters(customFilter = {"boot", "autistic1"}, mostMatchType = MostMatchType.ALL)
+    @Filters(customFilter = {"boot", "autistic1"}, customMostMatchType = MostMatchType.ALL)
     public void autistic1(GroupMsg msg, MsgSender sender) {
         String fromGroup = msg.getGroupInfo().getGroupCode();
         String fromQQ = msg.getAccountInfo().getAccountCode();
         if (PowerUtils.powerCompare(msg, fromQQ, sender)) {
             sender.SETTER.setGroupBan(fromGroup, fromQQ, 1800);
-            SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + "自闭成功" + CQ.getFace("178"));
+            SenderUtil.sendGroupMsg(fromGroup, CQ.at(fromQQ) + "自闭成功" + CQ.getFace("178"));
         } else {
-            SenderUtil.sendGroupMsg(sender, fromGroup,
+            SenderUtil.sendGroupMsg(fromGroup,
                     CQ.at(fromQQ) + "自闭失败,我没有禁言你的权限" + CQ.getFace("174"));
         }
     }
 
     @OnGroup
-    @Filters(customFilter = {"boot", "autistic2"}, mostMatchType = MostMatchType.ALL)
+    @Filters(customFilter = {"boot", "autistic2"}, customMostMatchType = MostMatchType.ALL)
     public void autistic2(GroupMsg msg, MsgSender sender) {
         String fromGroup = msg.getGroupInfo().getGroupCode();
         String fromQQ = msg.getAccountInfo().getAccountCode();
@@ -149,10 +149,10 @@ public class GroupOtherListeners {
             int time = r.nextInt(30) + 1;
             if (PowerUtils.powerCompare(msg, fromQQ, sender)) {
                 sender.SETTER.setGroupBan(fromGroup, fromQQ, time * 60);
-                SenderUtil.sendGroupMsg(sender, fromGroup,
+                SenderUtil.sendGroupMsg(fromGroup,
                         CQ.at(fromQQ) + "恭喜领取了" + time + "分钟套餐" + CQ.getFace("178"));
             } else {
-                SenderUtil.sendGroupMsg(sender, fromGroup,
+                SenderUtil.sendGroupMsg(fromGroup,
                         CQ.at(fromQQ) + "领取失败,我没有禁言你的权限" + CQ.getFace("201"));
             }
             return;
@@ -162,22 +162,22 @@ public class GroupOtherListeners {
                 String timeStr = sub.trim();
                 int times = Integer.parseInt(timeStr);
                 if (times > 1440 * 30) {
-                    SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + "领取失败,时间不能超过30天!");
+                    SenderUtil.sendGroupMsg(fromGroup, CQ.at(fromQQ) + "领取失败,时间不能超过30天!");
                     return;
                 }
                 int time = times * 60;
                 timeStr = getTime(time);
                 sender.SETTER.setGroupBan(fromGroup, fromQQ, times * 60L);
-                SenderUtil.sendGroupMsg(sender, fromGroup,
+                SenderUtil.sendGroupMsg(fromGroup,
                         CQ.at(fromQQ) + "恭喜领取了"
                                 + timeStr.replace("天0小时", "天").replace("小时0分钟", "小时").replace("分钟0秒", "分钟") + "的套餐"
                                 + CQ.getFace("201"));
             } else {
-                SenderUtil.sendGroupMsg(sender, fromGroup,
+                SenderUtil.sendGroupMsg(fromGroup,
                         CQ.at(fromQQ) + "领取失败,我没有禁言你的权限" + CQ.getFace("174"));
             }
         } catch (Exception e) {
-            SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + "领取失败,指令不合法");
+            SenderUtil.sendGroupMsg(fromGroup, CQ.at(fromQQ) + "领取失败,指令不合法");
         }
     }
 

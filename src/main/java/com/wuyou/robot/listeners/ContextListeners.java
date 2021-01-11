@@ -36,11 +36,11 @@ public class ContextListeners {
             if (ret[2].equals(message) && ret[3].equals(message) && ret[4].equals(message)) {
                 int ran = new Random().nextInt(6) + 1;
                 if (ran <= 4) {
-                    SenderUtil.sendGroupMsg(sender, fromGroup, message);
+                    SenderUtil.sendGroupMsg(fromGroup, message);
                 } else if (ran == 5) {
-                    SenderUtil.sendGroupMsg(sender, fromGroup, "打断复读~~~");
+                    SenderUtil.sendGroupMsg(fromGroup, "打断复读~~~");
                 } else {
-                    SenderUtil.sendGroupMsg(sender, fromGroup, "打断打断!!!");
+                    SenderUtil.sendGroupMsg(fromGroup, "打断打断!!!");
                 }
                 ret = new String[]{"", "", "", "", message};
             }

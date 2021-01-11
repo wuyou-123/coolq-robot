@@ -38,18 +38,18 @@ public class GroupBanMessageListener {
         String fromGroup = msg.getGroupInfo().getGroupCode();
         List<String> list = service.getAllByGroupId(fromGroup);
         if (list.size() == 0) {
-            SenderUtil.sendGroupMsg(sender, fromGroup, "暂无回复记录");
+            SenderUtil.sendGroupMsg(fromGroup, "暂无回复记录");
             return;
         }
         StringBuilder mes = new StringBuilder(msg.getMsg() + ":");
         for (String str : list) {
             mes.append("\n\t关键词: \"").append(str).append("\"");
         }
-        SenderUtil.sendGroupMsg(sender, fromGroup, mes.toString().trim());
+        SenderUtil.sendGroupMsg(fromGroup, mes.toString().trim());
     }
 
     @OnGroup
-    @Filters(customFilter = {"boot", "sendBanMessage"}, mostMatchType = MostMatchType.ALL)
+    @Filters(customFilter = {"boot", "sendBanMessage"}, customMostMatchType = MostMatchType.ALL)
     public void sendMessage(GroupMsg msg, MsgSender sender) {
 
         String fromGroup = msg.getGroupInfo().getGroupCode();
@@ -77,11 +77,11 @@ public class GroupBanMessageListener {
         for (String banMessage : list) {
             if (message.contains(banMessage)) {
                 if (PowerUtils.powerCompare(msg, fromQQ, sender)) {
-                    SenderUtil.sendGroupMsg(sender, fromGroup,
+                    SenderUtil.sendGroupMsg(fromGroup,
                             CQ.at(fromQQ) + "发送关键词[" + banMessage + "]！ 抽中禁言" + a / 2 + "分");
                     sender.SETTER.setGroupBan(fromGroup, fromQQ, (a / 2) * 60);
                 } else {
-                    SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + "发送关键词[" + banMessage + "]， 抽中禁言" + a / 2
+                    SenderUtil.sendGroupMsg(fromGroup, CQ.at(fromQQ) + "发送关键词[" + banMessage + "]， 抽中禁言" + a / 2
                             + "分，可是我没有禁言你的权限" + CQ.getFace("174"));
                 }
             }
@@ -90,7 +90,7 @@ public class GroupBanMessageListener {
     }
 
     @OnGroup
-    @Filters(customFilter = {"boot", "addBanMessage"}, mostMatchType = MostMatchType.ALL)
+    @Filters(customFilter = {"boot", "addBanMessage"}, customMostMatchType = MostMatchType.ALL)
     public void addMessage(GroupMsg msg, MsgSender sender) {
         String mess = msg.getMsg();
         String group = msg.getGroupInfo().getGroupCode();
@@ -99,26 +99,26 @@ public class GroupBanMessageListener {
             System.out.println("执行添加关键词代码");
             String message = mess.substring(mess.indexOf("添加关键词") + 5).trim();
             if ("".equals(message)) {
-                SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "添加失败: 内容不完整");
+                SenderUtil.sendGroupMsg(group, CQ.at(qq) + "添加失败: 内容不完整");
                 return;
             }
             try {
                 service.addBanMessage(group, message);
                 if ("抽奖".equals(message)) {
-                    SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "\n添加成功: \n\t\t已开启抽奖功能!");
+                    SenderUtil.sendGroupMsg(group, CQ.at(qq) + "\n添加成功: \n\t\t已开启抽奖功能!");
                 } else {
-                    SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "\n添加成功: \n\t\t消息内容: " + message);
+                    SenderUtil.sendGroupMsg(group, CQ.at(qq) + "\n添加成功: \n\t\t消息内容: " + message);
                 }
             } catch (ObjectExistedException e) {
-                SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "\n更改失败: \n此条关键词已存在");
+                SenderUtil.sendGroupMsg(group, CQ.at(qq) + "\n更改失败: \n此条关键词已存在");
             }
         } else {
-            SenderUtil.sendGroupMsg(sender, group, "添加失败,你不是我的管理员!");
+            SenderUtil.sendGroupMsg(group, "添加失败,你不是我的管理员!");
         }
     }
 
     @OnGroup
-    @Filters(customFilter = {"boot", "removeBanMessage"}, mostMatchType = MostMatchType.ALL)
+    @Filters(customFilter = {"boot", "removeBanMessage"}, customMostMatchType = MostMatchType.ALL)
     public void removeMessage(GroupMsg msg, MsgSender sender) {
         String mess = msg.getMsg();
         String group = msg.getGroupInfo().getGroupCode();
@@ -127,21 +127,21 @@ public class GroupBanMessageListener {
             System.out.println("执行删除关键词代码");
             String message = mess.substring(mess.indexOf("删除关键词") + 5).trim();
             if ("".equals(message)) {
-                SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "删除失败: 内容不完整");
+                SenderUtil.sendGroupMsg(group, CQ.at(qq) + "删除失败: 内容不完整");
                 return;
             }
             try {
                 service.removeBanMessage(group, message);
                 if ("抽奖".equals(message)) {
-                    SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "\n删除成功: \n\t\t已关闭抽奖功能!");
+                    SenderUtil.sendGroupMsg(group, CQ.at(qq) + "\n删除成功: \n\t\t已关闭抽奖功能!");
                 } else {
-                    SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "\n删除成功: \n\t\t关键词内容: " + message);
+                    SenderUtil.sendGroupMsg(group, CQ.at(qq) + "\n删除成功: \n\t\t关键词内容: " + message);
                 }
             } catch (ObjectNotFoundException e) {
-                SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "\n删除失败: \n没找到此条消息");
+                SenderUtil.sendGroupMsg(group, CQ.at(qq) + "\n删除失败: \n没找到此条消息");
             }
         } else {
-            SenderUtil.sendGroupMsg(sender, group, "删除失败,你不是我的管理员!");
+            SenderUtil.sendGroupMsg(group, "删除失败,你不是我的管理员!");
         }
     }
 
@@ -169,14 +169,14 @@ public class GroupBanMessageListener {
         int min = a % max == 0 ? 1 : a % max;
         if (a <= 90) {
             if (PowerUtils.powerCompare(msg, fromQQ, sender)) {
-                SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + "抽中禁言" + min + "分");
+                SenderUtil.sendGroupMsg(fromGroup, CQ.at(fromQQ) + "抽中禁言" + min + "分");
                 sender.SETTER.setGroupBan(fromGroup, fromQQ, min * 60);
             } else {
-                SenderUtil.sendGroupMsg(sender, fromGroup,
+                SenderUtil.sendGroupMsg(fromGroup,
                         CQ.at(fromQQ) + "抽中禁言" + min + "分，可是我没有禁言你的权限" + CQ.getFace("174"));
             }
         } else {
-            SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + "恭喜轮空");
+            SenderUtil.sendGroupMsg(fromGroup, CQ.at(fromQQ) + "恭喜轮空");
         }
     }
 

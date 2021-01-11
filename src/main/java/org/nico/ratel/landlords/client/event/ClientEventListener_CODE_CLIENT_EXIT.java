@@ -16,6 +16,7 @@ public class ClientEventListener_CODE_CLIENT_EXIT extends ClientEventListener{
 		System.out.println(qq+"掉线了");
 		Map<String, Object> map = MapHelper.parser(data);
 		GlobalVariable.LANDLORDS_PLAYER.remove(qq);
+//		GlobalVariable.LANDLORDS_ROOM.remove()
 		String exitClientId = (String) map.get("exitClientId");
 		String role;
 		if(exitClientId.equals(qq)) {

@@ -54,37 +54,37 @@ public class GroupManagerListener {
             removeManager(members, fromGroup, sender);
         }
         if (a > 0) {
-            SenderUtil.sendGroupMsg(sender, fromGroup, str.toString().trim());
+            SenderUtil.sendGroupMsg(fromGroup, str.toString().trim());
         } else {
-            SenderUtil.sendGroupMsg(sender, fromGroup, "暂无管理员");
+            SenderUtil.sendGroupMsg(fromGroup, "暂无管理员");
         }
     }
 
     @OnGroup
-    @Filters(customFilter = {"boot", "addManager"}, mostMatchType = MostMatchType.ANY)
+    @Filters(customFilter = {"boot", "addManager"}, customMostMatchType = MostMatchType.ALL)
     public void addManager(GroupMsg msg, MsgSender sender) {
         String group = msg.getGroupInfo().getGroupCode();
         if (PowerUtils.getPermissions(group, msg.getAccountInfo().getAccountCode(), sender) > 1) {
             addManagers(msg, sender);
         } else {
-            SenderUtil.sendGroupMsg(sender, group, "添加失败,你不是我的管理员!");
+            SenderUtil.sendGroupMsg(group, "添加失败,你不是我的管理员!");
         }
     }
 
     @OnGroup
-    @Filters(customFilter = {"boot", "removeManager"}, mostMatchType = MostMatchType.ALL)
+    @Filters(customFilter = {"boot", "removeManager"}, customMostMatchType = MostMatchType.ALL)
     public void removeManager(GroupMsg msg, MsgSender sender) {
         String group = msg.getGroupInfo().getGroupCode();
         if (PowerUtils.getPermissions(group, msg.getAccountInfo().getAccountCode(), sender) > 1) {
             Set<String> set = new HashSet<>(CQ.getAts(msg.getMsg()));
             removeManager(set, group, sender);
         } else {
-            SenderUtil.sendGroupMsg(sender, group, "删除失败,你不是我的管理员!");
+            SenderUtil.sendGroupMsg(group, "删除失败,你不是我的管理员!");
         }
     }
 
     @OnGroup
-    @Filters(customFilter = {"boot", "addGroupManager"}, mostMatchType = MostMatchType.ALL)
+    @Filters(customFilter = {"boot", "addGroupManager"}, customMostMatchType = MostMatchType.ALL)
     public void addGroupManager(GroupMsg msg, MsgSender sender) {
         String group = msg.getGroupInfo().getGroupCode();
         if (PowerUtils.getPermissions(group, msg.getAccountInfo().getAccountCode(), sender) > 1) {
@@ -92,15 +92,15 @@ public class GroupManagerListener {
                 Set<String> set = new HashSet<>(CQ.getAts(msg.getMsg()));
                 addGroupManager(set, group, sender);
             } else {
-                SenderUtil.sendGroupMsg(sender, group, "添加失败,我不是群主!");
+                SenderUtil.sendGroupMsg(group, "添加失败,我不是群主!");
             }
         } else {
-            SenderUtil.sendGroupMsg(sender, group, "添加失败,你不是我的管理员!");
+            SenderUtil.sendGroupMsg(group, "添加失败,你不是我的管理员!");
         }
     }
 
     @OnGroup
-    @Filters(customFilter = {"boot", "removeGroupManager"}, mostMatchType = MostMatchType.ALL)
+    @Filters(customFilter = {"boot", "removeGroupManager"}, customMostMatchType = MostMatchType.ALL)
     public void removeGroupManager(GroupMsg msg, MsgSender sender) {
         String group = msg.getGroupInfo().getGroupCode();
         if (PowerUtils.getPermissions(group, msg.getAccountInfo().getAccountCode(), sender) > 1) {
@@ -108,10 +108,10 @@ public class GroupManagerListener {
                 Set<String> set = new HashSet<>(CQ.getAts(msg.getMsg()));
                 removeGroupManager(set, group, sender);
             } else {
-                SenderUtil.sendGroupMsg(sender, group, "添加失败,我不是群主!");
+                SenderUtil.sendGroupMsg(group, "添加失败,我不是群主!");
             }
         } else {
-            SenderUtil.sendGroupMsg(sender, group, "添加失败,你不是我的管理员!");
+            SenderUtil.sendGroupMsg(group, "添加失败,你不是我的管理员!");
         }
     }
 
@@ -143,7 +143,7 @@ public class GroupManagerListener {
                     break;
             }
         }
-        SenderUtil.sendGroupMsg(sender, fromGroup, str.toString());
+        SenderUtil.sendGroupMsg(fromGroup, str.toString());
     }
 
     /**
@@ -184,7 +184,7 @@ public class GroupManagerListener {
                     break;
             }
         }
-        SenderUtil.sendGroupMsg(sender, fromGroup, str.toString());
+        SenderUtil.sendGroupMsg(fromGroup, str.toString());
     }
 
     private void addManagers(GroupMsg msg, MsgSender sender) {
@@ -209,7 +209,7 @@ public class GroupManagerListener {
                 str.append("\n\t\t添加管理员失败: QQ:[").append(user).append("](").append(nickname).append(")已存在");
             }
         }
-        SenderUtil.sendGroupMsg(sender, fromGroup, str.toString());
+        SenderUtil.sendGroupMsg(fromGroup, str.toString());
     }
 
     private void removeManager(Set<String> list, String fromGroup, MsgSender sender) {
@@ -224,6 +224,6 @@ public class GroupManagerListener {
             str.append("\n\t取消成功: QQ:[").append(user).append("]已取消管理员");
 ///			managers.get(fromGroup).remove(user);
         }
-        SenderUtil.sendGroupMsg(sender, fromGroup, str.toString());
+        SenderUtil.sendGroupMsg(fromGroup, str.toString());
     }
 }

@@ -86,7 +86,7 @@ public class PrivateMsgListener {
         String message = msg.getMsg();
         System.out.println("点歌");
         String music = message.trim().substring(3);
-//        SenderUtil.sendGroupMsg(sender, msg.getGroupInfo().getGroupCode(),CQ.getMusic(music).toString());
+//        SenderUtil.sendGroupMsg(msg.getGroupInfo().getGroupCode(),CQ.getMusic(music).toString());
         sender.SENDER.sendPrivateMsg(qq, CQ.getMusic(music).toString());
     }
 

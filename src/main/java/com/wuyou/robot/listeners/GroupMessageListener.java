@@ -90,7 +90,7 @@ public class GroupMessageListener {
         String fromGroup = msg.getGroupInfo().getGroupCode();
         Map<String, String> map = service.getAllByGroup(fromGroup);
         if (map.size() == 0) {
-            SenderUtil.sendGroupMsg(sender, fromGroup, "暂无回复记录");
+            SenderUtil.sendGroupMsg(fromGroup, "暂无回复记录");
             return;
         }
         GroupMemberList groupMemberList = sender.GETTER.getGroupMemberList(fromGroup);
@@ -109,7 +109,7 @@ public class GroupMessageListener {
         for (Map.Entry<String, String> entry : newMap.entrySet()) {
             mes.append("\t发送: \"").append(entry.getKey()).append("\"\t回复: \"").append(entry.getValue()).append("\"\n");
         }
-        SenderUtil.sendGroupMsg(sender, fromGroup, mes.toString().trim());
+        SenderUtil.sendGroupMsg(fromGroup, mes.toString().trim());
     }
 
     private String getStr(MsgSender sender, String fromGroup, Set<String> qqSet, String str) {
@@ -134,14 +134,14 @@ public class GroupMessageListener {
         }
         for (Map.Entry<String, String> entry : map.entrySet()) {
             if (message.trim().equals(entry.getKey())) {
-                SenderUtil.sendGroupMsg(sender, fromGroup, entry.getValue());
+                SenderUtil.sendGroupMsg(fromGroup, entry.getValue());
                 return;
             }
         }
     }
 
     @OnGroup
-    @Filters(customFilter = {"boot", "ai"}, mostMatchType = MostMatchType.ALL)
+    @Filters(customFilter = {"boot", "ai"}, customMostMatchType = MostMatchType.ALL)
     public void sendAiMessage(GroupMsg msg, MsgSender sender) {
         String fromGroup = msg.getGroupInfo().getGroupCode();
         String message = CQ.UTILS.removeByType("at", msg.getMsg(), true, true);
@@ -162,7 +162,7 @@ public class GroupMessageListener {
             if (json.getInteger("code") == 200) {
                 String reply = json.getJSONArray("newslist").getJSONObject(0).getString("reply");
                 if (!reply.isEmpty()) {
-                    SenderUtil.sendGroupMsg(sender, fromGroup, reply);
+                    SenderUtil.sendGroupMsg(fromGroup, reply);
                     return;
                 }
             }
@@ -170,7 +170,7 @@ public class GroupMessageListener {
             sender.SENDER.sendPrivateMsg("1097810498", "聊天接口调用失败! 群号: " + fromGroup + ", 请求消息: " + message);
         } else {
 ///    @OnGroup
-///    @Filters(customFilter = {"boot", "ai"}, mostMatchType = MostMatchType.ALL)
+///    @Filters(customFilter = {"boot", "ai"}, customMostMatchType = MostMatchType.ALL)
 ///    public void sendAiMessage2(GroupMsg msg, MsgSender sender) {
             System.out.println(message);
             try {
@@ -201,9 +201,9 @@ public class GroupMessageListener {
                 }
                 JSONObject data = json.getJSONObject("data");
                 if (json.getInteger("ret") == 0) {
-                    SenderUtil.sendGroupMsg(sender, fromGroup, data.getString("answer"));
+                    SenderUtil.sendGroupMsg(fromGroup, data.getString("answer"));
                 } else if (json.getInteger("ret") == 16394) {
-                    SenderUtil.sendGroupMsg(sender, fromGroup, "我没有听懂你的话");
+                    SenderUtil.sendGroupMsg(fromGroup, "我没有听懂你的话");
                 } else {
                     System.out.println(web);
                     System.out.println("请求错误");
@@ -215,7 +215,7 @@ public class GroupMessageListener {
     }
 
     @OnGroup
-    @Filters(customFilter = {"boot", "aiVoice"}, mostMatchType = MostMatchType.ALL)
+    @Filters(customFilter = {"boot", "aiVoice"}, customMostMatchType = MostMatchType.ALL)
     public void sendAiVoice(GroupMsg msg, MsgSender sender) {
         String fromGroup = msg.getGroupInfo().getGroupCode();
         String message = CQ.UTILS.remove(msg.getMsg(), true, true).substring(1);
@@ -282,9 +282,9 @@ public class GroupMessageListener {
                 fos.write(d);
                 fos.flush();
                 fos.close();
-                SenderUtil.sendGroupMsg(sender, fromGroup, CQ.getRecord(path + "/" + filePath).toString());
+                SenderUtil.sendGroupMsg(fromGroup, CQ.getRecord(path + "/" + filePath).toString());
             } else {
-                SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(msg.getAccountInfo().getAccountCode()) + "小忧没有看懂你说的是什么~");
+                SenderUtil.sendGroupMsg(fromGroup, CQ.at(msg.getAccountInfo().getAccountCode()) + "小忧没有看懂你说的是什么~");
                 System.out.println("请求错误");
             }
         } catch (Exception e) {
@@ -304,14 +304,14 @@ public class GroupMessageListener {
     }
 
     @OnGroup
-    @Filters(customFilter = {"boot", "addMessage"}, mostMatchType = MostMatchType.ALL)
+    @Filters(customFilter = {"boot", "addMessage"}, customMostMatchType = MostMatchType.ALL)
     public void addMessage(GroupMsg msg, MsgSender sender) {
         String mess = msg.getMsg();
         String group = msg.getGroupInfo().getGroupCode();
         String qq = msg.getAccountInfo().getAccountCode();
         System.out.println(mess);
         if (mess.toLowerCase().contains("atall")) {
-            SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "添加失败: 不允许有艾特全体");
+            SenderUtil.sendGroupMsg(group, CQ.at(qq) + "添加失败: 不允许有艾特全体");
             return;
         }
         if (PowerUtils.getPermissions(group, qq, sender) > 1) {
@@ -319,27 +319,27 @@ public class GroupMessageListener {
             String message = mess.substring(mess.indexOf("添加消息") + 4, mess.indexOf("回复")).trim();
             String answer = mess.substring(mess.indexOf("回复") + 2).trim();
             if ("".equals(message) || "".equals(answer)) {
-                SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "添加失败: 内容不完整");
+                SenderUtil.sendGroupMsg(group, CQ.at(qq) + "添加失败: 内容不完整");
                 return;
             }
             try {
                 if (service.addMessage(group, message, answer) == 1) {
-                    SenderUtil.sendGroupMsg(sender, group,
+                    SenderUtil.sendGroupMsg(group,
                             CQ.at(qq) + "\n添加成功: \n\t\t消息内容: " + message + "\n\t\t回复内容: " + answer);
                 } else {
-                    SenderUtil.sendGroupMsg(sender, group,
+                    SenderUtil.sendGroupMsg(group,
                             CQ.at(qq) + "\n更改成功: \n\t\t消息内容: " + message + "\n\t\t回复内容已替换为: " + answer);
                 }
             } catch (ObjectExistedException e) {
-                SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "\n更改失败: \n此条消息已存在");
+                SenderUtil.sendGroupMsg(group, CQ.at(qq) + "\n更改失败: \n此条消息已存在");
             }
         } else {
-            SenderUtil.sendGroupMsg(sender, group, "添加失败,你不是我的管理员!");
+            SenderUtil.sendGroupMsg(group, "添加失败,你不是我的管理员!");
         }
     }
 
     @OnGroup
-    @Filters(customFilter = {"boot", "removeMessage"}, mostMatchType = MostMatchType.ALL)
+    @Filters(customFilter = {"boot", "removeMessage"}, customMostMatchType = MostMatchType.ALL)
     public void removeMessage(GroupMsg msg, MsgSender sender) {
         String mess = msg.getMsg();
         String group = msg.getGroupInfo().getGroupCode();
@@ -348,28 +348,28 @@ public class GroupMessageListener {
             System.out.println("执行删除消息代码");
             String message = mess.substring(mess.indexOf("删除消息") + 4).trim();
             if ("".equals(message)) {
-                SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "删除失败: 内容不完整");
+                SenderUtil.sendGroupMsg(group, CQ.at(qq) + "删除失败: 内容不完整");
                 return;
             }
             try {
                 service.removeMessage(group, message);
-                SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "\n删除成功: \n\t\t消息内容: " + message);
+                SenderUtil.sendGroupMsg(group, CQ.at(qq) + "\n删除成功: \n\t\t消息内容: " + message);
             } catch (ObjectNotFoundException e) {
-                SenderUtil.sendGroupMsg(sender, group, CQ.at(qq) + "\n更改失败: \n没找到此条消息");
+                SenderUtil.sendGroupMsg(group, CQ.at(qq) + "\n更改失败: \n没找到此条消息");
             }
         } else {
-            SenderUtil.sendGroupMsg(sender, group, "删除失败,你不是我的管理员!");
+            SenderUtil.sendGroupMsg(group, "删除失败,你不是我的管理员!");
         }
     }
 
     @OnGroup
-    @Filter("重启斗地主")
+    @Filters(value = @Filter("重启斗地主"), customFilter = "boot")
     public void reloadLandlords(GroupMsg msg, MsgSender sender) {
         boot.initLandlords();
     }
 
     @OnGroup
-    @Filter("上桌")
+    @Filters(value = @Filter("上桌"), customFilter = "boot")
     public void playLandlords(GroupMsg msg, MsgSender sender) {
         String group = msg.getGroupInfo().getGroupCode();
         String qq = msg.getAccountInfo().getAccountCode();
@@ -386,7 +386,7 @@ public class GroupMessageListener {
                 ClientSide clientSide = new ClientSide(getId(channel, qq), ClientStatus.TO_CHOOSE, channel);
                 clientSide.setNickname(String.valueOf(clientSide.getId()));
                 clientSide.setRole(ClientRole.PLAYER);
-                System.out.println("clientSideId: "+clientSide.getId());
+                System.out.println("clientSideId: " + clientSide.getId());
                 ServerContains.CLIENT_SIDE_MAP.put(clientSide.getId(), clientSide);
                 System.out.println(ServerContains.CLIENT_SIDE_MAP);
                 SimplePrinter.serverLog("Has client connect to the server：" + clientSide.getId());
@@ -398,14 +398,17 @@ public class GroupMessageListener {
                 pushToServer(channel, ServerEventCode.CODE_CLIENT_NICKNAME_SET, qq);
 //                pushToServer(channel, ServerEventCode.CODE_ROOM_CREATE, group).sync();
                 Room room = GlobalVariable.LANDLORDS_ROOM.get(group);
-                if (room==null||ServerContains.getRoom(group) == null) {
-                    pushToServer(channel, ServerEventCode.CODE_ROOM_CREATE, group);
+                if (room == null || ServerContains.getRoom(group) == null) {
+                    pushToServer(channel, ServerEventCode.CODE_ROOM_CREATE, group).sync();
                 } else {
-                    pushToServer(channel, ServerEventCode.CODE_ROOM_JOIN, room.getId() + "");
+                    pushToServer(channel, ServerEventCode.CODE_ROOM_JOIN, room.getId() + "").sync();
                 }
-                System.out.println("创建房间");
+                if (room != null) {
+                    System.out.println(room.getClientSideList());
+                    SenderUtil.sendGroupMsg(group, "上桌成功, 现在房间里有" + room.getClientSideList().size() + "人, 满三人即可开始游戏");
+                }
             } else {
-                SenderUtil.sendGroupMsg(sender, group, "你已经在桌上了");
+                SenderUtil.sendGroupMsg(group, "你已经在桌上了");
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -417,7 +420,7 @@ public class GroupMessageListener {
     private String getId(Channel channel, String id) {
         String longId = channel.localAddress().toString();
         ServerContains.CHANNEL_ID_MAP.putIfAbsent(longId, id);
-        System.out.println(longId+"------"+id);
+        System.out.println(longId + "------" + id);
         System.out.println(channel);
         return ServerContains.CHANNEL_ID_MAP.get(longId);
     }

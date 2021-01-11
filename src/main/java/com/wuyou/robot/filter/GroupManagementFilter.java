@@ -158,6 +158,8 @@ public class GroupManagementFilter {
             MsgGet msgget = data.getMsgGet();
             if (msgget instanceof GroupMsg) {
                 String msg = ((GroupMsg) msgget).getMsg().trim();
+                System.out.println(msg);
+                System.out.println(CQ.getAt(msg));
                 return (msg.startsWith("添加管理") || msg.startsWith("设置管理") || msg.startsWith("给管理")) && CQ.getAt(msg) != null;
             }
             return false;

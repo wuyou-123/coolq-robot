@@ -16,7 +16,7 @@ public class ClientEventListener_CODE_GAME_POKER_PLAY_PASS extends ClientEventLi
 		String qq = GetQQUtils.getQQ(channel);
 		Map<String, Object> map = MapHelper.parser(data);
 		
-		SimplePrinter.sendNotice(qq, map.get("clientNickname") + " 11跳过了. 现在轮到" + map.get("nextClientNickname") + "出牌.");
+		SimplePrinter.sendNotice(qq, map.get("clientNickname") + " 跳过了. 现在轮到" + map.get("nextClientNickname") + "出牌.");
 		
 		String turnClientId = (String) map.get("nextClientId");
 		if(qq.equals(turnClientId)) {

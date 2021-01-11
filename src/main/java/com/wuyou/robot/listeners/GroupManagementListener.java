@@ -32,13 +32,13 @@ public class GroupManagementListener {
     ClearService clearService;
 
     @OnGroup
-    @Filters(customFilter = {"boot", "kickMember"}, mostMatchType = MostMatchType.ALL)
+    @Filters(customFilter = {"boot", "kickMember"}, customMostMatchType = MostMatchType.ALL)
     public void kickMember(GroupMsg msg, MsgSender sender) {
         String fromGroup = msg.getGroupInfo().getGroupCode();
         String fromQQ = msg.getAccountInfo().getAccountCode();
         Set<String> set = CQ.getAts(msg.getMsg());
         if (set.size() == 0) {
-            SenderUtil.sendGroupMsg(sender, fromGroup, "指令不合法,请至少艾特一位群成员");
+            SenderUtil.sendGroupMsg(fromGroup, "指令不合法,请至少艾特一位群成员");
             return;
         }
         if (getPower(msg, sender)) {
@@ -61,12 +61,12 @@ public class GroupManagementListener {
                 }
 
             }
-            SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + str);
+            SenderUtil.sendGroupMsg(fromGroup, CQ.at(fromQQ) + str);
         }
     }
 
     @OnGroup
-    @Filters(customFilter = {"boot", "banMember"}, mostMatchType = MostMatchType.ALL)
+    @Filters(customFilter = {"boot", "banMember"}, customMostMatchType = MostMatchType.ALL)
     public void banMember(GroupMsg msg, MsgSender sender) {
         System.out.println("GroupManagementListener.banMember()");
         if (getPower(msg, sender)) {
@@ -75,14 +75,14 @@ public class GroupManagementListener {
             String fromQQ = msg.getAccountInfo().getAccountCode();
             Set<String> set = CQ.getAts(message);
             if (set.size() == 0) {
-                SenderUtil.sendGroupMsg(sender, fromGroup, "指令不合法,请至少艾特一位群成员");
+                SenderUtil.sendGroupMsg(fromGroup, "指令不合法,请至少艾特一位群成员");
                 return;
             }
             long time;
             try {
                 time = Long.parseLong(message.split(" ")[message.split(" ").length - 1]);
             } catch (NumberFormatException e) {
-                SenderUtil.sendGroupMsg(sender, fromGroup, "指令不合法,请在后面添加纯数字,单位:分钟");
+                SenderUtil.sendGroupMsg(fromGroup, "指令不合法,请在后面添加纯数字,单位:分钟");
                 return;
             }
             try {
@@ -115,15 +115,15 @@ public class GroupManagementListener {
                         str.append("\n\t\t禁言成员[").append(qq).append("](").append(nickname).append(")失败,我没有禁言TA的权限");
                     }
                 }
-                SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + str);
+                SenderUtil.sendGroupMsg(fromGroup, CQ.at(fromQQ) + str);
             } catch (RuntimeException e) {
-                SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + "指令不合法");
+                SenderUtil.sendGroupMsg(fromGroup, CQ.at(fromQQ) + "指令不合法");
             }
         }
     }
 
     @OnGroup
-    @Filters(customFilter = {"boot", "cancelBanMember"}, mostMatchType = MostMatchType.ALL)
+    @Filters(customFilter = {"boot", "cancelBanMember"}, customMostMatchType = MostMatchType.ALL)
     public void cancelBanMember(GroupMsg msg, MsgSender sender) {
         if (getPower(msg, sender)) {
             String message = msg.getMsg();
@@ -131,7 +131,7 @@ public class GroupManagementListener {
             String fromQQ = msg.getAccountInfo().getAccountCode();
             Set<String> set = CQ.getAts(message);
             if (set.size() == 0) {
-                SenderUtil.sendGroupMsg(sender, fromGroup, "指令不合法,请至少艾特一位群成员");
+                SenderUtil.sendGroupMsg(fromGroup, "指令不合法,请至少艾特一位群成员");
                 return;
             }
 ///            JSONArray list = banList(fromGroup, sender);
@@ -159,12 +159,12 @@ public class GroupManagementListener {
                     str.append("\n\t\t解禁成员[").append(qq).append("](").append(nickname).append(")失败,我没有解禁TA的权限");
                 }
             }
-            SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + str);
+            SenderUtil.sendGroupMsg(fromGroup, CQ.at(fromQQ) + str);
         }
     }
 
     @OnGroup
-    @Filters(customFilter = {"boot", "blackMember"}, mostMatchType = MostMatchType.ALL)
+    @Filters(customFilter = {"boot", "blackMember"}, customMostMatchType = MostMatchType.ALL)
     public void blackMember(GroupMsg msg, MsgSender sender) {
         if (getPower(msg, sender)) {
             String message = msg.getMsg();
@@ -180,7 +180,7 @@ public class GroupManagementListener {
     }
 
     @OnGroup
-    @Filters(customFilter = {"boot", "cancelBlackMember"}, mostMatchType = MostMatchType.ALL)
+    @Filters(customFilter = {"boot", "cancelBlackMember"}, customMostMatchType = MostMatchType.ALL)
     public void cancelBlackMember(GroupMsg msg, MsgSender sender) {
         String message = msg.getMsg();
         Set<String> set = CQ.getAts(message);
@@ -207,14 +207,14 @@ public class GroupManagementListener {
             str.append("\n\t\t黑名单成员").append(num).append(": ").append(user);
         }
         if (num == 0) {
-            SenderUtil.sendGroupMsg(sender, fromGroup, "暂无黑名单记录");
+            SenderUtil.sendGroupMsg(fromGroup, "暂无黑名单记录");
         } else {
-            SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + str);
+            SenderUtil.sendGroupMsg(fromGroup, CQ.at(fromQQ) + str);
         }
     }
 
     @OnGroup
-    @Filters(customFilter = {"boot", "changeNick"}, mostMatchType = MostMatchType.ALL)
+    @Filters(customFilter = {"boot", "changeNick"}, customMostMatchType = MostMatchType.ALL)
     public void changeNick(GroupMsg msg, MsgSender sender) {
         String message = msg.getMsg();
         String fromGroup = msg.getGroupInfo().getGroupCode();
@@ -222,7 +222,7 @@ public class GroupManagementListener {
         String thisQQ = msg.getBotInfo().getBotCode();
         Set<String> set = CQ.getAts(message);
         if (set.size() == 0) {
-            SenderUtil.sendGroupMsg(sender, fromGroup, "指令不合法,请至少艾特一位群成员");
+            SenderUtil.sendGroupMsg(fromGroup, "指令不合法,请至少艾特一位群成员");
             return;
         }
         if (PowerUtils.getPermissions(fromGroup, fromQQ, sender) > 1) {
@@ -231,10 +231,10 @@ public class GroupManagementListener {
                 String name = message.split(" ")[message.split(" ").length - 1];
                 if (CQ.getAt(name) == null) {
                     sender.SETTER.setGroupRemark(fromGroup, thisQQ, name);
-                    SenderUtil.sendGroupMsg(sender, fromGroup, "已把我的名字改为: \"" + name + "\"");
+                    SenderUtil.sendGroupMsg(fromGroup, "已把我的名字改为: \"" + name + "\"");
                 } else {
                     sender.SETTER.setGroupRemark(fromGroup, thisQQ, "");
-                    SenderUtil.sendGroupMsg(sender, fromGroup, "已取消我的群名片");
+                    SenderUtil.sendGroupMsg(fromGroup, "已取消我的群名片");
                 }
                 return;
             }
@@ -266,15 +266,15 @@ public class GroupManagementListener {
                         str.append("\n\t\t已取消成员[").append(qq).append("](").append(nickname).append(")的群名片");
                     }
                 }
-                SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + str);
+                SenderUtil.sendGroupMsg(fromGroup, CQ.at(fromQQ) + str);
             } catch (RuntimeException e) {
-                SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + "\n指令不合法");
+                SenderUtil.sendGroupMsg(fromGroup, CQ.at(fromQQ) + "\n指令不合法");
             }
         }
     }
 
     @OnGroup
-    @Filters(customFilter = {"boot", "changeTitle"}, mostMatchType = MostMatchType.ALL)
+    @Filters(customFilter = {"boot", "changeTitle"}, customMostMatchType = MostMatchType.ALL)
     public void changeTitle(GroupMsg msg, MsgSender sender) {
         System.out.println("给头衔");
         String message = msg.getMsg();
@@ -283,7 +283,7 @@ public class GroupManagementListener {
         String thisQQ = msg.getBotInfo().getBotCode();
         Set<String> set = CQ.getAts(message);
         if (set.size() == 0) {
-            SenderUtil.sendGroupMsg(sender, fromGroup, "指令不合法,请至少艾特一位群成员");
+            SenderUtil.sendGroupMsg(fromGroup, "指令不合法,请至少艾特一位群成员");
             return;
         }
 //        System.out.println(11111);
@@ -323,12 +323,12 @@ public class GroupManagementListener {
                         str.append("\n\t\t已取消成员[").append(qq).append("](").append(nickname).append(")的群头衔");
                     }
                 }
-                SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + str);
+                SenderUtil.sendGroupMsg(fromGroup, CQ.at(fromQQ) + str);
             } catch (RuntimeException e) {
-                SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + "\n指令不合法");
+                SenderUtil.sendGroupMsg(fromGroup, CQ.at(fromQQ) + "\n指令不合法");
             }
         } else {
-            SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + "我不是群主,不能给头衔");
+            SenderUtil.sendGroupMsg(fromGroup, CQ.at(fromQQ) + "我不是群主,不能给头衔");
 
         }
     }
@@ -357,7 +357,7 @@ public class GroupManagementListener {
         StringBuilder str = new StringBuilder("\n禁言列表: ");
         JSONArray list = banList(fromGroup, sender);
         if (list == null) {
-            SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + "当前群内没有被禁言的群员");
+            SenderUtil.sendGroupMsg(fromGroup, CQ.at(fromQQ) + "当前群内没有被禁言的群员");
             return;
         }
         int num = 0;
@@ -370,7 +370,7 @@ public class GroupManagementListener {
             String times = GroupOtherListeners.getTime(time);
             str.append("\n\t群成员").append(num).append(": QQ:[").append(qq).append("](").append(nick).append("), 禁言时间: ").append(times.replace("0小时", "").replace("0分钟", "").replace("0秒", ""));
         }
-        SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + str);
+        SenderUtil.sendGroupMsg(fromGroup, CQ.at(fromQQ) + str);
     }
 
     public JSONArray banList(String fromGroup, MsgSender sender) {
@@ -392,7 +392,7 @@ public class GroupManagementListener {
     public void atAll(GroupMsg msg, MsgSender sender) {
         String message = msg.getMsg();
         if (getPower(msg, sender)) {
-            SenderUtil.sendGroupMsg(sender, msg.getGroupInfo().getGroupCode(),
+            SenderUtil.sendGroupMsg(msg.getGroupInfo().getGroupCode(),
                     CQ.at("all") + " " + message.substring(message.indexOf("艾特全体") + 4));
         }
     }
@@ -421,10 +421,10 @@ public class GroupManagementListener {
             if (power == 3 || power == 1) {
                 return true;
             } else {
-                SenderUtil.sendGroupMsg(sender, group, "操作失败,我没有管理员权限!");
+                SenderUtil.sendGroupMsg(group, "操作失败,我没有管理员权限!");
             }
         } else {
-            SenderUtil.sendGroupMsg(sender, group, "操作失败,你不是我的管理员!");
+            SenderUtil.sendGroupMsg(group, "操作失败,你不是我的管理员!");
         }
         return false;
     }
@@ -473,7 +473,7 @@ public class GroupManagementListener {
                 str.append("\n\t\t添加黑名单失败: QQ:[").append(user).append("](").append(nickname).append(")已存在");
             }
         }
-        SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + str);
+        SenderUtil.sendGroupMsg(fromGroup, CQ.at(fromQQ) + str);
     }
 
     private void cancelBlackUsers(GroupMsg msg, MsgSender sender, Set<String> set) {
@@ -489,7 +489,7 @@ public class GroupManagementListener {
                 str.append("\n\t取消失败: QQ:[").append(user).append("]不在黑名单");
             }
         }
-        SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(fromQQ) + str);
+        SenderUtil.sendGroupMsg(fromGroup, CQ.at(fromQQ) + str);
 
     }
 

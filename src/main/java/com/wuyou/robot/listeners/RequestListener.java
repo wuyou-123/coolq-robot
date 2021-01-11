@@ -62,7 +62,7 @@ public class RequestListener {
                     + getter.getFriendInfo(qq).getAccountInfo().getAccountRemarkOrNickname() + ")加入群[" + request.getGroupInfo().getGroupCode() + "]("
                     + getter.getGroupInfo(request.getGroupInfo().getGroupCode()).getGroupName() + ")," + ("".equals(request.getText()) ? "附加消息为空"
                     : Objects.requireNonNull(request.getText()).contains("邀请人") ? request.getText() : "附加消息为: " + request.getText()));
-            SenderUtil.sendGroupMsg(sender, fromGroup, "已经拒绝黑名单成员[" + request.getAccountInfo().getAccountCode() + "]("
+            SenderUtil.sendGroupMsg(fromGroup, "已经拒绝黑名单成员[" + request.getAccountInfo().getAccountCode() + "]("
                     + getter.getFriendInfo(qq).getAccountInfo().getAccountRemarkOrNickname() + ")加入群, " + ("".equals(request.getText()) ? "附加消息为空"
                     : Objects.requireNonNull(request.getText()).contains("邀请人") ? request.getText() : "附加消息为: " + request.getText()));
             return;
@@ -111,10 +111,10 @@ public class RequestListener {
                 GroupMemberInfo beingOperateMember = getter.getMemberInfo(fromGroup, beingOperateQQ);
                 if (getter.getMemberInfo(fromGroup, loginQQ).getPermission() != Permissions.MEMBER) {
                     sender.SETTER.setGroupMemberKick(fromGroup, beingOperateQQ, "", true);
-                    SenderUtil.sendGroupMsg(sender, fromGroup,
+                    SenderUtil.sendGroupMsg(fromGroup,
                             "发现黑名单成员[" + beingOperateQQ + "](" + beingOperateMember.getAccountInfo().getAccountRemarkOrNickname() + ")入群,已将他移除此群");
                 } else {
-                    SenderUtil.sendGroupMsg(sender, fromGroup, "发现黑名单成员[" + beingOperateQQ + "]("
+                    SenderUtil.sendGroupMsg(fromGroup, "发现黑名单成员[" + beingOperateQQ + "]("
                             + beingOperateMember.getAccountInfo().getAccountRemarkOrNickname() + ")入群,但是我没有权限将他移除此群");
                 }
                 return;
@@ -134,7 +134,7 @@ public class RequestListener {
                         (level <= 3 && level > 0 ? "，你的等级小于三级,该不会是谁的小号吧"
                                 : level >= 3 && level <= 5 ? "，你的等级为" + level + "级,有一点点低哦"
                                 : level >= 5 && level <= 10 ? "，你的等级为" + level + "级,有一点低哦" : end);
-                SenderUtil.sendGroupMsg(sender, fromGroup, CQ.at(beingOperateQQ) + welcomeMessage);
+                SenderUtil.sendGroupMsg(fromGroup, CQ.at(beingOperateQQ) + welcomeMessage);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -166,7 +166,7 @@ public class RequestListener {
     @Filter("群活跃信息")
     public void testListen2(GroupMsg msg, MsgSender sender) {
         System.out.println("发送群活跃信息");
-        SenderUtil.sendGroupMsg(sender, msg.getGroupInfo().getGroupCode(),
+        SenderUtil.sendGroupMsg(msg.getGroupInfo().getGroupCode(),
                 "https://qqweb.qq.com/m/qun/activedata/active.html?gc=" + msg.getGroupInfo().getGroupCode());
     }
 

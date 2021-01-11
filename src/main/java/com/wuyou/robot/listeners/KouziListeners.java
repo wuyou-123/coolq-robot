@@ -24,7 +24,7 @@ public class KouziListeners {
             Random r = new Random();
             for (int i = 0; i < 100; i++) {
                 int num = r.nextInt(kou.length);
-                SenderUtil.sendGroupMsg(sender, msg.getGroupInfo().getGroupCode(), kou[num]);
+                SenderUtil.sendGroupMsg(msg.getGroupInfo().getGroupCode(), kou[num]);
             }
         }
     }

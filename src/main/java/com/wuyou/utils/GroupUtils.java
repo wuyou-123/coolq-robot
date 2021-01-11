@@ -80,6 +80,7 @@ public class GroupUtils {
             return list;
         } catch (Exception e) {
             sender.SENDER.sendPrivateMsg(GlobalVariable.ADMINISTRATOR.get(0), "出现异常");
+            System.out.println(e.getMessage());
             sender.SENDER.sendPrivateMsg(GlobalVariable.ADMINISTRATOR.get(0), e.getMessage());
             return new ArrayList<>();
         }
@@ -110,7 +111,7 @@ public class GroupUtils {
                 map.put("qq", qq);
                 GlobalVariable.GROUP_DRAGON.put(group, map);
                 if (qq != null) {
-                    SenderUtil.sendGroupMsg(sender, group, CQ.at(qq));
+                    SenderUtil.sendGroupMsg(group, CQ.at(qq));
                     return;
                 } else {
                     if (type == 0) {
@@ -120,9 +121,9 @@ public class GroupUtils {
                 }
             }
             GlobalVariable.GROUP_DRAGON.put(group, map);
-            SenderUtil.sendGroupMsg(sender, group, "当前暂无龙王");
+            SenderUtil.sendGroupMsg(group, "当前暂无龙王");
         } catch (Exception e) {
-            SenderUtil.sendGroupMsg(sender, group, "获取失败");
+            SenderUtil.sendGroupMsg(group, "获取失败");
             sender.SENDER.sendPrivateMsg(GlobalVariable.ADMINISTRATOR.get(0), "出现异常");
             sender.SENDER.sendPrivateMsg(GlobalVariable.ADMINISTRATOR.get(0), e.getMessage());
         }

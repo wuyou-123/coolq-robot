@@ -30,7 +30,7 @@ public class GroupBootListener {
         if (PowerUtils.getPermissions(fromGroup, fromQQ, sender) > 1) {
             service.bootAndShutDown(msg.getGroupInfo().getGroupCode(), 1);
             GlobalVariable.BOOT_MAP.put(msg.getGroupInfo().getGroupCode(), true);
-            SenderUtil.sendGroupMsg(sender, msg.getGroupInfo().getGroupCode(), "已开机, 发送\"菜单\"查看帮助信息, 艾特我可以和我聊天哦");
+            SenderUtil.sendGroupMsg(msg.getGroupInfo().getGroupCode(), "已开机, 发送\"菜单\"查看帮助信息, 艾特我可以和我聊天哦");
         }
     }
 
@@ -42,7 +42,7 @@ public class GroupBootListener {
         if (PowerUtils.getPermissions(fromGroup, fromQQ, sender) > 1) {
             service.bootAndShutDown(msg.getGroupInfo().getGroupCode(), 0);
             GlobalVariable.BOOT_MAP.put(msg.getGroupInfo().getGroupCode(), false);
-            SenderUtil.sendGroupMsg(sender, msg.getGroupInfo().getGroupCode(), "已关机");
+            SenderUtil.sendGroupMsg(msg.getGroupInfo().getGroupCode(), "已关机");
         }
     }
 
