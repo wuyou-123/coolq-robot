@@ -47,7 +47,7 @@ public enum FaceEnum {
     Face200(200, "/拜托"), Face201(201, "/点赞"), Face202(202, "/无聊"), Face203(203, "/托脸"),
     Face204(204, "/吃"), Face205(205, "/送花"), Face206(206, "/害怕"), Face207(207, "/花痴"),
     Face208(208, "/小样儿"), Face209(209, "/拜托"), Face210(210, "/飙泪"), Face211(211, "/我不看"),
-    Face212(212, "/托腮");
+    Face212(212, "/托腮"), Face213(213, "");
 
     private final int id;
     private final String string;

@@ -1,4 +1,4 @@
-package org.nico.ratel.landlords.enums;
+package com.wuyou.enums;
 
 public enum SellType {
 
@@ -41,7 +41,7 @@ public enum SellType {
 	
 	private String msg;
 
-	private SellType(String msg) {
+	SellType(String msg) {
 		this.msg = msg;
 	}
 

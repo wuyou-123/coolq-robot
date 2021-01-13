@@ -1,4 +1,4 @@
-package org.nico.ratel.landlords.enums;
+package com.wuyou.enums;
 
 public enum RoomStatus{
 	/**
@@ -9,6 +9,8 @@ public enum RoomStatus{
 	WAIT("等待"),
 	
 	STARTING("开始"),
+
+	STOPPED("已结束"),
 	
 	
 	;

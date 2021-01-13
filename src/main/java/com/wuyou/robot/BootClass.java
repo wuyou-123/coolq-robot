@@ -4,19 +4,7 @@ import com.wuyou.service.StatService;
 import com.wuyou.utils.CQ;
 import com.wuyou.utils.GlobalVariable;
 import com.wuyou.utils.WebCookiesUtils;
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.epoll.Epoll;
-import io.netty.channel.epoll.EpollEventLoopGroup;
-import io.netty.channel.epoll.EpollServerSocketChannel;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
 import love.forte.common.ioc.annotation.Beans;
-import com.wuyou.utils.landlordsPrint.SimplePrinter;
-import org.nico.ratel.landlords.robot.RobotDecisionMakers;
-import org.nico.ratel.landlords.server.ServerContains;
-import org.nico.ratel.landlords.server.handler.DefaultChannelInitializer;
-import org.nico.ratel.landlords.server.timer.RoomClearTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,12 +12,9 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -76,35 +61,36 @@ public class BootClass {
 
     public void initLandlords() {
         System.out.println("启动斗地主服务");
-        if (GlobalVariable.BOOTSTRAP != null) {
-            GlobalVariable.PARENT_GROUP.shutdownGracefully();
-            GlobalVariable.CHILD_GROUP.shutdownGracefully();
-            GlobalVariable.BOOTSTRAP.bind().channel().close();
-        }
-        GlobalVariable.PARENT_GROUP = Epoll.isAvailable() ? new EpollEventLoopGroup() : new NioEventLoopGroup();
-        GlobalVariable.CHILD_GROUP = Epoll.isAvailable() ? new EpollEventLoopGroup() : new NioEventLoopGroup();
-        GlobalVariable.BOOTSTRAP = new ServerBootstrap()
-                .group(GlobalVariable.PARENT_GROUP, GlobalVariable.CHILD_GROUP)
-                .channel(Epoll.isAvailable() ? EpollServerSocketChannel.class : NioServerSocketChannel.class)
-                .localAddress(new InetSocketAddress(ServerContains.port))
-                .childHandler(new DefaultChannelInitializer());
-
-        try {
-            ChannelFuture f = GlobalVariable.BOOTSTRAP.bind().sync();
-
-            SimplePrinter.serverLog("斗地主服务器已经在端口: " + ServerContains.port + " 启动成功");
-            //Init robot.
-            RobotDecisionMakers.init();
-            ServerContains.THREAD_EXCUTER.execute(() ->
-                Executors.newScheduledThreadPool(5).scheduleAtFixedRate(RoomClearTask::new, 0, 20, TimeUnit.SECONDS)
-            );
-            f.channel().closeFuture().sync();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } finally {
-            GlobalVariable.BOOTSTRAP.config().group().shutdownGracefully();
-            GlobalVariable.BOOTSTRAP.config().childGroup().shutdownGracefully();
-        }
+        GlobalVariable.resetLandlords();
+//        if (GlobalVariable.BOOTSTRAP != null) {
+//            GlobalVariable.PARENT_GROUP.shutdownGracefully();
+//            GlobalVariable.CHILD_GROUP.shutdownGracefully();
+//            GlobalVariable.BOOTSTRAP.bind().player().close();
+//        }
+//        GlobalVariable.PARENT_GROUP = Epoll.isAvailable() ? new EpollEventLoopGroup() : new NioEventLoopGroup();
+//        GlobalVariable.CHILD_GROUP = Epoll.isAvailable() ? new EpollEventLoopGroup() : new NioEventLoopGroup();
+//        GlobalVariable.BOOTSTRAP = new ServerBootstrap()
+//                .group(GlobalVariable.PARENT_GROUP, GlobalVariable.CHILD_GROUP)
+//                .player(Epoll.isAvailable() ? EpollServerSocketChannel.class : NioServerSocketChannel.class)
+//                .localAddress(new InetSocketAddress(ServerContains.port))
+//                .childHandler(new DefaultChannelInitializer());
+//
+//        try {
+//            ChannelFuture f = GlobalVariable.BOOTSTRAP.bind().sync();
+//
+//            SimplePrinter.serverLog("斗地主服务器已经在端口: " + ServerContains.port + " 启动成功");
+//            //Init robot.
+//            RobotDecisionMakers.init();
+//            GlobalVariable.THREAD_POOL.execute(() ->
+//                Executors.newScheduledThreadPool(5).scheduleAtFixedRate(RoomClearTask::new, 0, 20, TimeUnit.MINUTES)
+//            );
+//            f.player().closeFuture().sync();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        } finally {
+//            GlobalVariable.BOOTSTRAP.config().group().shutdownGracefully();
+//            GlobalVariable.BOOTSTRAP.config().childGroup().shutdownGracefully();
+//        }
     }
 ///    public void setu() {
 ///        BlockingQueue<String> setu = GlobalVariable.setuQueue;

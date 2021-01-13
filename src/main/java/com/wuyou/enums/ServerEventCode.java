@@ -1,4 +1,4 @@
-package org.nico.ratel.landlords.enums;
+package com.wuyou.enums;
 
 import java.io.Serializable;
 
@@ -7,16 +7,10 @@ public enum ServerEventCode implements Serializable{
 	CODE_CLIENT_EXIT("玩家退出"),
 	
 	CODE_CLIENT_OFFLINE("玩家离线"),
-	
-	CODE_CLIENT_NICKNAME_SET("设置昵称"),
-	
+
 	CODE_CLIENT_HEAD_BEAT("不出"),
 	
-	CODE_ROOM_CREATE("创建PVP房间"),
-	
-	CODE_ROOM_CREATE_PVE("创建PVE房间"),
-	
-	CODE_GET_ROOMS("获取房间列表"),
+	CODE_ROOM_CREATE("创建房间"),
 
 	CODE_ROOM_JOIN("加入房间"),
 	
@@ -30,13 +24,11 @@ public enum ServerEventCode implements Serializable{
 	
 	CODE_GAME_POKER_PLAY_PASS("不出"),
 
-	CODE_SEND_TO_QQ("发送到QQ"),
-
-	CODE_GAME_WATCH("观战");
+	CODE_CLIENT_READY("玩家准备");
 	
 	private String msg;
 
-	private ServerEventCode(String msg) {
+	ServerEventCode(String msg) {
 		this.msg = msg;
 	}
 

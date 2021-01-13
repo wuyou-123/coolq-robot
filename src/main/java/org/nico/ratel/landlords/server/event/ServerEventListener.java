@@ -1,7 +1,7 @@
 package org.nico.ratel.landlords.server.event;
 
-import org.nico.ratel.landlords.entity.ClientSide;
-import org.nico.ratel.landlords.enums.ServerEventCode;
+import com.wuyou.entity.Player;
+import com.wuyou.enums.ServerEventCode;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -9,7 +9,7 @@ import java.util.Map;
 
 public interface ServerEventListener {
 
-	void call(ClientSide client, String data);
+	void call(Player client, String data);
 
 	Map<ServerEventCode, ServerEventListener> LISTENER_MAP = new HashMap<>();
 	

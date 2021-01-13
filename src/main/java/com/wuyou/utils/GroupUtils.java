@@ -37,6 +37,10 @@ public class GroupUtils {
             return list;
         } catch (Exception e) {
             sender.SENDER.sendPrivateMsg(GlobalVariable.ADMINISTRATOR.get(0), "出现异常");
+            if ("null".equals(e.getMessage()) || e.getMessage() == null) {
+                sender.SENDER.sendPrivateMsg(GlobalVariable.ADMINISTRATOR.get(0), "空指针");
+                return new ArrayList<>();
+            }
             sender.SENDER.sendPrivateMsg(GlobalVariable.ADMINISTRATOR.get(0), e.getMessage());
             return new ArrayList<>();
         }
@@ -81,6 +85,10 @@ public class GroupUtils {
         } catch (Exception e) {
             sender.SENDER.sendPrivateMsg(GlobalVariable.ADMINISTRATOR.get(0), "出现异常");
             System.out.println(e.getMessage());
+            if ("null".equals(e.getMessage()) || e.getMessage() == null) {
+                sender.SENDER.sendPrivateMsg(GlobalVariable.ADMINISTRATOR.get(0), "空指针");
+                return new ArrayList<>();
+            }
             sender.SENDER.sendPrivateMsg(GlobalVariable.ADMINISTRATOR.get(0), e.getMessage());
             return new ArrayList<>();
         }
@@ -93,38 +101,42 @@ public class GroupUtils {
     public static void getDragon(final MsgSender sender, final String group, int type) {
         System.out.println("获取" + group + "的龙王");
         try {
-            Map<String, String> cookies = CookiesUtils.getCookies(sender);
-            System.out.println("请求的cookie: "+cookies);
-            String url = "http://qun.qq.com/interactive/honorlist?gc=" + group + "&type=1&_wv=3&_wwv=129";
-            String url1 = "http://qun.qq.com/interactive/qunhonor?gc=" + group + "&_wv=3&&_wwv=128&dragon_gray1";
-
-            String body = HttpUtils.get(type == 0 ? url : url1, null, cookies).getResponse();
-            JSONObject json = getJson(body);
-            System.out.println(json);
-            JSONObject currentTalkative = json.getJSONObject("currentTalkative");
-            Map<String, Object> map = new HashMap<>(4);
-            Calendar cal = Calendar.getInstance();
-            cal.add(Calendar.MINUTE, 1);
-            map.put("time", cal);
-            if (currentTalkative != null) {
-                String qq = currentTalkative.getString("uin");
-                map.put("qq", qq);
-                GlobalVariable.GROUP_DRAGON.put(group, map);
-                if (qq != null) {
-                    SenderUtil.sendGroupMsg(group, CQ.at(qq));
-                    return;
-                } else {
-                    if (type == 0) {
-                        getDragon(sender, group, 1);
-                        return;
-                    }
-                }
-            }
-            GlobalVariable.GROUP_DRAGON.put(group, map);
-            SenderUtil.sendGroupMsg(group, "当前暂无龙王");
+//            Map<String, String> cookies = CookiesUtils.getCookies(sender);
+//            System.out.println("请求的cookie: " + cookies);
+//            String url = "http://qun.qq.com/interactive/honorlist?gc=" + group + "&type=1&_wv=3&_wwv=129";
+//            String url1 = "http://qun.qq.com/interactive/qunhonor?gc=" + group + "&_wv=3&&_wwv=128&dragon_gray1";
+//
+//            String body = HttpUtils.get(type == 0 ? url : url1, null, cookies).getResponse();
+//            JSONObject json = getJson(body);
+//            System.out.println(json);
+//            JSONObject currentTalkative = json.getJSONObject("currentTalkative");
+//            Map<String, Object> map = new HashMap<>(4);
+//            Calendar cal = Calendar.getInstance();
+//            cal.add(Calendar.MINUTE, 1);
+//            map.put("time", cal);
+//            if (currentTalkative != null) {
+//                String qq = currentTalkative.getString("uin");
+//                map.put("qq", qq);
+//                GlobalVariable.GROUP_DRAGON.put(group, map);
+//                if (qq != null) {
+//                    SenderUtil.sendGroupMsg(group, CQ.at(qq));
+//                    return;
+//                } else {
+//                    if (type == 0) {
+//                        getDragon(sender, group, 1);
+//                        return;
+//                    }
+//                }
+//            }
+//            GlobalVariable.GROUP_DRAGON.put(group, map);
+            SenderUtil.sendGroupMsg(group, "功能暂时停用");
         } catch (Exception e) {
             SenderUtil.sendGroupMsg(group, "获取失败");
             sender.SENDER.sendPrivateMsg(GlobalVariable.ADMINISTRATOR.get(0), "出现异常");
+            if ("null".equals(e.getMessage()) || e.getMessage() == null) {
+                sender.SENDER.sendPrivateMsg(GlobalVariable.ADMINISTRATOR.get(0), "空指针");
+                return;
+            }
             sender.SENDER.sendPrivateMsg(GlobalVariable.ADMINISTRATOR.get(0), e.getMessage());
         }
     }

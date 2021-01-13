@@ -5,15 +5,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.wuyou.enums.FaceEnum;
 import com.wuyou.exception.ObjectExistedException;
 import com.wuyou.exception.ObjectNotFoundException;
-import com.wuyou.robot.BootClass;
 import com.wuyou.service.MessageService;
 import com.wuyou.utils.*;
-import com.wuyou.utils.landlordsPrint.SimplePrinter;
-import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import love.forte.catcode.Neko;
 import love.forte.common.ioc.annotation.Beans;
 import love.forte.common.ioc.annotation.Depend;
@@ -24,15 +17,6 @@ import love.forte.simbot.api.message.events.GroupMsg;
 import love.forte.simbot.api.message.results.GroupMemberList;
 import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.filter.MostMatchType;
-import org.nico.ratel.landlords.client.event.ClientEventListener;
-import org.nico.ratel.landlords.client.handler.DefaultChannelInitializer;
-import org.nico.ratel.landlords.entity.ClientSide;
-import org.nico.ratel.landlords.entity.Room;
-import org.nico.ratel.landlords.enums.ClientEventCode;
-import org.nico.ratel.landlords.enums.ClientRole;
-import org.nico.ratel.landlords.enums.ClientStatus;
-import org.nico.ratel.landlords.enums.ServerEventCode;
-import org.nico.ratel.landlords.server.ServerContains;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -40,8 +24,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static org.nico.ratel.landlords.channel.ChannelUtils.pushToServer;
 
 /**
  * @author Administrator<br>
@@ -51,8 +33,6 @@ import static org.nico.ratel.landlords.channel.ChannelUtils.pushToServer;
 public class GroupMessageListener {
     @Depend
     MessageService service;
-    @Depend
-    private BootClass boot;
 
     private static String getReqSign(Map<String, String> params) throws UnsupportedEncodingException {
         List<String> list = new ArrayList<>(params.keySet());
@@ -116,8 +96,8 @@ public class GroupMessageListener {
         Set<Neko> stringSet = CQ.getAtKqs(str);
         final String[] newStr = {str};
         stringSet.forEach(neko -> {
-            if (qqSet.contains(neko.get("qq"))) {
-                newStr[0] = newStr[0].replace(neko, "@" + sender.GETTER.getMemberInfo(fromGroup, Objects.requireNonNull(neko.get("qq"))).getAccountInfo().getAccountRemarkOrNickname());
+            if (qqSet.contains(neko.get("code"))) {
+                newStr[0] = newStr[0].replace(neko, "@" + sender.GETTER.getMemberInfo(fromGroup, Objects.requireNonNull(neko.get("code"))).getAccountInfo().getAccountRemarkOrNickname());
             }
         });
         return newStr[0];
@@ -144,13 +124,15 @@ public class GroupMessageListener {
     @Filters(customFilter = {"boot", "ai"}, customMostMatchType = MostMatchType.ALL)
     public void sendAiMessage(GroupMsg msg, MsgSender sender) {
         String fromGroup = msg.getGroupInfo().getGroupCode();
-        String message = CQ.UTILS.removeByType("at", msg.getMsg(), true, true);
+        String message = CQ.UTILS.removeByType(msg.getMsg(), "at", true, true);
+        System.out.println(message);
         Map<String, String> map = service.getAllByGroup(fromGroup);
         if (map.containsKey(msg.getMsg().trim())) {
             return;
         }
         List<Neko> faces = CQ.getKq(message, "face");
         for (Neko neko : faces) {
+        System.out.println(neko.get("id"));
             String str = FaceEnum.getString(neko.get("id"));
             message = message.replace(neko, str);
         }
@@ -362,66 +344,4 @@ public class GroupMessageListener {
         }
     }
 
-    @OnGroup
-    @Filters(value = @Filter("重启斗地主"), customFilter = "boot")
-    public void reloadLandlords(GroupMsg msg, MsgSender sender) {
-        boot.initLandlords();
-    }
-
-    @OnGroup
-    @Filters(value = @Filter("上桌"), customFilter = "boot")
-    public void playLandlords(GroupMsg msg, MsgSender sender) {
-        String group = msg.getGroupInfo().getGroupCode();
-        String qq = msg.getAccountInfo().getAccountCode();
-        System.out.println(qq);
-        EventLoopGroup nioEventLoopGroup = new NioEventLoopGroup();
-        try {
-            if (GlobalVariable.LANDLORDS_PLAYER.get(qq) == null) {
-                Bootstrap bootstrap = new Bootstrap()
-                        .group(nioEventLoopGroup)
-                        .channel(NioSocketChannel.class)
-                        .handler(new DefaultChannelInitializer());
-                Channel channel = bootstrap.connect("127.0.0.1", ServerContains.port).sync().channel();
-                GlobalVariable.LANDLORDS_PLAYER.put(qq, channel);
-                ClientSide clientSide = new ClientSide(getId(channel, qq), ClientStatus.TO_CHOOSE, channel);
-                clientSide.setNickname(String.valueOf(clientSide.getId()));
-                clientSide.setRole(ClientRole.PLAYER);
-                System.out.println("clientSideId: " + clientSide.getId());
-                ServerContains.CLIENT_SIDE_MAP.put(clientSide.getId(), clientSide);
-                System.out.println(ServerContains.CLIENT_SIDE_MAP);
-                SimplePrinter.serverLog("Has client connect to the server：" + clientSide.getId());
-                System.out.println("客户端id: " + clientSide.getId());
-//        ChannelUtils.pushToClient(ch, ClientEventCode.CODE_CLIENT_CONNECT, String.valueOf(clientSide.getId()));
-                ClientEventListener.get(ClientEventCode.CODE_CLIENT_CONNECT).call(channel, qq);
-
-                Thread.sleep(100);
-                pushToServer(channel, ServerEventCode.CODE_CLIENT_NICKNAME_SET, qq);
-//                pushToServer(channel, ServerEventCode.CODE_ROOM_CREATE, group).sync();
-                Room room = GlobalVariable.LANDLORDS_ROOM.get(group);
-                if (room == null || ServerContains.getRoom(group) == null) {
-                    pushToServer(channel, ServerEventCode.CODE_ROOM_CREATE, group).sync();
-                } else {
-                    pushToServer(channel, ServerEventCode.CODE_ROOM_JOIN, room.getId() + "").sync();
-                }
-                if (room != null) {
-                    System.out.println(room.getClientSideList());
-                    SenderUtil.sendGroupMsg(group, "上桌成功, 现在房间里有" + room.getClientSideList().size() + "人, 满三人即可开始游戏");
-                }
-            } else {
-                SenderUtil.sendGroupMsg(group, "你已经在桌上了");
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } finally {
-            nioEventLoopGroup.shutdownGracefully();
-        }
-    }
-
-    private String getId(Channel channel, String id) {
-        String longId = channel.localAddress().toString();
-        ServerContains.CHANNEL_ID_MAP.putIfAbsent(longId, id);
-        System.out.println(longId + "------" + id);
-        System.out.println(channel);
-        return ServerContains.CHANNEL_ID_MAP.get(longId);
-    }
 }

@@ -24,8 +24,9 @@ public class GroupManagementFilter {
         public boolean test(@NotNull FilterData data) {
             MsgGet msgget = data.getMsgGet();
             if (msgget instanceof GroupMsg) {
-                String msg = ((GroupMsg) msgget).getMsg().trim();
-                return msg.startsWith("踢") && CQ.getAt(msg) != null;
+                GroupMsg groupMsg = ((GroupMsg) msgget);
+                String msg = groupMsg.getMsg().trim();
+                return msg.startsWith("踢") && groupMsg.getMsgContent().getCats("at").size() > 0;
             }
             return false;
         }
@@ -38,8 +39,9 @@ public class GroupManagementFilter {
         public boolean test(@NotNull FilterData data) {
             MsgGet msgget = data.getMsgGet();
             if (msgget instanceof GroupMsg) {
-                String msg = ((GroupMsg) msgget).getMsg().trim();
-                return msg.startsWith("禁言") && CQ.getAt(msg) != null;
+                GroupMsg groupMsg = ((GroupMsg) msgget);
+                String msg = groupMsg.getMsg().trim();
+                return msg.startsWith("禁言") && groupMsg.getMsgContent().getCats("at").size() > 0;
             }
             return false;
         }
@@ -52,8 +54,9 @@ public class GroupManagementFilter {
         public boolean test(@NotNull FilterData data) {
             MsgGet msgget = data.getMsgGet();
             if (msgget instanceof GroupMsg) {
-                String msg = ((GroupMsg) msgget).getMsg().trim();
-                return msg.startsWith("解禁") && CQ.getAt(msg) != null;
+                GroupMsg groupMsg = ((GroupMsg) msgget);
+                String msg = groupMsg.getMsg().trim();
+                return msg.startsWith("解禁") && groupMsg.getMsgContent().getCats("at").size() > 0;
             }
             return false;
         }
@@ -67,7 +70,8 @@ public class GroupManagementFilter {
         public boolean test(@NotNull FilterData data) {
             MsgGet msgget = data.getMsgGet();
             if (msgget instanceof GroupMsg) {
-                String msg = ((GroupMsg) msgget).getMsg().trim();
+                GroupMsg groupMsg = ((GroupMsg) msgget);
+                String msg = groupMsg.getMsg().trim();
                 if (msg.startsWith("拉黑")) {
                     if (CQ.getAts(msg).size() > 0) {
                         return true;
@@ -97,7 +101,8 @@ public class GroupManagementFilter {
         public boolean test(@NotNull FilterData data) {
             MsgGet msgget = data.getMsgGet();
             if (msgget instanceof GroupMsg) {
-                String msg = ((GroupMsg) msgget).getMsg().trim();
+                GroupMsg groupMsg = ((GroupMsg) msgget);
+                String msg = groupMsg.getMsg().trim();
                 if (msg.startsWith("取消拉黑")) {
                     if (CQ.getAts(msg).size() > 0) {
                         return true;
@@ -127,8 +132,9 @@ public class GroupManagementFilter {
         public boolean test(@NotNull FilterData data) {
             MsgGet msgget = data.getMsgGet();
             if (msgget instanceof GroupMsg) {
-                String msg = ((GroupMsg) msgget).getMsg().trim();
-                return msg.startsWith("改名") && CQ.getAt(msg) != null;
+                GroupMsg groupMsg = ((GroupMsg) msgget);
+                String msg = groupMsg.getMsg().trim();
+                return msg.startsWith("改名") && groupMsg.getMsgContent().getCats("at").size() > 0;
             }
             return false;
         }
@@ -142,8 +148,9 @@ public class GroupManagementFilter {
         public boolean test(@NotNull FilterData data) {
             MsgGet msgget = data.getMsgGet();
             if (msgget instanceof GroupMsg) {
-                String msg = ((GroupMsg) msgget).getMsg().trim();
-                return msg.startsWith("给头衔") && CQ.getAt(msg) != null;
+                GroupMsg groupMsg = ((GroupMsg) msgget);
+                String msg = groupMsg.getMsg().trim();
+                return msg.startsWith("给头衔") && groupMsg.getMsgContent().getCats("at").size() > 0;
             }
             return false;
         }
@@ -157,10 +164,9 @@ public class GroupManagementFilter {
         public boolean test(@NotNull FilterData data) {
             MsgGet msgget = data.getMsgGet();
             if (msgget instanceof GroupMsg) {
-                String msg = ((GroupMsg) msgget).getMsg().trim();
-                System.out.println(msg);
-                System.out.println(CQ.getAt(msg));
-                return (msg.startsWith("添加管理") || msg.startsWith("设置管理") || msg.startsWith("给管理")) && CQ.getAt(msg) != null;
+                GroupMsg groupMsg = ((GroupMsg) msgget);
+                String msg = groupMsg.getMsg().trim();
+                return (msg.startsWith("添加管理") || msg.startsWith("设置管理") || msg.startsWith("给管理")) && (groupMsg.getMsgContent().getCats("at").size() > 0);
             }
             return false;
         }
@@ -174,8 +180,9 @@ public class GroupManagementFilter {
         public boolean test(@NotNull FilterData data) {
             MsgGet msgget = data.getMsgGet();
             if (msgget instanceof GroupMsg) {
-                String msg = ((GroupMsg) msgget).getMsg().trim();
-                return (msg.startsWith("删除管理") || msg.startsWith("取消管理") || msg.startsWith("移除管理")) && CQ.getAt(msg) != null;
+                GroupMsg groupMsg = ((GroupMsg) msgget);
+                String msg = groupMsg.getMsg().trim();
+                return (msg.startsWith("删除管理") || msg.startsWith("取消管理") || msg.startsWith("移除管理")) && (groupMsg.getMsgContent().getCats("at").size() > 0);
             }
             return false;
         }
@@ -189,9 +196,10 @@ public class GroupManagementFilter {
         public boolean test(@NotNull FilterData data) {
             MsgGet msgget = data.getMsgGet();
             if (msgget instanceof GroupMsg) {
-                String msg = ((GroupMsg) msgget).getMsg().trim();
+                GroupMsg groupMsg = ((GroupMsg) msgget);
+                String msg = groupMsg.getMsg().trim();
                 return (msg.startsWith("添加群管理") || msg.startsWith("设置群管理") || msg.startsWith("给群管理"))
-                        && CQ.getAt(msg) != null;
+                        && groupMsg.getMsgContent().getCats("at").size() > 0;
             }
             return false;
         }
@@ -205,9 +213,9 @@ public class GroupManagementFilter {
         public boolean test(@NotNull FilterData data) {
             MsgGet msgget = data.getMsgGet();
             if (msgget instanceof GroupMsg) {
-                String msg = ((GroupMsg) msgget).getMsg().trim();
-                return (msg.startsWith("删除群管理") || msg.startsWith("取消群管理") || msg.startsWith("移除群管理"))
-                        && CQ.getAt(msg) != null;
+                GroupMsg groupMsg = ((GroupMsg) msgget);
+                String msg = groupMsg.getMsg().trim();
+                return (msg.startsWith("删除群管理") || msg.startsWith("取消群管理") || msg.startsWith("移除群管理")) && groupMsg.getMsgContent().getCats("at").size() > 0;
             }
             return false;
         }

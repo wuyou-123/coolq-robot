@@ -1,7 +1,7 @@
 package org.nico.ratel.landlords.server.robot;
 
-import org.nico.ratel.landlords.entity.ClientSide;
-import org.nico.ratel.landlords.enums.ClientEventCode;
+import com.wuyou.entity.Player;
+import com.wuyou.enums.ClientEventCode;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -9,14 +9,14 @@ import java.util.Map;
 
 public interface RobotEventListener {
 
-	final static String LISTENER_PREFIX = "org.nico.ratel.landlords.server.robot.RobotEventListener_";
+	String LISTENER_PREFIX = "org.nico.ratel.landlords.server.robot.RobotEventListener_";
 	
-	public final static Map<ClientEventCode, RobotEventListener> LISTENER_MAP = new HashMap<>();
+	Map<ClientEventCode, RobotEventListener> LISTENER_MAP = new HashMap<>();
 	
-	public void call(ClientSide robot, String data);
+	void call(Player robot, String data);
 
 	@SuppressWarnings("unchecked")
-	public static RobotEventListener get(ClientEventCode code) {
+	static RobotEventListener get(ClientEventCode code) {
 		System.out.println("RobotEventListener-----"+code);
 		RobotEventListener listener = null;
 		try {
@@ -36,7 +36,7 @@ public interface RobotEventListener {
 		}catch(ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
-		return listener;
+		return null;
 	}
 	
 }

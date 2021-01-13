@@ -1,24 +1,22 @@
 package org.nico.ratel.landlords.server.robot;
 
+import com.wuyou.entity.Player;
+import com.wuyou.enums.SellType;
+import com.wuyou.enums.ServerEventCode;
+import com.wuyou.utils.GlobalVariable;
 import org.nico.noson.Noson;
-import org.nico.ratel.landlords.entity.ClientSide;
 import org.nico.ratel.landlords.entity.PokerSell;
 import org.nico.ratel.landlords.entity.Room;
-import org.nico.ratel.landlords.enums.SellType;
-import org.nico.ratel.landlords.enums.ServerEventCode;
-import org.nico.ratel.landlords.helper.PokerHelper;
 import org.nico.ratel.landlords.helper.TimeHelper;
-import com.wuyou.utils.landlordsPrint.SimplePrinter;
 import org.nico.ratel.landlords.robot.RobotDecisionMakers;
-import org.nico.ratel.landlords.server.ServerContains;
 import org.nico.ratel.landlords.server.event.ServerEventListener;
 
 public class RobotEventListener_CODE_GAME_POKER_PLAY implements RobotEventListener{
 
 	@Override
-	public void call(ClientSide robot, String data) {
-		ServerContains.THREAD_EXCUTER.execute(() -> {
-			Room room = ServerContains.getRoom(robot.getRoomId());
+	public void call(Player robot, String data) {
+		GlobalVariable.THREAD_POOL.execute(() -> {
+			Room room = GlobalVariable.getRoom(robot.getRoomId());
 
 			PokerSell lastPokerSell = null;
 			PokerSell pokerSell;
@@ -28,14 +26,12 @@ public class RobotEventListener_CODE_GAME_POKER_PLAY implements RobotEventListen
 			}else {
 				pokerSell = RobotDecisionMakers.howToPlayPokers(room.getDifficultyCoefficient(), null, robot);
 			}
-			
-			if(pokerSell != null && lastPokerSell != null) {
-				SimplePrinter.serverLog("Robot monitoring[room:" + room.getId() + "]");
-				SimplePrinter.serverLog("last  sell  -> " + lastPokerSell.toString());
-				SimplePrinter.serverLog("robot sell  -> " + pokerSell.toString());
-				SimplePrinter.serverLog("robot poker -> " + PokerHelper.textOnlyNoType(robot.getPokers()));
-			}
-			
+
+			//				SimplePrinter.serverLog("Robot monitoring[room:" + room.getId() + "]");
+			//				SimplePrinter.serverLog("last  sell  -> " + lastPokerSell.toString());
+			//				SimplePrinter.serverLog("robot sell  -> " + pokerSell.toString());
+			//				SimplePrinter.serverLog("robot poker -> " + PokerHelper.textOnlyNoType(robot.getPokers()));
+
 			TimeHelper.sleep(300);
 			
 			if(pokerSell == null || pokerSell.getSellType() == SellType.ILLEGAL) {

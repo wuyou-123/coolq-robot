@@ -197,6 +197,7 @@ public class GroupOtherListeners {
                 web = HttpUtils.get("http://api.lolicon.app/setu/", params, null).getResponse();
                 json = JSONObject.parseObject(web);
             }
+//            QQAndroidBot
         } catch (Exception e) {
             e.printStackTrace();
         }

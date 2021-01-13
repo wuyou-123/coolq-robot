@@ -1,22 +1,14 @@
 package org.nico.ratel.landlords.robot;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.wuyou.utils.GlobalVariable;
-import org.nico.ratel.landlords.entity.ClientSide;
+import com.wuyou.entity.Player;
+import com.wuyou.enums.SellType;
 import org.nico.ratel.landlords.entity.Poker;
 import org.nico.ratel.landlords.entity.PokerSell;
-import org.nico.ratel.landlords.enums.SellType;
 import org.nico.ratel.landlords.helper.PokerHelper;
-import com.wuyou.utils.landlordsPrint.SimplePrinter;
-import org.nico.ratel.landlords.utils.StreamUtils;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,31 +28,16 @@ public class MediumRobotDecisionMakers extends AbstractRobotDecisionMakers {
     private static Map<String, Long> DP = new ConcurrentHashMap<>();
 
     public MediumRobotDecisionMakers() {
-        try {
-            InputStream stream = this.getClass().getClassLoader().getResourceAsStream("dp.json");
-            String dpJson = StreamUtils.convertToString(stream);
-            DP = gson.fromJson(dpJson, new TypeToken<ConcurrentHashMap<String, Long>>() {
-            }.getType());
-            SimplePrinter.serverLog("Medium Robot init with dp.json.");
-        } catch (Exception e) {
-            e.printStackTrace();
-            SimplePrinter.serverLog("Medium Robot init without dp.json.");
-        }
-
-        GlobalVariable.THREAD_POOL.execute(() -> {
-            try {
-                while (true) {
-                    Thread.sleep(1000 * 60);
-                    String date = SDF.format(new Date());
-                    FileWriter w = new FileWriter("dp_" + date + ".json", false);
-                    w.write(gson.toJson(DP));
-                    w.flush();
-                    w.close();
-                }
-            } catch (InterruptedException | IOException e) {
-                e.printStackTrace();
-            }
-        });
+//        try {
+//            InputStream stream = this.getClass().getClassLoader().getResourceAsStream("dp.json");
+//            String dpJson = StreamUtils.convertToString(stream);
+//            DP = gson.fromJson(dpJson, new TypeToken<ConcurrentHashMap<String, Long>>() {
+//            }.getType());
+////            SimplePrinter.serverLog("Medium Robot init with dp.json.");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+////            SimplePrinter.serverLog("Medium Robot init without dp.json.");
+//        }
     }
 
     private static String serialPokers(List<Poker> pokers) {
@@ -84,7 +61,7 @@ public class MediumRobotDecisionMakers extends AbstractRobotDecisionMakers {
     }
 
     @Override
-    public PokerSell howToPlayPokers(PokerSell lastPokerSell, ClientSide robot) {
+    public PokerSell howToPlayPokers(PokerSell lastPokerSell, Player robot) {
         if (lastPokerSell != null && lastPokerSell.getSellType() == SellType.KING_BOMB) {
             return null;
         }

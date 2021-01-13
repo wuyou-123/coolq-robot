@@ -1,6 +1,5 @@
 package com.wuyou.robot.listeners;
 
-import com.wuyou.entity.GroupEntity;
 import com.wuyou.exception.ObjectExistedException;
 import com.wuyou.exception.ObjectNotFoundException;
 import com.wuyou.robot.BootClass;
@@ -8,15 +7,15 @@ import com.wuyou.service.AllBlackService;
 import com.wuyou.service.ClearService;
 import com.wuyou.utils.CQ;
 import com.wuyou.utils.GlobalVariable;
-import com.wuyou.utils.GroupUtils;
 import love.forte.common.ioc.annotation.Beans;
 import love.forte.common.ioc.annotation.Depend;
 import love.forte.simbot.annotation.Filter;
-import love.forte.simbot.annotation.Filters;
 import love.forte.simbot.annotation.OnPrivate;
 import love.forte.simbot.api.message.events.PrivateMsg;
 import love.forte.simbot.api.message.results.GroupFullInfo;
+import love.forte.simbot.api.message.results.GroupList;
 import love.forte.simbot.api.message.results.GroupMemberInfo;
+import love.forte.simbot.api.message.results.GroupOwner;
 import love.forte.simbot.api.sender.MsgSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -40,16 +39,8 @@ public class PrivateMsgListener {
     @Autowired
     private BootClass boot;
 
-    ///    @Value("${command}")
-///    private String commandStr;
-    @OnPrivate
-    @Filters(customFilter = "landlords")
-    public void landlords(PrivateMsg msg, MsgSender sender) {
-    }
-
     @OnPrivate
     public void testPrivateMsg(PrivateMsg msg, MsgSender sender) {
-//        System.out.println(1111);
         String qq = msg.getAccountInfo().getAccountCode();
         String message = msg.getMsg();
         if (!"1097810498".equals(qq)) {
@@ -63,19 +54,10 @@ public class PrivateMsgListener {
         if (message.startsWith("重启斗地主")) {
             boot.initLandlords();
         }
-//        if (message.startsWith("发牌 ")) {
-
-//            sender.SENDER.sendPrivateMsg(qq, CQ.getPoker(pokerFile.toString()).toString());
-//        }
         if ("a".equals(message)) {
-//            String a = "[CQ:image,file=/Users/wuyou/other/coolq-robot/src/resourcesData/poker/poker_comp/a1_a2.png,destruct=false]";
-//            String a = "[CQ:image,file=/Users/wuyou/Desktop/小恐龙表情/a048e674d5bcfe02eaa96a6b0f41fb46.jpg,destruct=false]";
-            String a = CQ.getImage("/Users/wuyou/Desktop/小恐龙表情/a048e674d5bcfe02eaa96a6b0f41fb46.jpg").toString();
-            String b = CQ.getImage("/Users/wuyou/other/coolq-robot/src/resourcesData/poker/poker_comp/a2_b2_ak_bk_ck_dk_dq_aj_cj_dj_a9_c8_a7_c7_c5_b4_c4.png").toString();
-            System.out.println(a);
-            sender.SENDER.sendPrivateMsg(qq, a);
-            sender.SENDER.sendPrivateMsg(qq, b);
-
+            for (int i = 213; i < 300; i++) {
+//                SenderUtil.sendPrivateMsg(qq, "id: " + i +"  "+ CQ.getFace(i + "").toString());
+            }
         }
     }
 
@@ -193,18 +175,29 @@ public class PrivateMsgListener {
         if (GlobalVariable.ADMINISTRATOR.contains(msg.getAccountInfo().getAccountCode())) {
             GlobalVariable.THREAD_POOL.execute(() -> {
                 // 发送群列表
-                List<GroupEntity> groupList = GroupUtils.getGroupList(sender);
-                System.out.println(groupList.size());
+                GroupList groupEntities = sender.GETTER.getGroupList();
                 StringBuilder groupInfo = new StringBuilder("群列表:\n");
                 AtomicInteger num = new AtomicInteger(0);
-                groupList.forEach(group -> {
-                    System.out.println(group);
-                    groupInfo.append(num.getAndIncrement() + 1).append(". ").append(group.getGroupName()).append("(").append(group.getUin()).append(")  ").append(group.getRole()).append("\n");
-                    groupInfo.append("\t群主信息: ").append(group.getOwner().getNick()).append("(").append(group.getOwner().getUin()).append(")\n\n");
+                groupEntities.forEach(group -> {
+                    String groupCode = group.getGroupCode();
+                    GroupOwner owner = sender.GETTER.getGroupInfo(groupCode).getOwner();
+                    groupInfo.append(num.getAndIncrement() + 1).append(". ").append(group.getGroupName()).append("(").append(group.getGroupCode()).append(")  [").append(sender.GETTER.getMemberInfo(group.getGroupCode(), sender.GETTER.getBotInfo().getBotCode()).getPermission()).append("]\n");
+                    groupInfo.append("\t群主信息: ").append(owner.getAccountInfo().getAccountRemarkOrNickname()).append("(").append(owner.getAccountInfo().getAccountCode()).append(")\n\n");
                     if (num.get() % 10 == 0) {
                         groupInfo.append("\n\n\n");
                     }
                 });
+//                List<GroupEntity> groupList = GroupUtils.getGroupList(sender);
+//                StringBuilder groupInfo = new StringBuilder("群列表:\n");
+//                AtomicInteger num = new AtomicInteger(0);
+//                groupList.forEach(group -> {
+//                    System.out.println(group);
+//                    groupInfo.append(num.getAndIncrement() + 1).append(". ").append(group.getGroupName()).append("(").append(group.getUin()).append(")  ").append(group.getRole()).append("\n");
+//                    groupInfo.append("\t群主信息: ").append(group.getOwner().getNick()).append("(").append(group.getOwner().getUin()).append(")\n\n");
+//                    if (num.get() % 10 == 0) {
+//                        groupInfo.append("\n\n\n");
+//                    }
+//                });
                 String[] messageArray = groupInfo.toString().split("\n\n\n");
                 for (String message : messageArray) {
                     sender.SENDER.sendPrivateMsg(msg.getAccountInfo().getAccountCode(), message.trim());

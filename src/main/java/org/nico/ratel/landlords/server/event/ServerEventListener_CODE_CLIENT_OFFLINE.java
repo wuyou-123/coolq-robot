@@ -1,37 +1,37 @@
 package org.nico.ratel.landlords.server.event;
 
+import com.wuyou.entity.Player;
+import com.wuyou.enums.ClientEventCode;
+import com.wuyou.enums.ClientRole;
+import com.wuyou.utils.GlobalVariable;
 import org.nico.ratel.landlords.client.event.ClientEventListener;
-import org.nico.ratel.landlords.entity.ClientSide;
 import org.nico.ratel.landlords.entity.Room;
-import org.nico.ratel.landlords.enums.ClientEventCode;
-import org.nico.ratel.landlords.enums.ClientRole;
 import org.nico.ratel.landlords.helper.MapHelper;
-import org.nico.ratel.landlords.server.ServerContains;
 
 public class ServerEventListener_CODE_CLIENT_OFFLINE implements ServerEventListener {
 
     @Override
-    public void call(ClientSide clientSide, String data) {
+    public void call(Player player, String data) {
 
-        Room room = ServerContains.getRoom(clientSide.getRoomId());
+        Room room = GlobalVariable.getRoom(player.getRoomId());
 
         if (room != null) {
             String result = MapHelper.newInstance()
                     .put("roomId", room.getId())
-                    .put("exitClientId", clientSide.getId())
-                    .put("exitClientNickname", clientSide.getNickname())
+                    .put("exitClientId", player.getId())
+                    .put("exitClientNickname", player.getNickname())
                     .json();
-            for (ClientSide client : room.getClientSideList()) {
+            for (Player client : room.getPlayerList()) {
                 if (client.getRole() == ClientRole.PLAYER) {
-                    if (!client.getId().equals(clientSide.getId())) {
-//						ChannelUtils.pushToClient(client.getChannel(), ClientEventCode.CODE_CLIENT_EXIT, result);
-                        ClientEventListener.get(ClientEventCode.CODE_CLIENT_EXIT).call(client.getChannel(), result);
+                    if (!client.getId().equals(player.getId())) {
+//						ChannelUtils.pushToClient(player, ClientEventCode.CODE_CLIENT_EXIT, result);
+                        ClientEventListener.get(ClientEventCode.CODE_CLIENT_EXIT).call(client, result);
 
                         client.init();
                     }
                 }
             }
-            ServerContains.removeRoom(room.getId());
+            GlobalVariable.removeRoom(room.getId());
         }
         System.out.println("掉线");
 //        try {
@@ -40,7 +40,7 @@ public class ServerEventListener_CODE_CLIENT_OFFLINE implements ServerEventListe
 //            e.printStackTrace();
 //        }
 //        try {
-//            ServerContains.CLIENT_SIDE_MAP.remove(GlobalVariable.CLIENT_ID_MAP.get(clientSide.getId()));
+//            ServerContains.CLIENT_SIDE_MAP.remove(GlobalVariable.CLIENT_ID_MAP.get(player.getId()));
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //        }

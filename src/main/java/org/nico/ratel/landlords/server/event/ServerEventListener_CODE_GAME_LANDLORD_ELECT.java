@@ -1,109 +1,110 @@
 package org.nico.ratel.landlords.server.event;
 
 
+import com.wuyou.entity.Player;
+import com.wuyou.enums.*;
+import com.wuyou.utils.CQ;
 import com.wuyou.utils.GlobalVariable;
+import com.wuyou.utils.SenderUtil;
 import org.nico.ratel.landlords.client.event.ClientEventListener;
-import org.nico.ratel.landlords.entity.ClientSide;
+import org.nico.ratel.landlords.entity.Poker;
 import org.nico.ratel.landlords.entity.Room;
-import org.nico.ratel.landlords.enums.ClientEventCode;
-import org.nico.ratel.landlords.enums.ClientRole;
-import org.nico.ratel.landlords.enums.ClientType;
-import org.nico.ratel.landlords.enums.ServerEventCode;
 import org.nico.ratel.landlords.helper.MapHelper;
 import org.nico.ratel.landlords.helper.PokerHelper;
-import org.nico.ratel.landlords.server.ServerContains;
 import org.nico.ratel.landlords.server.robot.RobotEventListener;
+
+import java.util.List;
 
 public class ServerEventListener_CODE_GAME_LANDLORD_ELECT implements ServerEventListener {
 
     @Override
-    public void call(ClientSide clientSide, String data) {
+    public void call(Player player, String data) {
         try {
-            Room room = ServerContains.getRoom(clientSide.getRoomId());
+            player.setStatus(ClientStatus.WAIT);
+            Room room = GlobalVariable.getRoom(player.getRoomId());
 
             if (room != null) {
                 boolean isY = Boolean.parseBoolean(data);
-                System.out.println(clientSide.getId() + "选择了" + isY);
+                System.out.println(player.getId() + "选择了" + isY);
                 if (isY) {
-                    clientSide.getPokers().addAll(room.getLandlordPokers());
-                    PokerHelper.sortPoker(clientSide.getPokers());
+                    player.getPokers().addAll(room.getLandlordPokers());
+                    PokerHelper.sortPoker(player.getPokers());
 
-                    String currentClientId = clientSide.getId();
+                    String currentClientId = player.getId();
                     room.setLandlordId(currentClientId);
                     room.setLastSellClient(currentClientId);
                     room.setCurrentSellClient(currentClientId);
-                    clientSide.setType(ClientType.地主);
+                    player.setType(ClientType.地主);
 
-                    for (ClientSide client : room.getClientSideList()) {
+                    for (Player client : room.getPlayerList()) {
+                        client.setStatus(ClientStatus.PLAYING);
                         GlobalVariable.THREAD_POOL.execute(() -> {
-                            System.out.println(room.getClientSideList().size());
-                            System.out.println("11111-------" + client.getId());
                             String result = MapHelper.newInstance()
                                     .put("roomId", room.getId())
                                     .put("roomOwner", room.getRoomOwner())
-                                    .put("roomClientCount", room.getClientSideList().size())
-                                    .put("landlordNickname", clientSide.getNickname())
-                                    .put("landlordId", clientSide.getId())
+                                    .put("roomClientCount", room.getPlayerList().size())
+                                    .put("landlordNickname", player.getNickname())
+                                    .put("landlordId", player.getId())
                                     .put("additionalPokers", room.getLandlordPokers())
                                     .json();
 
-                            if (client.getRole() == ClientRole.PLAYER) {
-///						ChannelUtils.pushToClient(client.getChannel(), ClientEventCode.CODE_GAME_LANDLORD_CONFIRM, result);
-                                ClientEventListener.get(ClientEventCode.CODE_GAME_LANDLORD_CONFIRM).call(client.getChannel(), result);
-
-                            } else {
-                                if (currentClientId.equals(client.getId())) {
-                                    RobotEventListener.get(ClientEventCode.CODE_GAME_POKER_PLAY).call(client, result);
-                                }
-                            }
+///						ChannelUtils.pushToClient(player, ClientEventCode.CODE_GAME_LANDLORD_CONFIRM, result);
+                                ClientEventListener.get(ClientEventCode.CODE_GAME_LANDLORD_CONFIRM).call(client, result);
                         });
                     }
 
-                    notifyWatcherConfirmLandlord(room, clientSide);
+                    String landlordNickname = player.getNickname();
+                    SenderUtil.sendGroupMsg(room.getId(), landlordNickname + " 已经成为地主并获得了额外的三张牌");
+                    List<Poker> additionalPokers = room.getLandlordPokers();
+                    SenderUtil.sendGroupMsg(room.getId(), CQ.getPoker(additionalPokers));
+                    Thread.sleep(1000);
+                    SenderUtil.sendGroupMsg(room.getId(), "下一位玩家是 " + GlobalVariable.LANDLORDS_PLAYER.get(room.getCurrentSellClient()).getNickname() + ", 请等待他确认.");
+//                    notifyWatcherConfirmLandlord(room, player);
                 } else {
-                    if (clientSide.getNext().getId().equals(room.getFirstSellClient())) {
-                        for (ClientSide client : room.getClientSideList()) {
+                    if (player.getNext().getId().equals(room.getFirstSellClient())) {
+                        for (Player client : room.getPlayerList()) {
                             GlobalVariable.THREAD_POOL.execute(() -> {
                                 if (client.getRole() == ClientRole.PLAYER) {
-///							ChannelUtils.pushToClient(client.getChannel(), ClientEventCode.CODE_GAME_LANDLORD_CYCLE, null);
-                                    ClientEventListener.get(ClientEventCode.CODE_GAME_LANDLORD_CYCLE).call(client.getChannel(), null);
+///							ChannelUtils.pushToClient(player, ClientEventCode.CODE_GAME_LANDLORD_CYCLE, null);
+                                    ClientEventListener.get(ClientEventCode.CODE_GAME_LANDLORD_CYCLE).call(client, null);
                                 }
                             });
                         }
-
-                        ServerEventListener.get(ServerEventCode.CODE_GAME_STARTING).call(clientSide, null);
+                        ServerEventListener.get(ServerEventCode.CODE_GAME_STARTING).call(player, null);
                     } else {
-                        ClientSide turnClientSide = clientSide.getNext();
-                        room.setCurrentSellClient(turnClientSide.getId());
+                        Player turnPlayer = player.getNext();
+                        room.setCurrentSellClient(turnPlayer.getId());
                         String result = MapHelper.newInstance()
                                 .put("roomId", room.getId())
                                 .put("roomOwner", room.getRoomOwner())
-                                .put("roomClientCount", room.getClientSideList().size())
-                                .put("preClientNickname", clientSide.getNickname())
-                                .put("nextClientNickname", turnClientSide.getNickname())
-                                .put("nextClientId", turnClientSide.getId())
+                                .put("roomClientCount", room.getPlayerList().size())
+                                .put("preClientNickname", player.getNickname())
+                                .put("nextClientNickname", turnPlayer.getNickname())
+                                .put("nextClientId", turnPlayer.getId())
                                 .json();
+                        SenderUtil.sendGroupMsg(room.getId(), player.getNickname() + " 没有抢地主!");
+                        SenderUtil.sendGroupMsg(room.getId(), "现在轮到" + turnPlayer.getNickname() + ". 请耐心等待他/她选择是否抢地主!");
 
-                        for (ClientSide client : room.getClientSideList()) {
+                        for (Player client : room.getPlayerList()) {
                             GlobalVariable.THREAD_POOL.execute(() -> {
                                 if (client.getRole() == ClientRole.PLAYER) {
-///							ChannelUtils.pushToClient(client.getChannel(), ClientEventCode.CODE_GAME_LANDLORD_ELECT, result);
-                                    ClientEventListener.get(ClientEventCode.CODE_GAME_LANDLORD_ELECT).call(client.getChannel(), result);
+///							ChannelUtils.pushToClient(player, ClientEventCode.CODE_GAME_LANDLORD_ELECT, result);
+                                    ClientEventListener.get(ClientEventCode.CODE_GAME_LANDLORD_ELECT).call(client, result);
 
                                 } else {
-                                    if (client.getId().equals(turnClientSide.getId())) {
+                                    if (client.getId().equals(turnPlayer.getId())) {
                                         RobotEventListener.get(ClientEventCode.CODE_GAME_LANDLORD_ELECT).call(client, result);
                                     }
                                 }
                             });
                         }
 
-                        notifyWatcherRobLandlord(room, clientSide);
+                        notifyWatcherRobLandlord(room, player);
                     }
                 }
             }
 ///            else {
-///			ChannelUtils.pushToClient(clientSide.getChannel(), ClientEventCode.CODE_ROOM_PLAY_FAIL_BY_INEXIST, null);
+///			ChannelUtils.pushToClient(player, ClientEventCode.CODE_ROOM_PLAY_FAIL_BY_INEXIST, null);
 ///            }
         } catch (Exception e) {
             e.printStackTrace();
@@ -116,15 +117,15 @@ public class ServerEventListener_CODE_GAME_LANDLORD_ELECT implements ServerEvent
      * @param room     房间
      * @param landlord 地主
      */
-    private void notifyWatcherConfirmLandlord(Room room, ClientSide landlord) {
+    private void notifyWatcherConfirmLandlord(Room room, Player landlord) {
         String json = MapHelper.newInstance()
                 .put("landlord", landlord.getNickname())
                 .put("additionalPokers", room.getLandlordPokers())
                 .json();
 
-        for (ClientSide watcher : room.getWatcherList()) {
-///			ChannelUtils.pushToClient(watcher.getChannel(), ClientEventCode.CODE_GAME_LANDLORD_CONFIRM, json);
-            ClientEventListener.get(ClientEventCode.CODE_GAME_LANDLORD_CONFIRM).call(watcher.getChannel(), json);
+        for (Player watcher : room.getWatcherList()) {
+///			ChannelUtils.pushToClient(watcher, ClientEventCode.CODE_GAME_LANDLORD_CONFIRM, json);
+            ClientEventListener.get(ClientEventCode.CODE_GAME_LANDLORD_CONFIRM).call(watcher, json);
 
         }
     }
@@ -134,10 +135,10 @@ public class ServerEventListener_CODE_GAME_LANDLORD_ELECT implements ServerEvent
      *
      * @param room 房间
      */
-    private void notifyWatcherRobLandlord(Room room, ClientSide player) {
-        for (ClientSide watcher : room.getWatcherList()) {
-///			ChannelUtils.pushToClient(watcher.getChannel(), ClientEventCode.CODE_GAME_LANDLORD_ELECT, player.getNickname());
-            ClientEventListener.get(ClientEventCode.CODE_GAME_LANDLORD_ELECT).call(watcher.getChannel(), player.getNickname());
+    private void notifyWatcherRobLandlord(Room room, Player player) {
+        for (Player watcher : room.getWatcherList()) {
+///			ChannelUtils.pushToClient(watcher, ClientEventCode.CODE_GAME_LANDLORD_ELECT, player.getNickname());
+            ClientEventListener.get(ClientEventCode.CODE_GAME_LANDLORD_ELECT).call(watcher, player.getNickname());
 
         }
     }

@@ -1,13 +1,13 @@
 package org.nico.ratel.landlords.server.robot;
 
-import org.nico.ratel.landlords.entity.ClientSide;
+import com.wuyou.entity.Player;
+import com.wuyou.enums.ServerEventCode;
+import com.wuyou.utils.GlobalVariable;
 import org.nico.ratel.landlords.entity.Poker;
 import org.nico.ratel.landlords.entity.Room;
-import org.nico.ratel.landlords.enums.ServerEventCode;
 import org.nico.ratel.landlords.helper.PokerHelper;
 import org.nico.ratel.landlords.helper.TimeHelper;
 import org.nico.ratel.landlords.robot.RobotDecisionMakers;
-import org.nico.ratel.landlords.server.ServerContains;
 import org.nico.ratel.landlords.server.event.ServerEventListener;
 
 import java.util.ArrayList;
@@ -16,9 +16,9 @@ import java.util.List;
 public class RobotEventListener_CODE_GAME_LANDLORD_ELECT implements RobotEventListener{
 
 	@Override
-	public void call(ClientSide robot, String data) {
-		ServerContains.THREAD_EXCUTER.execute(() -> {
-			Room room = ServerContains.getRoom(robot.getRoomId());
+	public void call(Player robot, String data) {
+		GlobalVariable.THREAD_POOL.execute(() -> {
+			Room room = GlobalVariable.getRoom(robot.getRoomId());
 
 			List<Poker> landlordPokers = new ArrayList<>(20);
 			landlordPokers.addAll(robot.getPokers());

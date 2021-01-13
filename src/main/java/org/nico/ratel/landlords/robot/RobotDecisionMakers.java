@@ -1,10 +1,9 @@
 package org.nico.ratel.landlords.robot;
 
 import com.wuyou.utils.GlobalVariable;
-import org.nico.ratel.landlords.entity.ClientSide;
+import com.wuyou.entity.Player;
 import org.nico.ratel.landlords.entity.Poker;
 import org.nico.ratel.landlords.entity.PokerSell;
-import org.nico.ratel.landlords.server.ServerContains;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,14 +22,13 @@ public class RobotDecisionMakers {
 		DECISION_MAKERS_MAP.put(1, new EasyRobotDecisionMakers());
 		DECISION_MAKERS_MAP.put(2, new MediumRobotDecisionMakers());
 		GlobalVariable.LANDLORDS_PLAYER.clear();
-		ServerContains.clearAll();
 	}
 	
 	public static boolean contains(int difficultyCoefficient) {
 		return DECISION_MAKERS_MAP.containsKey(difficultyCoefficient);
 	}
 	
-	public static PokerSell howToPlayPokers(int difficultyCoefficient, PokerSell lastPokerSell, ClientSide robot){
+	public static PokerSell howToPlayPokers(int difficultyCoefficient, PokerSell lastPokerSell, Player robot){
 		return DECISION_MAKERS_MAP.get(difficultyCoefficient).howToPlayPokers(lastPokerSell, robot);
 	}
 	

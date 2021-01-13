@@ -19,6 +19,7 @@ import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.filter.MostMatchType;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Administrator<br>
@@ -36,7 +37,7 @@ public class GroupManagementListener {
     public void kickMember(GroupMsg msg, MsgSender sender) {
         String fromGroup = msg.getGroupInfo().getGroupCode();
         String fromQQ = msg.getAccountInfo().getAccountCode();
-        Set<String> set = CQ.getAts(msg.getMsg());
+        Set<String> set = msg.getMsgContent().getCats("at").stream().map((neko)-> neko.get("code")).collect(Collectors.toSet());
         if (set.size() == 0) {
             SenderUtil.sendGroupMsg(fromGroup, "指令不合法,请至少艾特一位群成员");
             return;

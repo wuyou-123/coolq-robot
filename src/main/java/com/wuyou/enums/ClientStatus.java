@@ -1,4 +1,4 @@
-package org.nico.ratel.landlords.enums;
+package com.wuyou.enums;
 
 public enum ClientStatus{
 

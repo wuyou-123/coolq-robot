@@ -1,4 +1,4 @@
-package org.nico.ratel.landlords.enums;
+package com.wuyou.enums;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -10,7 +10,9 @@ import java.util.Set;
  * @author nico
  */
 public enum PokerLevel{
-
+	/**
+	 * 所有的牌
+	 */
 	LEVEL_3(3, "3", new Character[]{'3'}),
 	
 	LEVEL_4(4, "4", new Character[]{'4'}),
@@ -48,22 +50,22 @@ public enum PokerLevel{
 	
 	private Character[] alias;
 	
-	private static Set<Character> aliasSet = new HashSet<>();
+	private static final Set<Character> ALIAS_SET = new HashSet<>();
 	
 	static {
 		for(PokerLevel level: PokerLevel.values()) {
-			PokerLevel.aliasSet.addAll(Arrays.asList(level.getAlias()));
+			PokerLevel.ALIAS_SET.addAll(Arrays.asList(level.getAlias()));
 		}
 	}
 	
-	private PokerLevel(int level, String name, Character[] alias) {
+	PokerLevel(int level, String name, Character[] alias) {
 		this.level = level;
 		this.name = name;
 		this.alias = alias;
 	}
 
 	public static boolean aliasContains(char key) {
-		return aliasSet.contains(key);
+		return !ALIAS_SET.contains(key);
 	}
 
 	public final Character[] getAlias() {
@@ -90,7 +92,7 @@ public enum PokerLevel{
 		this.level = level;
 	}
 	
-	public static final PokerLevel parseByName(String name) {
+	public static PokerLevel parseByName(String name) {
 		if(name == null) {
 			return null;
 		}
@@ -102,7 +104,7 @@ public enum PokerLevel{
 		return null;
 	}
 	
-	public static final PokerLevel parseByLevel(int l) {
+	public static PokerLevel parseByLevel(int l) {
 		for(PokerLevel level: PokerLevel.values()) {
 			if(level.level == l) {
 				return level;

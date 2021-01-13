@@ -48,7 +48,7 @@ public class CQ {
         List<String> list = UTILS.split(msg);
         Neko code = UTILS.getNeko(list.get(0), "at");
         if (code != null) {
-            return code.get("qq");
+            return code.get("code");
         }
         return "";
     }
@@ -58,7 +58,7 @@ public class CQ {
      */
     public static Set<String> getAts(String msg) {
         final List<Neko> list = UTILS.getNekoList(msg, "at");
-        return list.stream().map(item -> item.get("qq")).collect(Collectors.toSet());
+        return list.stream().map(item -> item.get("code")).collect(Collectors.toSet());
     }
 
     /**
@@ -73,11 +73,11 @@ public class CQ {
      * 获取第一个艾特的QQ号
      */
     public static String getAt(String msg) {
-        final List<Neko> list = UTILS.getNekoList(msg, "at");
-        if (list.size() == 0) {
+        Neko neko = UTILS.getNeko(msg);
+        if (neko == null) {
             return null;
         }
-        return list.get(0).get("qq");
+        return neko.get("code");
     }
 
     public static List<Neko> getKq(String msg, String type) {
@@ -232,6 +232,7 @@ public class CQ {
 //            System.out.println();
             Process proc = Runtime.getRuntime().exec(command.toArray(new String[]{}));
             proc.waitFor();
+            Thread.sleep(500);
             return getImage(pokerFile.toString()).toString();
         } catch (Exception e) {
             return "";

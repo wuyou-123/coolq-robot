@@ -2,7 +2,6 @@ package com.wuyou.utils.landlordsPrint;
 
 import com.wuyou.utils.SenderUtil;
 
-import java.util.Arrays;
 import java.util.Formatter;
 
 public class FormatPrinter {
@@ -11,7 +10,6 @@ public class FormatPrinter {
 	}
 
 	public static void printNotice(String qq, String format, Object... args) {
-		System.out.println(Arrays.toString(args));
 		SenderUtil.sendPrivateMsg(qq,new Formatter().format(format, args).toString());
 //		System.out.printf(format, args);
 	}

@@ -1,27 +1,27 @@
 package org.nico.ratel.landlords.client.event;
 
-import com.wuyou.utils.landlordsPrint.SimplePrinter;
-import io.netty.channel.Channel;
-import org.nico.ratel.landlords.enums.ServerEventCode;
+import com.wuyou.entity.Player;
+import com.wuyou.enums.ServerEventCode;
+import com.wuyou.utils.SenderUtil;
 import org.nico.ratel.landlords.helper.MapHelper;
 import org.nico.ratel.landlords.server.event.ServerEventListener;
-import org.nico.ratel.landlords.utils.GetQQUtils;
 
 import java.util.Map;
 
 public class ClientEventListener_CODE_GAME_POKER_PLAY_PASS extends ClientEventListener{
 
 	@Override
-	public void call(Channel channel, String data) {
-		String qq = GetQQUtils.getQQ(channel);
+	public void call(Player player, String data) {
+		String qq = player.getId();
 		Map<String, Object> map = MapHelper.parser(data);
 		
-		SimplePrinter.sendNotice(qq, map.get("clientNickname") + " 跳过了. 现在轮到" + map.get("nextClientNickname") + "出牌.");
-		
+		SenderUtil.sendPrivateMsg(qq, map.get("clientNickname") + " 跳过了. 现在轮到" + map.get("nextClientNickname") + "出牌.");
+//		SenderUtil.sendGroupMsg(Objects.requireNonNull(GlobalVariable.getRoomById(qq)).getId(), map.get("clientNickname") + " 跳过了. 现在轮到" + map.get("nextClientNickname") + "出牌.");
+
 		String turnClientId = (String) map.get("nextClientId");
 		if(qq.equals(turnClientId)) {
-			ServerEventListener.get(ServerEventCode.CODE_GAME_POKER_PLAY_REDIRECT).call(GetQQUtils.getClient(channel), null);
-//			pushToServer(channel, ServerEventCode.CODE_GAME_POKER_PLAY_REDIRECT);
+			ServerEventListener.get(ServerEventCode.CODE_GAME_POKER_PLAY_REDIRECT).call(player, null);
+//			pushToServer(player, ServerEventCode.CODE_GAME_POKER_PLAY_REDIRECT);
 		}
 	}
 

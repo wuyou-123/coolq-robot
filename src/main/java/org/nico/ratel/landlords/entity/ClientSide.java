@@ -1,9 +1,9 @@
 package org.nico.ratel.landlords.entity;
 
-import io.netty.channel.Channel;
-import org.nico.ratel.landlords.enums.ClientRole;
-import org.nico.ratel.landlords.enums.ClientStatus;
-import org.nico.ratel.landlords.enums.ClientType;
+import com.wuyou.entity.Player;
+import com.wuyou.enums.ClientRole;
+import com.wuyou.enums.ClientStatus;
+import com.wuyou.enums.ClientType;
 
 import java.util.List;
 
@@ -27,14 +27,14 @@ public class ClientSide{
 	
 	private ClientSide pre;
 	
-	private transient Channel channel;
+	private transient Player player;
 	
 	public ClientSide() {}
 
-	public ClientSide(String id, ClientStatus status, Channel channel) {
+	public ClientSide(String id, ClientStatus status, Player player) {
 		this.id = id;
 		this.status = status;
-		this.channel = channel;
+		this.player = player;
 	}
 	
 	public void init() {
@@ -62,12 +62,12 @@ public class ClientSide{
 		this.nickname = nickname;
 	}
 
-	public final Channel getChannel() {
-		return channel;
+	public final Player getChannel() {
+		return player;
 	}
 
-	public final void setChannel(Channel channel) {
-		this.channel = channel;
+	public final void setChannel(Player player) {
+		this.player = player;
 	}
 
 	public final String getRoomId() {
@@ -141,4 +141,12 @@ public class ClientSide{
 		return id.equals(other.id);
 	}
 
+	@Override
+	public String toString() {
+		return "ClientSide{" +
+				"id='" + id + '\'' +
+				", roomId='" + roomId + '\'' +
+				", nickname='" + nickname + '\'' +
+				'}';
+	}
 }

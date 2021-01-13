@@ -1,21 +1,20 @@
 package org.nico.ratel.landlords.client.event;
 
-import com.wuyou.utils.landlordsPrint.SimplePrinter;
-import io.netty.channel.Channel;
+import com.wuyou.entity.Player;
+import com.wuyou.utils.SenderUtil;
 import org.nico.noson.Noson;
 import org.nico.ratel.landlords.entity.Room;
-import org.nico.ratel.landlords.utils.GetQQUtils;
 
-public class ClientEventListener_CODE_ROOM_CREATE_SUCCESS extends ClientEventListener{
+public class ClientEventListener_CODE_ROOM_CREATE_SUCCESS extends ClientEventListener {
 
-	@Override
-	public void call(Channel channel, String data) {
-		String qq = GetQQUtils.getQQ(channel);
-//		pushToServer(channel, ServerEventCode.CODE_SEND_TO_QQ, "CODE_ROOM_CREATE_SUCCESS");
-		Room room = Noson.convert(data, Room.class);
-		initLastSellInfo();
-		SimplePrinter.sendNotice(qq, "创建房间成功, 房间id: " + room.getId());
-		SimplePrinter.sendNotice(qq, "请等待其他玩家加入!");
-	}
+    @Override
+    public void call(Player player, String data) {
+        String qq = player.getId();
+        Room room = Noson.convert(data, Room.class);
+        initLastSellInfo();
+        SenderUtil.sendGroupMsg(room.getId(), "创建房间成功! 等待玩家加入");
+        SenderUtil.sendPrivateMsg(qq, "创建房间成功, 房间id: " + room.getId());
+        SenderUtil.sendPrivateMsg(qq, "请等待其他玩家加入!");
+    }
 
 }

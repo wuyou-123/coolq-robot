@@ -3,7 +3,6 @@ package com.wuyou.robot.listeners;
 import com.wuyou.exception.ObjectExistedException;
 import com.wuyou.exception.ObjectNotFoundException;
 import com.wuyou.service.ManagerService;
-import com.wuyou.utils.CQ;
 import com.wuyou.utils.GlobalVariable;
 import com.wuyou.utils.PowerUtils;
 import com.wuyou.utils.SenderUtil;
@@ -20,6 +19,7 @@ import love.forte.simbot.filter.MostMatchType;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author Administrator<br>
@@ -76,7 +76,7 @@ public class GroupManagerListener {
     public void removeManager(GroupMsg msg, MsgSender sender) {
         String group = msg.getGroupInfo().getGroupCode();
         if (PowerUtils.getPermissions(group, msg.getAccountInfo().getAccountCode(), sender) > 1) {
-            Set<String> set = new HashSet<>(CQ.getAts(msg.getMsg()));
+            Set<String> set = msg.getMsgContent().getCats("at").stream().map((neko)-> neko.get("code")).collect(Collectors.toSet());
             removeManager(set, group, sender);
         } else {
             SenderUtil.sendGroupMsg(group, "删除失败,你不是我的管理员!");
@@ -89,7 +89,7 @@ public class GroupManagerListener {
         String group = msg.getGroupInfo().getGroupCode();
         if (PowerUtils.getPermissions(group, msg.getAccountInfo().getAccountCode(), sender) > 1) {
             if (PowerUtils.getPermissions(group, msg.getBotInfo().getBotCode(), sender) == 3) {
-                Set<String> set = new HashSet<>(CQ.getAts(msg.getMsg()));
+                Set<String> set = msg.getMsgContent().getCats("at").stream().map((neko)-> neko.get("code")).collect(Collectors.toSet());
                 addGroupManager(set, group, sender);
             } else {
                 SenderUtil.sendGroupMsg(group, "添加失败,我不是群主!");
@@ -105,7 +105,7 @@ public class GroupManagerListener {
         String group = msg.getGroupInfo().getGroupCode();
         if (PowerUtils.getPermissions(group, msg.getAccountInfo().getAccountCode(), sender) > 1) {
             if (PowerUtils.getPermissions(group, msg.getBotInfo().getBotCode(), sender) == 3) {
-                Set<String> set = new HashSet<>(CQ.getAts(msg.getMsg()));
+                Set<String> set = msg.getMsgContent().getCats("at").stream().map((neko)-> neko.get("code")).collect(Collectors.toSet());
                 removeGroupManager(set, group, sender);
             } else {
                 SenderUtil.sendGroupMsg(group, "添加失败,我不是群主!");
@@ -188,7 +188,8 @@ public class GroupManagerListener {
     }
 
     private void addManagers(GroupMsg msg, MsgSender sender) {
-        Set<String> list = CQ.getAts(msg.getMsg());
+        Set<String> list = msg.getMsgContent().getCats("at").stream().map((neko)-> neko.get("code")).collect(Collectors.toSet());
+//        msg.getMsgContent().getCats("at").stream().map((neko)-> neko.get("code")).collect(Collectors.toSet());;
         String fromGroup = msg.getGroupInfo().getGroupCode();
         StringBuilder str = new StringBuilder("添加管理员:");
         for (String user : list) {

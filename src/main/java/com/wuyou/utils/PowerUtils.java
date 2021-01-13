@@ -33,7 +33,8 @@ public class PowerUtils {
         if (GlobalVariable.ADMINISTRATOR.contains(user)) {
             return 4;
         }
-        Permissions power = GroupUtils.getGroupMembers(sender, group, user).get(0).getRole();
+///        Permissions power = GroupUtils.getGroupMembers(sender, group, user).get(0).getRole();
+        Permissions power = sender.GETTER.getMemberInfo(group, user).getPermission();
         if (power.isOwner()) {
             return 3;
         }
@@ -53,8 +54,10 @@ public class PowerUtils {
      */
     public static boolean powerCompare(GroupMsg msg, String user, MsgSender sender) {
         String group = msg.getGroupInfo().getGroupCode();
-        Permissions userPower = GroupUtils.getGroupMembers(sender, group, user).get(0).getRole();
-        Permissions thisPower = GroupUtils.getGroupMembers(sender, group, msg.getBotInfo().getBotCode()).get(0).getRole();
+///        Permissions userPower = GroupUtils.getGroupMembers(sender, group, user).get(0).getRole();
+///        Permissions thisPower = GroupUtils.getGroupMembers(sender, group, msg.getBotInfo().getBotCode()).get(0).getRole();
+        Permissions userPower = sender.GETTER.getMemberInfo(group, user).getPermission();
+        Permissions thisPower = sender.GETTER.getMemberInfo(group, msg.getBotInfo().getBotCode()).getPermission();
         if (userPower.isMember()) {
             if (thisPower.isAdmin() || thisPower.isOwner()) {
                 return true;

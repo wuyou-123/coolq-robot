@@ -1,7 +1,8 @@
 package org.nico.ratel.landlords.entity;
 
-import org.nico.ratel.landlords.enums.RoomStatus;
-import org.nico.ratel.landlords.enums.RoomType;
+import com.wuyou.entity.Player;
+import com.wuyou.enums.RoomStatus;
+import com.wuyou.enums.RoomType;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -19,9 +20,9 @@ public class Room{
 	
 	private RoomType type;
 	
-	private Map<String, ClientSide> clientSideMap;
+	private Map<String, Player> playerMap;
 	
-	private LinkedList<ClientSide> clientSideList;
+	private LinkedList<Player> playerList;
 	
 	private String landlordId = "-1";
 	
@@ -42,15 +43,15 @@ public class Room{
 	private String firstSellClient;
 
 	/** 观战者列表 */
-	private List<ClientSide> watcherList = new ArrayList<>(5);
+	private List<Player> watcherList = new ArrayList<>(5);
 	
 	public Room() {
 	}
 
 	public Room(String id) {
 		this.id = id;
-		this.clientSideMap = new ConcurrentSkipListMap<>();
-		this.clientSideList = new LinkedList<>();
+		this.playerMap = new ConcurrentSkipListMap<>();
+		this.playerList = new LinkedList<>();
 		this.status = RoomStatus.BLANK;
 	}
 
@@ -118,12 +119,12 @@ public class Room{
 		this.landlordId = landlordId;
 	}
 
-	public LinkedList<ClientSide> getClientSideList() {
-		return clientSideList;
+	public LinkedList<Player> getPlayerList() {
+		return playerList;
 	}
 
-	public void setClientSideList(LinkedList<ClientSide> clientSideList) {
-		this.clientSideList = clientSideList;
+	public void setPlayerList(LinkedList<Player> playerList) {
+		this.playerList = playerList;
 	}
 
 	public List<Poker> getLandlordPokers() {
@@ -158,12 +159,12 @@ public class Room{
 		this.status = status;
 	}
 
-	public final Map<String, ClientSide> getClientSideMap() {
-		return clientSideMap;
+	public final Map<String, Player> getPlayerMap() {
+		return playerMap;
 	}
 
-	public final void setClientSideMap(Map<String, ClientSide> clientSideMap) {
-		this.clientSideMap = clientSideMap;
+	public final void setPlayerMap(Map<String, Player> playerMap) {
+		this.playerMap = playerMap;
 	}
 
 	public String getFirstSellClient() {
@@ -174,7 +175,7 @@ public class Room{
 		this.firstSellClient = firstSellClient;
 	}
 
-	public List<ClientSide> getWatcherList() {
+	public List<Player> getWatcherList() {
 		return watcherList;
 	}
 }

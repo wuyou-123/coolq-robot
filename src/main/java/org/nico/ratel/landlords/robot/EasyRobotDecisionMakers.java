@@ -1,9 +1,9 @@
 package org.nico.ratel.landlords.robot;
 
-import org.nico.ratel.landlords.entity.ClientSide;
+import com.wuyou.entity.Player;
 import org.nico.ratel.landlords.entity.Poker;
 import org.nico.ratel.landlords.entity.PokerSell;
-import org.nico.ratel.landlords.enums.SellType;
+import com.wuyou.enums.SellType;
 import org.nico.ratel.landlords.helper.PokerHelper;
 
 import java.util.List;
@@ -19,7 +19,7 @@ public class EasyRobotDecisionMakers extends AbstractRobotDecisionMakers{
 	private static Random random = new Random();
 	
 	@Override
-	public PokerSell howToPlayPokers(PokerSell lastPokerSell, ClientSide robot) {
+	public PokerSell howToPlayPokers(PokerSell lastPokerSell, Player robot) {
 		if(lastPokerSell != null && lastPokerSell.getSellType() == SellType.KING_BOMB) {
 			return null;
 		}

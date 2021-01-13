@@ -5,10 +5,7 @@ import com.wuyou.enums.SexType;
 import com.wuyou.service.AllBlackService;
 import com.wuyou.service.BlackUserService;
 import com.wuyou.service.StatService;
-import com.wuyou.utils.CQ;
-import com.wuyou.utils.GroupUtils;
-import com.wuyou.utils.LevelUtils;
-import com.wuyou.utils.SenderUtil;
+import com.wuyou.utils.*;
 import love.forte.common.ioc.annotation.Beans;
 import love.forte.common.ioc.annotation.Depend;
 import love.forte.simbot.annotation.*;
@@ -122,12 +119,12 @@ public class RequestListener {
             }
             // 新人不是黑名单成员
             if (statService.getStat(fromGroup) == 1) {
-                List<GroupMemberEntity> groupMemberEntityList = GroupUtils.getGroupMembers(sender, fromGroup, beingOperateQQ);
+//                List<GroupMemberEntity> groupMemberEntityList = GroupUtils.getGroupMembers(sender, fromGroup, beingOperateQQ);
                 GroupMemberEntity groupMemberEntity = new GroupMemberEntity();
-                if (groupMemberEntityList.size() != 0) {
-                    groupMemberEntity = groupMemberEntityList.get(0);
-                    System.out.println(groupMemberEntity);
-                }
+//                if (groupMemberEntityList.size() != 0) {
+//                    groupMemberEntity = groupMemberEntityList.get(0);
+//                    System.out.println(groupMemberEntity);
+//                }
                 String end = "\uD83C\uDF89\uD83C\uDF89\uD83C\uDF89";
                 String welcomeMessage = "欢迎" + (groupMemberEntity.getSex() == SexType.MALE ? "新来的小哥哥"
                         : groupMemberEntity.getSex() == SexType.FEMALE ? "新来的小姐姐" : "新人") +
@@ -139,6 +136,10 @@ public class RequestListener {
         } catch (Exception e) {
             e.printStackTrace();
             sender.SENDER.sendPrivateMsg(adminQQ, "出现异常");
+            if ("null".equals(e.getMessage()) || e.getMessage() == null) {
+                sender.SENDER.sendPrivateMsg(GlobalVariable.ADMINISTRATOR.get(0), "空指针");
+                return;
+            }
             sender.SENDER.sendPrivateMsg(adminQQ, e.getMessage());
         }
     }

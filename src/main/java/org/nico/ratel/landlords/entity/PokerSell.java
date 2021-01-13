@@ -1,6 +1,6 @@
 package org.nico.ratel.landlords.entity;
 
-import org.nico.ratel.landlords.enums.SellType;
+import com.wuyou.enums.SellType;
 import org.nico.ratel.landlords.helper.PokerHelper;
 
 import java.util.List;

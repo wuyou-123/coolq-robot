@@ -1,26 +1,10 @@
-package org.nico.ratel.landlords.enums;
+package com.wuyou.enums;
 
 import java.io.Serializable;
 
 public enum ClientEventCode implements Serializable{
 
-	CODE_CLIENT_NICKNAME_SET("设置昵称"),
-	
 	CODE_CLIENT_EXIT("客户端退出"),
-	
-	CODE_CLIENT_KICK("客户端被踢出"),
-	
-	CODE_CLIENT_CONNECT("客户端加入成功"),
-	
-	CODE_SHOW_OPTIONS("全局选项列表"),
-	
-	CODE_SHOW_OPTIONS_SETTING("设置选项"),
-	
-	CODE_SHOW_OPTIONS_PVP("玩家对战选项"),
-	
-	CODE_SHOW_OPTIONS_PVE("人机对战选项"),
-	
-	CODE_SHOW_ROOMS("展示房间列表"),
 	
 	CODE_SHOW_POKERS("展示Poker"),
 	
@@ -58,17 +42,11 @@ public enum ClientEventCode implements Serializable{
 	
 	CODE_GAME_POKER_PLAY_ORDER_ERROR("顺序错误"),
 	
-	CODE_GAME_OVER("游戏结束"),
-	
-	CODE_PVE_DIFFICULTY_NOT_SUPPORT("人机难度不支持"),
-
-	CODE_GAME_WATCH("观战"),
-
-	CODE_GAME_WATCH_SUCCESSFUL("观战成功");
+	CODE_GAME_OVER("游戏结束");
 	
 	private String msg;
 
-	private ClientEventCode(String msg) {
+	ClientEventCode(String msg) {
 		this.msg = msg;
 	}
 

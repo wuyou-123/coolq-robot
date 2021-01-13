@@ -1,19 +1,23 @@
 package org.nico.ratel.landlords.client.event;
 
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import org.nico.ratel.landlords.channel.ChannelUtils;
+import com.wuyou.entity.Player;
 import org.nico.ratel.landlords.entity.Poker;
-import org.nico.ratel.landlords.enums.ClientEventCode;
-import org.nico.ratel.landlords.enums.ServerEventCode;
+import com.wuyou.enums.ClientEventCode;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author wuyou
+ */
 public abstract class ClientEventListener {
 
-	public abstract void call(Channel channel, String data);
+	/**
+	 * @param player 玩家
+	 * @param data 需要传递的数据
+	 */
+	public abstract void call(Player player, String data);
 
 	public final static Map<ClientEventCode, ClientEventListener> LISTENER_MAP = new HashMap<>();
 	
@@ -29,7 +33,6 @@ public abstract class ClientEventListener {
 		lastSellClientType = null;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static ClientEventListener get(ClientEventCode code){
 		System.out.println("ClientEventListener-----"+code);
 		ClientEventListener listener = null;
@@ -38,8 +41,8 @@ public abstract class ClientEventListener {
 				listener = ClientEventListener.LISTENER_MAP.get(code);
 			}else{
 				String eventListener = LISTENER_PREFIX + code.name();
-				Class<ClientEventListener> listenerClass = (Class<ClientEventListener>) Class.forName(eventListener);
-				listener = listenerClass.newInstance();
+				Class<?> listenerClass = Class.forName(eventListener);
+				listener = (ClientEventListener) listenerClass.newInstance();
 				ClientEventListener.LISTENER_MAP.put(code, listener);
 			}
 			return listener;
@@ -49,11 +52,11 @@ public abstract class ClientEventListener {
 		return listener;
 	}
 	
-	protected ChannelFuture pushToServer(Channel channel, ServerEventCode code, String datas){
-		return ChannelUtils.pushToServer(channel, code, datas);
-	}
-	
-	protected ChannelFuture pushToServer(Channel channel, ServerEventCode code){
-		return pushToServer(channel, code, null);
-	}
+//	protected ChannelFuture pushToServer(Player player, ServerEventCode code, String datas){
+//		return ChannelUtils.pushToServer(player, code, datas);
+//	}
+//
+//	protected ChannelFuture pushToServer(Player player, ServerEventCode code){
+//		return pushToServer(player, code, null);
+//	}
 }

@@ -1,4 +1,4 @@
-package org.nico.ratel.landlords.enums;
+package com.wuyou.enums;
 
 /**
  * Poker type Spade、 Heart、 Diamond、 Club
@@ -20,7 +20,7 @@ public enum PokerType{
 	
 	private String name;
 
-	private PokerType(String name) {
+	PokerType(String name) {
 		this.name = name;
 	}
 

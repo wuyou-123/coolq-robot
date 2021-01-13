@@ -1,7 +1,7 @@
 package org.nico.ratel.landlords.entity;
 
-import org.nico.ratel.landlords.enums.PokerLevel;
-import org.nico.ratel.landlords.enums.PokerType;
+import com.wuyou.enums.PokerLevel;
+import com.wuyou.enums.PokerType;
 
 /**
  * Poke, with {@link PokerLevel} and {@link PokerType}
@@ -50,23 +50,25 @@ public class Poker{
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		Poker other = (Poker) obj;
-		if (level != other.level)
+		if (level != other.level) {
 			return false;
-		if (type != other.type)
-			return false;
-		return true;
+		}
+		return type == other.type;
 	}
 
 	@Override
 	public String toString() {
-		return String.valueOf(level.getLevel()) + " ";
+		return level.getLevel() + " ";
 	}
 	
 }

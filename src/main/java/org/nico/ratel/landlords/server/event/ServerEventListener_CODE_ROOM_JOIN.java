@@ -1,13 +1,14 @@
 package org.nico.ratel.landlords.server.event;
 
+import com.wuyou.entity.Player;
+import com.wuyou.enums.ClientEventCode;
+import com.wuyou.enums.RoomStatus;
+import com.wuyou.enums.ServerEventCode;
+import com.wuyou.utils.GlobalVariable;
+import com.wuyou.utils.SenderUtil;
 import org.nico.ratel.landlords.client.event.ClientEventListener;
-import org.nico.ratel.landlords.entity.ClientSide;
 import org.nico.ratel.landlords.entity.Room;
-import org.nico.ratel.landlords.enums.ClientEventCode;
-import org.nico.ratel.landlords.enums.RoomStatus;
-import org.nico.ratel.landlords.enums.ServerEventCode;
 import org.nico.ratel.landlords.helper.MapHelper;
-import org.nico.ratel.landlords.server.ServerContains;
 
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -15,65 +16,65 @@ import java.util.concurrent.ConcurrentSkipListMap;
 public class ServerEventListener_CODE_ROOM_JOIN implements ServerEventListener{
 
 	@Override
-	public void call(ClientSide clientSide, String data) {
+	public void call(Player player, String data) {
 
-		Room room = ServerContains.getRoom(data);
-		System.out.println(clientSide.getNickname()+"尝试加入房间");
-		System.out.println(clientSide.getId()+"尝试加入房间");
+		Room room = GlobalVariable.getRoom(data);
+		System.out.println(player.getId()+"尝试加入房间");
 		if(room == null) {
 			String result = MapHelper.newInstance()
 								.put("roomId", data)
 								.json();
-//			ChannelUtils.pushToClient(clientSide.getChannel(), ClientEventCode.CODE_ROOM_JOIN_FAIL_BY_INEXIST, result);
-			ClientEventListener.get(ClientEventCode.CODE_ROOM_JOIN_FAIL_BY_INEXIST).call(clientSide.getChannel(), result);
+//			ChannelUtils.pushToClient(player, ClientEventCode.CODE_ROOM_JOIN_FAIL_BY_INEXIST, result);
+			ClientEventListener.get(ClientEventCode.CODE_ROOM_JOIN_FAIL_BY_INEXIST).call(player, result);
 
 
 		}else {
-			if(room.getClientSideList().size() == 3) {
+			if(room.getPlayerList().size() == 3) {
 				String result = MapHelper.newInstance()
 						.put("roomId", room.getId())
 						.put("roomOwner", room.getRoomOwner())
 						.json();
-//				ChannelUtils.pushToClient(clientSide.getChannel(), ClientEventCode.CODE_ROOM_JOIN_FAIL_BY_FULL, result);
-				ClientEventListener.get(ClientEventCode.CODE_ROOM_JOIN_FAIL_BY_FULL).call(clientSide.getChannel(), result);
+//				ChannelUtils.pushToClient(player, ClientEventCode.CODE_ROOM_JOIN_FAIL_BY_FULL, result);
+				ClientEventListener.get(ClientEventCode.CODE_ROOM_JOIN_FAIL_BY_FULL).call(player, result);
 
 			}else {
-				clientSide.setRoomId(room.getId());
+				player.setRoomId(room.getId());
 
-				ConcurrentSkipListMap<String, ClientSide> roomClientMap = (ConcurrentSkipListMap<String, ClientSide>) room.getClientSideMap();
-				LinkedList<ClientSide> roomClientList = room.getClientSideList();
+				ConcurrentSkipListMap<String, Player> roomClientMap = (ConcurrentSkipListMap<String, Player>) room.getPlayerMap();
+				LinkedList<Player> roomClientList = room.getPlayerList();
 
 				if(roomClientList.size() > 0){
-					ClientSide pre = roomClientList.getLast();
-					pre.setNext(clientSide);
-					clientSide.setPre(pre);
+					Player pre = roomClientList.getLast();
+					pre.setNext(player);
+					player.setPre(pre);
 				}
 
-				roomClientList.add(clientSide);
-				roomClientMap.put(clientSide.getId(), clientSide);
+				roomClientList.add(player);
+				roomClientMap.put(player.getId(), player);
 
 				if(roomClientMap.size() == 3) {
-					clientSide.setNext(roomClientList.getFirst());
-					roomClientList.getFirst().setPre(clientSide);
+					player.setNext(roomClientList.getFirst());
+					roomClientList.getFirst().setPre(player);
+					SenderUtil.sendGroupMsg(room.getId(), "上桌成功. 现在已经有 " + room.getPlayerList().size() + " 位玩家在房间中. 游戏开始!");
 
-					ServerEventListener.get(ServerEventCode.CODE_GAME_STARTING).call(clientSide, String.valueOf(room.getId()));
+					ServerEventListener.get(ServerEventCode.CODE_GAME_STARTING).call(player, String.valueOf(room.getId()));
 				}else {
 					room.setStatus(RoomStatus.WAIT);
 
 					String result = MapHelper.newInstance()
-							.put("clientId", clientSide.getId())
-							.put("clientNickname", clientSide.getNickname())
+							.put("clientId", player.getId())
+							.put("clientNickname", player.getNickname())
 							.put("roomId", room.getId())
 							.put("roomOwner", room.getRoomOwner())
-							.put("roomClientCount", room.getClientSideList().size())
+							.put("roomClientCount", room.getPlayerList().size())
 							.json();
-					for(ClientSide client: roomClientMap.values()) {
-//						ChannelUtils.pushToClient(client.getChannel(), ClientEventCode.CODE_ROOM_JOIN_SUCCESS, result);
-						ClientEventListener.get(ClientEventCode.CODE_ROOM_JOIN_SUCCESS).call(client.getChannel(), result);
+					SenderUtil.sendGroupMsg(room.getId(), "上桌成功. 现在已经有 " + room.getPlayerList().size() + " 位玩家在房间中.");
+					for(Player client: roomClientMap.values()) {
+						ClientEventListener.get(ClientEventCode.CODE_ROOM_JOIN_SUCCESS).call(player, result);
 
 					}
 
-					notifyWatcherJoinRoom(room, clientSide);
+//					notifyWatcherJoinRoom(room, player);
 				}
 			}
 		}
@@ -83,12 +84,12 @@ public class ServerEventListener_CODE_ROOM_JOIN implements ServerEventListener{
 	 * 通知观战者玩家加入房间
 	 *
 	 * @param room	房间
-	 * @param clientSide	玩家
+	 * @param player	玩家
 	 */
-	private void notifyWatcherJoinRoom(Room room, ClientSide clientSide) {
-		for (ClientSide watcher : room.getWatcherList()) {
-//			ChannelUtils.pushToClient(watcher.getChannel(), ClientEventCode.CODE_ROOM_JOIN_SUCCESS, clientSide.getNickname());
-			ClientEventListener.get(ClientEventCode.CODE_ROOM_JOIN_SUCCESS).call(watcher.getChannel(), clientSide.getNickname());
+	private void notifyWatcherJoinRoom(Room room, Player player) {
+		for (Player watcher : room.getWatcherList()) {
+//			ChannelUtils.pushToClient(watcher, ClientEventCode.CODE_ROOM_JOIN_SUCCESS, player.getNickname());
+			ClientEventListener.get(ClientEventCode.CODE_ROOM_JOIN_SUCCESS).call(watcher, player.getNickname());
 
 		}
 	}
