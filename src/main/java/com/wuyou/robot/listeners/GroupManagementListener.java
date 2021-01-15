@@ -45,7 +45,7 @@ public class GroupManagementListener {
         if (getPower(msg, sender)) {
             StringBuilder str = new StringBuilder("\n踢人:");
             for (String qq : set) {
-                String nickname = sender.GETTER.getMemberInfo(fromGroup, qq).getAccountInfo().getAccountRemarkOrNickname();
+                String nickname = sender.GETTER.getMemberInfo(fromGroup, qq).getAccountRemarkOrNickname();
                 if (qq.equals(msg.getBotInfo().getBotCode())) {
                     str.append("\n\t\t踢出成员[").append(qq).append("](").append(nickname).append(")失败,我踢我自己？");
                     continue;
@@ -89,7 +89,7 @@ public class GroupManagementListener {
             try {
                 StringBuilder str = new StringBuilder("\n禁言:");
                 for (String qq : set) {
-                    String nickname = sender.GETTER.getMemberInfo(fromGroup, qq).getAccountInfo().getAccountRemarkOrNickname();
+                    String nickname = sender.GETTER.getMemberInfo(fromGroup, qq).getAccountRemarkOrNickname();
                     if (qq.equals(msg.getBotInfo().getBotCode())) {
                         str.append("\n\t\t禁言成员[").append(qq).append("](").append(nickname).append(")失败,我禁我自己？");
                         continue;
@@ -140,15 +140,15 @@ public class GroupManagementListener {
             StringBuilder str = new StringBuilder("\n解禁:");
             BanList banList = sender.GETTER.getBanList(fromGroup);
             List<String> banCodeList = new ArrayList<>();
-            banList.stream().forEach(banInfo -> banCodeList.add(banInfo.getAccountInfo().getAccountCode()));
+            banList.stream().forEach(banInfo -> banCodeList.add(banInfo.getAccountCode()));
             for (String qq : set) {
                 GroupMemberInfo member = sender.GETTER.getMemberInfo(fromGroup, qq);
-                String nickname = member.getAccountInfo().getAccountRemarkOrNickname();
+                String nickname = member.getAccountRemarkOrNickname();
                 if (qq.equals(msg.getBotInfo().getBotCode())) {
                     str.append("\n\t\t解禁成员[").append(qq).append("](").append(nickname).append(")失败,我没有被禁言");
                     continue;
                 }
-                if (!banCodeList.contains(member.getAccountInfo().getAccountCode())) {
+                if (!banCodeList.contains(member.getAccountCode())) {
                     str.append("\n\t\t解禁成员[").append(qq).append("](").append(nickname).append(")失败,TA没有被禁言");
                     continue;
                 }
@@ -251,7 +251,7 @@ public class GroupManagementListener {
                             str.append("\n\t\t已把我的名字改为: \"").append(name).append("\"");
                             continue;
                         }
-                        String nickname = sender.GETTER.getMemberInfo(fromGroup, qq).getAccountInfo().getAccountRemarkOrNickname();
+                        String nickname = sender.GETTER.getMemberInfo(fromGroup, qq).getAccountRemarkOrNickname();
                         sender.SETTER.setGroupRemark(fromGroup, qq, name);
                         str.append("\n\t\t已将成员[").append(qq).append("](").append(nickname).append(")群名片改为: \"").append(name).append("\"");
                     }
@@ -262,7 +262,7 @@ public class GroupManagementListener {
                             str.append("\n\t\t已取消我的群名片");
                             continue;
                         }
-                        String nickname = sender.GETTER.getMemberInfo(fromGroup, qq).getAccountInfo().getAccountRemarkOrNickname();
+                        String nickname = sender.GETTER.getMemberInfo(fromGroup, qq).getAccountRemarkOrNickname();
                         sender.SETTER.setGroupRemark(fromGroup, qq, "");
                         str.append("\n\t\t已取消成员[").append(qq).append("](").append(nickname).append(")的群名片");
                     }
@@ -299,13 +299,13 @@ public class GroupManagementListener {
                             str.append("\n\t\t已把我的头衔设置为: ").append(name);
                             continue;
                         }
-                        String nickname = sender.GETTER.getMemberInfo(fromGroup, qq).getAccountInfo().getAccountRemarkOrNickname();
+                        String nickname = sender.GETTER.getMemberInfo(fromGroup, qq).getAccountRemarkOrNickname();
                         sender.SETTER.setGroupMemberSpecialTitle(fromGroup, qq, name);
                         str.append("\n\t\t已将成员[").append(qq).append("](").append(nickname).append(")的群头衔设置为: \"").append(name).append("\"");
                     }
                 } else {
                     for (String qq : set) {
-                        String title = sender.GETTER.getMemberInfo(fromGroup, qq).getAccountInfo().getAccountNickname();
+                        String title = sender.GETTER.getMemberInfo(fromGroup, qq).getAccountNickname();
                         if (qq.equals(thisQQ)) {
                             if ("".equals(title)) {
                                 str.append("\n\t\t取消失败,我没有头衔");
@@ -315,7 +315,7 @@ public class GroupManagementListener {
                             str.append("\n\t\t已取消我的群头衔");
                             continue;
                         }
-                        String nickname = sender.GETTER.getMemberInfo(fromGroup, qq).getAccountInfo().getAccountRemarkOrNickname();
+                        String nickname = sender.GETTER.getMemberInfo(fromGroup, qq).getAccountRemarkOrNickname();
                         if ("".equals(title)) {
                             str.append("\n\t\t取消失败,成员[").append(qq).append("](").append(nickname).append(")没有头衔");
                             continue;
@@ -367,7 +367,7 @@ public class GroupManagementListener {
             JSONObject j = (JSONObject) object;
             int time = j.getInteger("t");
             String qq = j.getString("uin");
-            String nick = sender.GETTER.getMemberInfo(fromGroup, qq).getAccountInfo().getAccountRemarkOrNickname();
+            String nick = sender.GETTER.getMemberInfo(fromGroup, qq).getAccountRemarkOrNickname();
             String times = GroupOtherListeners.getTime(time);
             str.append("\n\t群成员").append(num).append(": QQ:[").append(qq).append("](").append(nick).append("), 禁言时间: ").append(times.replace("0小时", "").replace("0分钟", "").replace("0秒", ""));
         }
@@ -381,9 +381,6 @@ public class GroupManagementListener {
                 + "&bkn=" + bkn;
         String body = HttpUtils.get(url, null, cookies).getResponse();
         JSONObject json = JSONObject.parseObject(body);
-        System.out.println(json);
-        System.out.println(bkn);
-        System.out.println(cookies);
         JSONObject shutup = json.getJSONObject("shutup");
         return shutup.getJSONArray("list");
     }
@@ -452,7 +449,7 @@ public class GroupManagementListener {
                 }
                 continue;
             }
-            String nickname = userMember.getAccountInfo().getAccountRemarkOrNickname();
+            String nickname = userMember.getAccountRemarkOrNickname();
             if (GlobalVariable.ADMINISTRATOR.contains(user)) {
                 str.append("\n\t\t添加黑名单失败: QQ:[").append(user).append("](").append(nickname).append("),不可以拉黑我的主人!");
                 continue;

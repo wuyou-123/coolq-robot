@@ -18,7 +18,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @EnableSimbot
-@MapperScan("com.wuyou.mapper")
+@MapperScan({"com.wuyou.mapper", "com.wuyou.toolbox.mapper"})
 @ComponentScan("com.wuyou")
 @SimbotApplication({
         @SimbotResource(value = "application.properties", orIgnore = true)

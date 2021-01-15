@@ -18,8 +18,8 @@ import love.forte.simbot.api.message.events.GroupMsg;
 import love.forte.simbot.api.message.events.PrivateMsg;
 import love.forte.simbot.api.sender.MsgSender;
 import org.nico.noson.Noson;
-import org.nico.ratel.landlords.entity.Room;
-import org.nico.ratel.landlords.server.event.ServerEventListener;
+import com.wuyou.landlords.entity.Room;
+import com.wuyou.landlords.server.event.ServerEventListener;
 
 import java.util.ArrayList;
 import java.util.List;

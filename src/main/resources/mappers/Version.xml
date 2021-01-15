@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+        "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.wuyou.toolbox.mapper.VersionMapper">
+    <insert id="saveVersion">
+        insert into version
+                (`id`,
+                 `versionId`,
+                 `content`,
+                 `url`)
+        values (#{id},
+                #{versionId},
+                #{content},
+                #{url})
+    </insert>
+    <select id="findMaxVersion" resultType="com.wuyou.toolbox.entity.Version">
+        select *
+        from version
+        where id = (select max(id) from version)
+    </select>
+    <select id="findAllVersion" resultType="com.wuyou.toolbox.entity.Version">
+        select *
+        from version
+    </select>
+    <select id="findVersion" resultType="com.wuyou.toolbox.entity.Version">
+        select *
+        from version
+        where versionId = #{versionId}
+    </select>
+</mapper>

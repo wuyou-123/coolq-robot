@@ -41,7 +41,7 @@ public class RequestListener {
     public void friendAddRequest(FriendAddRequest request, MsgSender sender) {
         sender.SETTER.setFriendAddRequest(request.getFlag(), "", true, false);
         sender.SENDER.sendPrivateMsg(adminQQ,
-                "已经添加[" + request.getAccountInfo().getAccountCode() + "](" + sender.GETTER.getFriendInfo(request.getAccountInfo().getAccountCode()).getAccountInfo().getAccountRemarkOrNickname() + ")为好友,验证消息为"
+                "已经添加[" + request.getAccountInfo().getAccountCode() + "](" + sender.GETTER.getFriendInfo(request.getAccountInfo().getAccountCode()).getAccountRemarkOrNickname() + ")为好友,验证消息为"
                         + ("".equals(request.getText()) ? "空" : ": " + request.getText()));
     }
 
@@ -56,11 +56,11 @@ public class RequestListener {
         if (list.contains(qq)) {
             sender.SETTER.setGroupAddRequest(request.getFlag(), false, true, "");
             sender.SENDER.sendPrivateMsg(adminQQ, "已经拒绝黑名单成员[" + request.getAccountInfo().getAccountCode() + "]("
-                    + getter.getFriendInfo(qq).getAccountInfo().getAccountRemarkOrNickname() + ")加入群[" + request.getGroupInfo().getGroupCode() + "]("
+                    + getter.getFriendInfo(qq).getAccountRemarkOrNickname() + ")加入群[" + request.getGroupInfo().getGroupCode() + "]("
                     + getter.getGroupInfo(request.getGroupInfo().getGroupCode()).getGroupName() + ")," + ("".equals(request.getText()) ? "附加消息为空"
                     : Objects.requireNonNull(request.getText()).contains("邀请人") ? request.getText() : "附加消息为: " + request.getText()));
             SenderUtil.sendGroupMsg(fromGroup, "已经拒绝黑名单成员[" + request.getAccountInfo().getAccountCode() + "]("
-                    + getter.getFriendInfo(qq).getAccountInfo().getAccountRemarkOrNickname() + ")加入群, " + ("".equals(request.getText()) ? "附加消息为空"
+                    + getter.getFriendInfo(qq).getAccountRemarkOrNickname() + ")加入群, " + ("".equals(request.getText()) ? "附加消息为空"
                     : Objects.requireNonNull(request.getText()).contains("邀请人") ? request.getText() : "附加消息为: " + request.getText()));
             return;
         }
@@ -71,14 +71,14 @@ public class RequestListener {
             if (allBlackGroups.contains(request.getGroupInfo().getGroupCode())) {
                 sender.SETTER.setGroupAddRequest(request.getFlag(), false, true, "");
                 sender.SENDER.sendPrivateMsg(adminQQ,
-                        "[" + request.getAccountInfo().getAccountCode() + "](" + getter.getFriendInfo(qq).getAccountInfo().getAccountRemarkOrNickname() + ")邀请我加入群["
+                        "[" + request.getAccountInfo().getAccountCode() + "](" + getter.getFriendInfo(qq).getAccountRemarkOrNickname() + ")邀请我加入群["
                                 + request.getGroupInfo().getGroupCode() + "](" + getter.getGroupInfo(request.getGroupInfo().getGroupCode()).getGroupName()
                                 + "),但是由于此群在黑名单内被我拒绝了");
                 return;
             }
             sender.SETTER.setGroupAddRequest(request.getFlag(), true, false, "");
             sender.SENDER.sendPrivateMsg(adminQQ,
-                    "[" + request.getAccountInfo().getAccountCode() + "](" + getter.getFriendInfo(qq).getAccountInfo().getAccountRemarkOrNickname() + ")已邀请我加入群["
+                    "[" + request.getAccountInfo().getAccountCode() + "](" + getter.getFriendInfo(qq).getAccountRemarkOrNickname() + ")已邀请我加入群["
                             + request.getGroupInfo().getGroupCode() + "](" + getter.getGroupInfo(request.getGroupInfo().getGroupCode()).getGroupName() + ")");
         }
     }
@@ -109,10 +109,10 @@ public class RequestListener {
                 if (getter.getMemberInfo(fromGroup, loginQQ).getPermission() != Permissions.MEMBER) {
                     sender.SETTER.setGroupMemberKick(fromGroup, beingOperateQQ, "", true);
                     SenderUtil.sendGroupMsg(fromGroup,
-                            "发现黑名单成员[" + beingOperateQQ + "](" + beingOperateMember.getAccountInfo().getAccountRemarkOrNickname() + ")入群,已将他移除此群");
+                            "发现黑名单成员[" + beingOperateQQ + "](" + beingOperateMember.getAccountRemarkOrNickname() + ")入群,已将他移除此群");
                 } else {
                     SenderUtil.sendGroupMsg(fromGroup, "发现黑名单成员[" + beingOperateQQ + "]("
-                            + beingOperateMember.getAccountInfo().getAccountRemarkOrNickname() + ")入群,但是我没有权限将他移除此群");
+                            + beingOperateMember.getAccountRemarkOrNickname() + ")入群,但是我没有权限将他移除此群");
                 }
                 return;
 

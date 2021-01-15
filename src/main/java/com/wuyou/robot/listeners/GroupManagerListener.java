@@ -47,7 +47,7 @@ public class GroupManagerListener {
                 continue;
             }
             a++;
-            String nickname = sender.GETTER.getMemberInfo(fromGroup, qq).getAccountInfo().getAccountRemarkOrNickname();
+            String nickname = sender.GETTER.getMemberInfo(fromGroup, qq).getAccountRemarkOrNickname();
             str.append("\t管理员").append(a).append(": ").append(qq).append("(").append(nickname).append(")\n");
         }
         if (members.size() > 0) {
@@ -119,7 +119,7 @@ public class GroupManagerListener {
         StringBuilder str = new StringBuilder("设置群管理员:");
         for (String user : list) {
             GroupMemberInfo userMember = sender.GETTER.getMemberInfo(fromGroup, user);
-            String nickname = userMember.getAccountInfo().getAccountRemarkOrNickname();
+            String nickname = userMember.getAccountRemarkOrNickname();
             int power = PowerUtils.getPermissions(fromGroup, user, sender);
             System.out.println(power);
             switch (power) {
@@ -155,7 +155,7 @@ public class GroupManagerListener {
         StringBuilder str = new StringBuilder("取消群管理员:");
         for (String user : list) {
             GroupMemberInfo userMember = sender.GETTER.getMemberInfo(fromGroup, user);
-            String nickname = userMember.getAccountInfo().getAccountRemarkOrNickname();
+            String nickname = userMember.getAccountRemarkOrNickname();
             int power = PowerUtils.getPermissions(fromGroup, user, sender);
             if (power == 1) {
                 sender.SETTER.setGroupAdmin(fromGroup, user, false);
@@ -194,7 +194,7 @@ public class GroupManagerListener {
         StringBuilder str = new StringBuilder("添加管理员:");
         for (String user : list) {
             GroupMemberInfo userMember = sender.GETTER.getMemberInfo(fromGroup, user);
-            String nickname = userMember.getAccountInfo().getAccountRemarkOrNickname();
+            String nickname = userMember.getAccountRemarkOrNickname();
             if (GlobalVariable.ADMINISTRATOR.contains(user)) {
                 str.append("\n\t\t添加管理员失败: QQ:[").append(user).append("](").append(nickname).append("),不需要添加我的主人!");
                 continue;

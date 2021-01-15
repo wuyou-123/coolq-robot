@@ -5,7 +5,7 @@ import com.wuyou.enums.ClientStatus;
 import com.wuyou.enums.ClientType;
 import lombok.Getter;
 import lombok.Setter;
-import org.nico.ratel.landlords.entity.Poker;
+import com.wuyou.landlords.entity.Poker;
 
 import java.util.HashMap;
 import java.util.List;

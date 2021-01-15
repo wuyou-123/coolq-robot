@@ -1,6 +1,6 @@
 package com.wuyou.utils;
 
-import org.nico.ratel.landlords.entity.Room;
+import com.wuyou.landlords.entity.Room;
 import org.springframework.stereotype.Component;
 
 import java.util.NoSuchElementException;

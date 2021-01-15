@@ -22,7 +22,9 @@ public class SimpleWriter {
                 input = "p";
             }
             GlobalVariable.USER_INPUT.remove(qq);
-            GlobalVariable.LANDLORDS_PLAYER.get(qq).setStatus(ClientStatus.PLAYING);
+            try {
+                GlobalVariable.LANDLORDS_PLAYER.get(qq).setStatus(ClientStatus.PLAYING);
+            }catch (Exception ignored){}
             return input;
         } catch (InterruptedException e) {
 ///            System.out.println("用户超时,调用跳过方法");

@@ -14,6 +14,7 @@ import love.forte.simbot.annotation.Filter;
 import love.forte.simbot.annotation.Filters;
 import love.forte.simbot.annotation.OnGroup;
 import love.forte.simbot.api.message.events.GroupMsg;
+import love.forte.simbot.api.message.results.GroupMemberInfo;
 import love.forte.simbot.api.message.results.GroupMemberList;
 import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.filter.MostMatchType;
@@ -74,7 +75,7 @@ public class GroupMessageListener {
             return;
         }
         GroupMemberList groupMemberList = sender.GETTER.getGroupMemberList(fromGroup);
-        Set<String> qqSet = groupMemberList.stream().map(item -> item.getAccountInfo().getAccountCode()).collect(Collectors.toSet());
+        Set<String> qqSet = groupMemberList.stream().map(GroupMemberInfo::getAccountCode).collect(Collectors.toSet());
         map.forEach((key, str) -> {
             String newStr = getStr(sender, fromGroup, qqSet, str);
             map.put(key, newStr);
@@ -97,7 +98,7 @@ public class GroupMessageListener {
         final String[] newStr = {str};
         stringSet.forEach(neko -> {
             if (qqSet.contains(neko.get("code"))) {
-                newStr[0] = newStr[0].replace(neko, "@" + sender.GETTER.getMemberInfo(fromGroup, Objects.requireNonNull(neko.get("code"))).getAccountInfo().getAccountRemarkOrNickname());
+                newStr[0] = newStr[0].replace(neko, "@" + sender.GETTER.getMemberInfo(fromGroup, Objects.requireNonNull(neko.get("code"))).getAccountRemarkOrNickname());
             }
         });
         return newStr[0];

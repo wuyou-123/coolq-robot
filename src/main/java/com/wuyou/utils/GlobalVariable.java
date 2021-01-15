@@ -2,7 +2,7 @@ package com.wuyou.utils;
 
 import com.wuyou.entity.Player;
 import love.forte.simbot.bot.BotManager;
-import org.nico.ratel.landlords.entity.Room;
+import com.wuyou.landlords.entity.Room;
 
 import java.util.ArrayList;
 import java.util.HashMap;

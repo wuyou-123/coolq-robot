@@ -86,7 +86,7 @@ public class PrivateMsgListener {
 //                    String toMessage = message.substring(message.indexOf("发送消息") + 4);
 //                    sender.SENDER.sendPrivateMsg(toQQ, toMessage);
 //                    sender.SENDER.sendPrivateMsg(qq, "已将[" + toMessage + "]发送给[" + toQQ + "]("
-//                            + sender.GETTER.getFriendInfo(toQQ).getAccountInfo().getAccountRemarkOrNickname() + ")");
+//                            + sender.GETTER.getFriendInfo(toQQ).getAccountRemarkOrNickname() + ")");
 //                }
 //            } catch (Exception e) {
 //                sender.SENDER.sendPrivateMsg(qq, "出现异常\n" + e.getMessage());
@@ -99,7 +99,7 @@ public class PrivateMsgListener {
 /////     收到他人发送的消息, 转发至自己
 //        String adminQQ = "1097810498";
 //        sender.SENDER.sendPrivateMsg(adminQQ,
-//                "收到来自[" + qq + "](" + sender.GETTER.getFriendInfo(qq).getAccountInfo().getAccountRemarkOrNickname() + ")的一条消息");
+//                "收到来自[" + qq + "](" + sender.GETTER.getFriendInfo(qq).getAccountRemarkOrNickname() + ")的一条消息");
 //        sender.SENDER.sendPrivateMsg(adminQQ, msg.getMsg());
 //        List<Neko> faces = CQ.getKq(message, "face");
 //        for (Neko neko : faces) {
@@ -111,7 +111,7 @@ public class PrivateMsgListener {
 //            String reply = json.getJSONArray("newslist").getJSONObject(0).getString("reply");
 //            if (!reply.isEmpty()) {
 //                sender.SENDER.sendPrivateMsg(qq, reply);
-//                sender.SENDER.sendPrivateMsg("1097810498", "向[" + qq + "](" + sender.GETTER.getFriendInfo(qq).getAccountInfo().getAccountRemarkOrNickname() + ")发送消息: " + reply);
+//                sender.SENDER.sendPrivateMsg("1097810498", "向[" + qq + "](" + sender.GETTER.getFriendInfo(qq).getAccountRemarkOrNickname() + ")发送消息: " + reply);
 //                return;
 //            }
 //        }
@@ -182,7 +182,7 @@ public class PrivateMsgListener {
                     String groupCode = group.getGroupCode();
                     GroupOwner owner = sender.GETTER.getGroupInfo(groupCode).getOwner();
                     groupInfo.append(num.getAndIncrement() + 1).append(". ").append(group.getGroupName()).append("(").append(group.getGroupCode()).append(")  [").append(sender.GETTER.getMemberInfo(group.getGroupCode(), sender.GETTER.getBotInfo().getBotCode()).getPermission()).append("]\n");
-                    groupInfo.append("\t群主信息: ").append(owner.getAccountInfo().getAccountRemarkOrNickname()).append("(").append(owner.getAccountInfo().getAccountCode()).append(")\n\n");
+                    groupInfo.append("\t群主信息: ").append(owner.getAccountRemarkOrNickname()).append("(").append(owner.getAccountCode()).append(")\n\n");
                     if (num.get() % 10 == 0) {
                         groupInfo.append("\n\n\n");
                     }
@@ -219,7 +219,7 @@ public class PrivateMsgListener {
                 resultMessage.append("\n群名称: ").append(groupInfo.getGroupName());
                 sender.GETTER.getGroupMemberList(group);
                 resultMessage.append("\n群介绍: ").append(groupInfo.getFullIntroduction());
-                resultMessage.append("\n群主QQ: ").append(groupInfo.getOwner().getAccountInfo().getAccountCode());
+                resultMessage.append("\n群主QQ: ").append(groupInfo.getOwner().getAccountCode());
                 sender.SENDER.sendPrivateMsg(msg.getAccountInfo().getAccountCode(), resultMessage.toString());
             }
         } catch (Exception e) {

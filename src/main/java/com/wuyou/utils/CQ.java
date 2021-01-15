@@ -6,7 +6,7 @@ import love.forte.catcode.CatCodeUtil;
 import love.forte.catcode.CodeTemplate;
 import love.forte.catcode.MutableNeko;
 import love.forte.catcode.Neko;
-import org.nico.ratel.landlords.entity.Poker;
+import com.wuyou.landlords.entity.Poker;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class CQ {
     public static final Map<String, String[]> CONTEXT = new HashMap<>();
     public static final CatCodeUtil UTILS = CatCodeUtil.getInstance();
-    final static CodeTemplate<Neko> STRING_TEMPLATE = UTILS.getNekoTemplate();
+    final static CodeTemplate<Neko> NEKO_TEMPLATE = UTILS.getNekoTemplate();
     private static String cqPath;
     private static String pokerPath;
 
@@ -35,13 +35,13 @@ public class CQ {
     }
 
     public static String at(String qq, String name) {
-        final MutableNeko at = STRING_TEMPLATE.at(qq).mutable();
+        final MutableNeko at = NEKO_TEMPLATE.at(qq).mutable();
         at.put("name", name);
         return at + " ";
     }
 
     public static String at(String qq) {
-        return STRING_TEMPLATE.at(qq) + " ";
+        return NEKO_TEMPLATE.at(qq) + " ";
     }
 
     public static String startsWithAt(String msg) {
@@ -85,15 +85,17 @@ public class CQ {
     }
 
     public static Neko getFace(String id) {
-        return STRING_TEMPLATE.face(id);
+        return NEKO_TEMPLATE.face(id);
     }
 
     public static Neko getRecord(String path) {
-        return STRING_TEMPLATE.record(path);
+        MutableNeko neko = NEKO_TEMPLATE.record(path).mutable();
+        neko.setType("voice");
+        return neko.immutable();
     }
 
     public static Neko getImage(String path) {
-        return STRING_TEMPLATE.image(path);
+        return NEKO_TEMPLATE.image(path);
     }
 
     public static Neko getMusic(String music) {

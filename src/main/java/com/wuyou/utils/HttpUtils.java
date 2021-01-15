@@ -86,10 +86,10 @@ public class HttpUtils {
     private static void setCookies(HttpRequestBase httpRequestBase, Map<String, String> cookies) {
         if (cookies != null) {
             StringBuilder cookie = new StringBuilder();
-            cookies.forEach((key, value) -> {
-                cookie.append(key).append("=").append(value).append(";");
-            });
+            cookies.forEach((key, value) -> cookie.append(key).append("=").append(value).append(";"));
             httpRequestBase.setHeader("Cookie", cookie.toString());
+            httpRequestBase.setHeader("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1");
+
         }
     }
 
