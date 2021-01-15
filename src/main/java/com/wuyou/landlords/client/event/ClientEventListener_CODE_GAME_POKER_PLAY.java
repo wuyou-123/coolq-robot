@@ -24,9 +24,10 @@ import java.util.Map;
 public class ClientEventListener_CODE_GAME_POKER_PLAY extends ClientEventListener {
 
     @Override
+    @SuppressWarnings("unchecked")
     public void call(Player player, String data) {
         String qq = player.getId();
-        Map<String, Object> map = MapHelper.parser(data);
+        Map<String, Object> map = (Map<String, Object>) MapHelper.parser(data);
         if (player.get("count")!=null && Integer.parseInt(player.get("count")) > 3) {
             ServerEventListener.get(ServerEventCode.CODE_CLIENT_EXIT).call(player, null);
             return;
